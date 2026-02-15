@@ -9,6 +9,8 @@
         "automotive"
     ],
     "license": "MIT",
+    "minimum-stability": "stable",
+    "version": "2.0.0",
     "require": {
         "php": "^8.2",
         "sylius/sylius": "^2.0"
