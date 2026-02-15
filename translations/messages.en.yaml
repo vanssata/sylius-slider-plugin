@@ -1,0 +1,7 @@
+vanssa_sylius_slider:
+    ui:
+        slider: Slider
+        sliders: Sliders
+        slide: Slide
+        slides: Slides
+        section: Slider Management

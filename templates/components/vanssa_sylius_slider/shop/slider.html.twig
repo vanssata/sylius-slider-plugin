@@ -1,0 +1,126 @@
+{% set settings = this.settings %}
+{% set slides = this.enabledSlides %}
+{% set autoplay = settings.autoplay|default({}) %}
+{% set showTitle = settings.showTitle|default(false) %}
+{% set showNavigation = settings.showNavigation|default(true) %}
+{% set showArrows = settings.showArrows|default(true) %}
+{% set cssClasses = settings.cssClasses|default('') %}
+{% set navigationIcon = settings.navigationIcon|default('chevron') %}
+{% set navigationSizeRaw = settings.navigationSize|default('1.5rem') %}
+{% set navigationSize = navigationSizeRaw in ['sm', 'md', 'lg']
+    ? (navigationSizeRaw == 'sm' ? '1rem' : (navigationSizeRaw == 'lg' ? '2rem' : '1.5rem'))
+    : navigationSizeRaw
+%}
+{% set paginationShape = settings.paginationShape|default('circle') %}
+{% set paginationSizeRaw = settings.paginationSize|default('0.625rem') %}
+{% set paginationSize = paginationSizeRaw in ['sm', 'md', 'lg']
+    ? (paginationSizeRaw == 'sm' ? '0.5rem' : (paginationSizeRaw == 'lg' ? '0.8rem' : '0.625rem'))
+    : paginationSizeRaw
+%}
+{% set navigationShadowPreset = settings.navigationShadow|default('none') %}
+{% set navigationShadow = navigationShadowPreset == 'soft'
+    ? '0 3px 10px rgba(15, 23, 42, 0.25)'
+    : (navigationShadowPreset == 'strong'
+        ? '0 10px 26px rgba(15, 23, 42, 0.46)'
+        : (navigationShadowPreset == 'glow'
+            ? '0 0 16px rgba(250, 204, 21, 0.55)'
+            : (navigationShadowPreset == 'none'
+                ? 'none'
+                : '0 6px 16px rgba(15, 23, 42, 0.35)')))
+%}
+{% set paginationShadowPreset = settings.paginationShadow|default('none') %}
+{% set paginationShadow = paginationShadowPreset == 'soft'
+    ? '0 2px 7px rgba(15, 23, 42, 0.22)'
+    : (paginationShadowPreset == 'strong'
+        ? '0 6px 16px rgba(15, 23, 42, 0.4)'
+        : (paginationShadowPreset == 'glow'
+            ? '0 0 10px rgba(250, 204, 21, 0.55)'
+            : (paginationShadowPreset == 'none'
+                ? 'none'
+                : '0 3px 9px rgba(15, 23, 42, 0.3)')))
+%}
+{% set sliderClasses = [
+    'vanssa-slider',
+    settings.overlay|default(false) ? 'vanssa-slider--overlay' : '',
+    settings.justifySlideHeight|default(true) ? 'vanssa-slider--justify-height' : '',
+    settings.containerWidth|default('content') == 'content' ? 'vanssa-slider--container-content' : 'vanssa-slider--container-full',
+    cssClasses
+] %}
+{% set sliderOptions = {
+    effect: settings.slideEffect|default('slide'),
+    speed: settings.speed|default(400),
+    rewind: settings.rewind|default(true),
+    autoplay: {
+        enabled: autoplay.enabled|default(autoplay.active|default(false)),
+        interval: autoplay.interval|default(5000),
+        pauseOnHover: autoplay.pauseOnHover|default(true)
+    },
+    paginationShape: paginationShape,
+    paginationSize: paginationSize
+} %}
+
+<section
+    class="{{ sliderClasses|filter(className => className is not empty)|join(' ') }}"
+    style="
+        --vanssa-slider-speed: {{ settings.speed|default(400) }}ms;
+        --vanssa-slider-nav-color: {{ settings.navigationColor|default('rgba(250, 204, 21, 1)') }};
+        --vanssa-slider-nav-bg: {{ settings.navigationBackgroundColor|default('rgba(17, 24, 39, 0.85)') }};
+        --vanssa-slider-nav-size: {{ navigationSize }};
+        --vanssa-slider-nav-shadow: {{ navigationShadow }};
+        --vanssa-slider-pagination-size: {{ paginationSize }};
+        --vanssa-slider-pagination-shadow: {{ paginationShadow }};
+        --vanssa-slider-pagination-color: {{ settings.paginationColor|default('rgba(250, 204, 21, 0.45)') }};
+        --vanssa-slider-pagination-active: {{ settings.paginationActiveColor|default('rgba(250, 204, 21, 1)') }};
+        --vanssa-slider-margin-top: {{ settings.marginTop|default('0') }};
+        --vanssa-slider-margin-right: {{ settings.marginRight|default('0') }};
+        --vanssa-slider-margin-bottom: {{ settings.marginBottom|default('0') }};
+        --vanssa-slider-margin-left: {{ settings.marginLeft|default('0') }};
+        --vanssa-slider-padding-top: {{ settings.paddingTop|default('0') }};
+        --vanssa-slider-padding-right: {{ settings.paddingRight|default('0') }};
+        --vanssa-slider-padding-bottom: {{ settings.paddingBottom|default('0') }};
+        --vanssa-slider-padding-left: {{ settings.paddingLeft|default('0') }};
+    "
+    {{ stimulus_controller('vanssa-slider', { options: sliderOptions }) }}
+>
+    <div class="vanssa-slider__container">
+        {% if showTitle %}
+            <header class="vanssa-slider__header d-flex align-items-center justify-content-between mb-3">
+                <h2 class="vanssa-slider__title mb-0">{{ this.slider.localizedName(this.localeCode, this.fallbackLocaleCode) }}</h2>
+            </header>
+        {% endif %}
+
+        {% if slides|length > 0 %}
+            <div class="vanssa-slider__inner">
+                <div class="vanssa-slider__wrapper">
+                    {% for slide in slides %}
+                        {{ component('vanssa_sylius_slider:shop:slide', {
+                            slide: slide,
+                            index: loop.index0,
+                            localeCode: this.localeCode,
+                            fallbackLocaleCode: this.fallbackLocaleCode,
+                            sliderSettings: settings
+                        }) }}
+                    {% endfor %}
+                </div>
+
+                {% if showNavigation and showArrows and slides|length > 1 %}
+                    <div class="vanssa-slider__controls">
+                        <button type="button" class="vanssa-slider__action vanssa-slider__action--prev vanssa-slider__action-icon--{{ navigationIcon }}" aria-label="Previous slide" {{ stimulus_target('vanssa-slider', 'prevButton') }}>
+                            {% if navigationIcon == 'square' %}■{% elseif navigationIcon == 'angle' %}❮{% else %}‹{% endif %}
+                        </button>
+                        <button type="button" class="vanssa-slider__action vanssa-slider__action--next vanssa-slider__action-icon--{{ navigationIcon }}" aria-label="Next slide" {{ stimulus_target('vanssa-slider', 'nextButton') }}>
+                            {% if navigationIcon == 'square' %}■{% elseif navigationIcon == 'angle' %}❯{% else %}›{% endif %}
+                        </button>
+                    </div>
+                {% endif %}
+
+                {% if showNavigation and slides|length > 1 %}
+                    <div class="vanssa-slider__pagination" aria-label="Slider pagination" {{ stimulus_target('vanssa-slider', 'pagination') }}></div>
+                {% endif %}
+            </div>
+            <span class="visually-hidden" aria-live="polite" {{ stimulus_target('vanssa-slider', 'liveUpdate') }}></span>
+        {% else %}
+            <p>{{ 'No active slides in this slider.'|trans }}</p>
+        {% endif %}
+    </div>
+</section>

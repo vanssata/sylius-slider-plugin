@@ -1,0 +1,38 @@
+<script>
+(function () {
+    if (window.__vanssaSliderPreviewInitialized) {
+        return;
+    }
+
+    window.__vanssaSliderPreviewInitialized = true;
+
+    const updatePreview = (input) => {
+        const target = input.getAttribute('data-preview-target');
+        if (!target) {
+            return;
+        }
+
+        const image = document.querySelector(target);
+        if (!image || !input.files || input.files.length === 0) {
+            return;
+        }
+
+        const file = input.files[0];
+        const url = URL.createObjectURL(file);
+        image.style.backgroundImage = `url('${url}')`;
+    };
+
+    document.addEventListener('change', (event) => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement)) {
+            return;
+        }
+
+        if (input.type !== 'file') {
+            return;
+        }
+
+        updatePreview(input);
+    });
+})();
+</script>

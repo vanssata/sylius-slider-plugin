@@ -1,0 +1,12 @@
+{
+  "recipes": {
+    "vanssa/sylius-slider-plugin": [
+      "1.0"
+    ]
+  },
+  "branch": "main",
+  "is_contrib": true,
+  "_links": {
+    "repository": "https://github.com/vanssa/sylius-slider-plugin"
+  }
+}

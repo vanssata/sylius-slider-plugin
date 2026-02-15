@@ -1,0 +1,87 @@
+{% set slideSettings = this.slide.localizedSlideSettings(this.localeCode, this.fallbackLocaleCode) %}
+{% set contentSettings = this.slide.localizedContentSettings(this.localeCode, this.fallbackLocaleCode) %}
+{% set slideTitle = this.slide.localizedTitle(this.localeCode, this.fallbackLocaleCode) ?: this.slide.localizedName(this.localeCode, this.fallbackLocaleCode) %}
+{% set slideDescription = this.slide.localizedDescription(this.localeCode, this.fallbackLocaleCode) %}
+{% set slideUrl = this.slide.localizedUrl(this.localeCode, this.fallbackLocaleCode) %}
+{% set buttonLabel = this.slide.localizedButtonLabel(this.localeCode, this.fallbackLocaleCode) ?: 'Learn more' %}
+{% set coverAlt = contentSettings.slideCover.alt|default(contentSettings.slideCoverAlt|default(slideTitle)) %}
+{% set coverTitle = contentSettings.slideCover.title|default(contentSettings.slideCoverTitle|default(slideTitle)) %}
+
+{% set headlineTag = slideSettings.headlineElement|default('h3') %}
+{% set rawContentPosX = slideSettings.contentHorizontalPosition|default('start') %}
+{% set rawContentPosY = slideSettings.contentVerticalPosition|default('bottom') %}
+{% set contentPosX = rawContentPosX in ['left', 'start'] ? 'start' : (rawContentPosX in ['right', 'end'] ? 'end' : 'center') %}
+{% set contentPosY = rawContentPosY in ['middle', 'center'] ? 'center' : (rawContentPosY == 'top' ? 'top' : 'bottom') %}
+{% set textAlign = slideSettings.contentTextAlign|default('start') %}
+{% set animation = slideSettings.contentAnimation|default('fade-up') %}
+{% set animationClass = animation == 'none' ? '' : 'is-anim-' ~ animation %}
+{% set blurPresetClass = 'is-bg-blur-' ~ (slideSettings.backgroundBlurPreset|default('none')) %}
+{% set mediaOverlayColor = slideSettings.mediaOverlayColor|default(null) %}
+
+{% set styleVars = [] %}
+{% if slideSettings.textColor|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-text-color: ' ~ slideSettings.textColor]) %}
+{% endif %}
+{% if slideSettings.headlineColor|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-headline-color: ' ~ slideSettings.headlineColor]) %}
+{% endif %}
+{% if slideSettings.descriptionColor|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-description-color: ' ~ slideSettings.descriptionColor]) %}
+{% endif %}
+{% if slideSettings.backgroundColor|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-background-color: ' ~ slideSettings.backgroundColor]) %}
+{% endif %}
+{% if slideSettings.borderRadius|default(null) is not empty %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-radius: ' ~ slideSettings.borderRadius ~ 'px']) %}
+{% endif %}
+{% if slideSettings.contentBlurStrength|default(null) is not empty %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-blur: ' ~ slideSettings.contentBlurStrength ~ 'px']) %}
+{% endif %}
+{% if slideSettings.animationDuration|default(null) is not empty %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-animation-duration: ' ~ slideSettings.animationDuration ~ 'ms']) %}
+{% endif %}
+{% if slideSettings.animationDelay|default(null) is not empty %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-animation-delay: ' ~ slideSettings.animationDelay ~ 'ms']) %}
+{% endif %}
+{% if slideSettings.contentPadding|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-padding: ' ~ slideSettings.contentPadding]) %}
+{% endif %}
+{% if slideSettings.contentMargin|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-margin: ' ~ slideSettings.contentMargin]) %}
+{% endif %}
+
+<article class="vanssa-slide {{ this.index == 0 ? 'is-active' : '' }} {{ slideSettings.customCssClass|default('') }}" data-slide-code="{{ this.slide.code }}" {{ stimulus_target('vanssa-slider', 'slide') }}>
+    {% if this.slide.slideCoverVideo %}
+        <video class="vanssa-slide__media" {% if this.sliderSettings.autoplay.enabled|default(this.sliderSettings.autoplay.active|default(false)) %}autoplay{% endif %} muted loop playsinline>
+            <source src="{{ this.slide.slideCoverVideo }}">
+        </video>
+    {% elseif this.slide.localizedSlideCover(this.localeCode, this.fallbackLocaleCode) or this.slide.localizedSlideCoverMobile(this.localeCode, this.fallbackLocaleCode) or this.slide.localizedSlideCoverTablet(this.localeCode, this.fallbackLocaleCode) %}
+        <picture>
+            {% if this.slide.localizedSlideCoverMobile(this.localeCode, this.fallbackLocaleCode) %}
+                <source media="(max-width: 767px)" srcset="{{ this.slide.localizedSlideCoverMobile(this.localeCode, this.fallbackLocaleCode) }}">
+            {% endif %}
+            {% if this.slide.localizedSlideCoverTablet(this.localeCode, this.fallbackLocaleCode) %}
+                <source media="(max-width: 1024px)" srcset="{{ this.slide.localizedSlideCoverTablet(this.localeCode, this.fallbackLocaleCode) }}">
+            {% endif %}
+            <img class="vanssa-slide__media" src="{{ this.slide.localizedSlideCover(this.localeCode, this.fallbackLocaleCode) ?: this.slide.localizedSlideCoverTablet(this.localeCode, this.fallbackLocaleCode) ?: this.slide.localizedSlideCoverMobile(this.localeCode, this.fallbackLocaleCode) }}" alt="{{ coverAlt }}" title="{{ coverTitle }}">
+        </picture>
+    {% endif %}
+
+    {% if mediaOverlayColor or this.sliderSettings.overlay|default(false) %}
+        <div class="vanssa-slide__overlay" {% if mediaOverlayColor %}style="background: {{ mediaOverlayColor }};"{% endif %}></div>
+    {% endif %}
+
+    <div class="vanssa-slide__content is-pos-x-{{ contentPosX }} is-pos-y-{{ contentPosY }}">
+        <div class="vanssa-slide__content-box {{ animationClass }} {{ blurPresetClass }} {{ slideSettings.enableTextBlur|default(false) ? 'is-blurred' : '' }}" style="{{ styleVars|join('; ') }}; text-align: {{ textAlign }};">
+            <{{ headlineTag }} class="vanssa-slide__headline">{{ slideTitle }}</{{ headlineTag }}>
+
+            {% if slideDescription %}
+                <div class="vanssa-slide__description">{{ sylius_slider_render_content(slideDescription) }}</div>
+            {% endif %}
+
+            {% if slideUrl %}
+                <a class="vanssa-slide__button" href="{{ slideUrl }}">{{ buttonLabel }}</a>
+            {% endif %}
+        </div>
+    </div>
+</article>

@@ -1,0 +1,12 @@
+{% set localeCode = localeCode|default(app.request.locale) %}
+{% set fallbackLocaleCode = fallbackLocaleCode|default(null) %}
+{% set settings = settings|default({}) %}
+{% set index = index|default(0) %}
+
+{{ component('vanssa_sylius_slider:shop:slide', {
+    slide: slide,
+    index: index,
+    localeCode: localeCode,
+    fallbackLocaleCode: fallbackLocaleCode,
+    sliderSettings: settings
+}) }}

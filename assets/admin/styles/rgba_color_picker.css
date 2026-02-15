@@ -1,0 +1,15 @@
+.vanssa-color-picker-swatch {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    padding: 0;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 0 .375rem .375rem 0;
+}
+.pickr .pcr-button {
+    min-height: 44px;
+    min-width: 44px;
+}
+.input-group > .form-control + .vanssa-color-picker-swatch {
+    height: calc(2.25rem + 2px);
+}

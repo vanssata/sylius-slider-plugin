@@ -1,0 +1,15 @@
+{% set previewId = preview_id|default('preview-' ~ random()) %}
+{% set imageUrl = image_path|default(null) %}
+
+<div class="row g-3 align-items-start mb-3">
+    <div class="col-auto">
+        {% if imageUrl %}
+            <span id="{{ previewId }}" class="avatar avatar-xl" style="background-image: url('{{ imageUrl }}')"></span>
+        {% else %}
+            <span id="{{ previewId }}" class="avatar avatar-xl"></span>
+        {% endif %}
+    </div>
+    <div class="col">
+        {{ form_row(field, { attr: { 'data-preview-target': '#' ~ previewId } }) }}
+    </div>
+</div>

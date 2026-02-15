@@ -1,0 +1,189 @@
+sylius_twig_hooks:
+    hooks:
+        'sylius_admin.slide.create#javascripts':
+            image_preview_script:
+                template: '@VanssaSyliusSliderPlugin/admin/shared/form/image_preview_script.html.twig'
+                priority: 0
+
+        'sylius_admin.slide.update#javascripts':
+            image_preview_script:
+                template: '@VanssaSyliusSliderPlugin/admin/shared/form/image_preview_script.html.twig'
+                priority: 0
+
+        'sylius_admin.slide.create.content':
+            form:
+               template: '@VanssaSyliusSliderPlugin/admin/shared/form/form.html.twig'
+               configuration:
+                    render_rest: false
+               priority: 100
+
+        'sylius_admin.slide.update.content':
+            form:
+                template: '@VanssaSyliusSliderPlugin/admin/shared/form/form.html.twig'
+                configuration:
+                    render_rest: false
+                priority: 100
+
+        'sylius_admin.slide.create.content.form':
+            sections:
+                enabled: false
+            content:
+                template: '@VanssaSyliusSliderPlugin/admin/shared/form/content.html.twig'
+                priority: 0
+
+        'sylius_admin.slide.update.content.form':
+            sections:
+                enabled: false
+            content:
+                template: '@VanssaSyliusSliderPlugin/admin/shared/form/content.html.twig'
+                priority: 0
+
+        # Disable legacy fallback branch to prevent duplicate field rendering.
+        'sylius_admin.slide.create.content.form.sections.general':
+            default:
+                enabled: false
+
+        # Disable legacy fallback branch to prevent duplicate field rendering.
+        'sylius_admin.slide.update.content.form.sections.general':
+            default:
+                enabled: false
+
+        'sylius_admin.slide.create.content.form.content':
+            side_navigation:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/side_navigation.html.twig'
+                priority: 100
+            sections:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections.html.twig'
+                priority: 0
+
+        'sylius_admin.slide.create.content.form.content.side_navigation':
+            general:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/side_navigation/general.html.twig'
+                configuration: { active: true }
+                priority: 400
+            media:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/side_navigation/media.html.twig'
+                priority: 350
+            translations:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/side_navigation/translations.html.twig'
+                priority: 100
+
+        'sylius_admin.slide.update.content.form.content':
+            side_navigation:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/side_navigation.html.twig'
+                priority: 100
+            sections:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections.html.twig'
+                priority: 0
+
+        'sylius_admin.slide.update.content.form.content.side_navigation':
+            general:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/side_navigation/general.html.twig'
+                configuration: { active: true }
+                priority: 400
+            media:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/side_navigation/media.html.twig'
+                priority: 350
+            translations:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/side_navigation/translations.html.twig'
+                priority: 100
+
+        'sylius_admin.slide.create.content.form.content.sections':
+            general:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general.html.twig'
+                configuration: { active: true }
+                priority: 400
+            media:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/media.html.twig'
+                priority: 200
+            translations:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations.html.twig'
+                priority: 100
+
+        'sylius_admin.slide.update.content.form.content.sections':
+            general:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general.html.twig'
+                configuration: { active: true }
+                priority: 400
+            media:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/media.html.twig'
+                priority: 200
+            translations:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations.html.twig'
+                priority: 100
+
+        'sylius_admin.slide.create.content.form.content.sections.general':
+            default: { enabled: false }
+            slider:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/slider.html.twig'
+                priority: 500
+            code:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/code.html.twig'
+                priority: 400
+            channels:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/channels.html.twig'
+                priority: 300
+            title:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/title.html.twig'
+                priority: 200
+            description:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/description.html.twig'
+                priority: 100
+            state:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/state.html.twig'
+                priority: 0
+
+        'sylius_admin.slide.update.content.form.content.sections.general':
+            default: { enabled: false }
+            slider:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/slider.html.twig'
+                priority: 500
+            code:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/code.html.twig'
+                priority: 400
+            channels:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/channels.html.twig'
+                priority: 300
+            title:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/title.html.twig'
+                priority: 200
+            description:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/description.html.twig'
+                priority: 100
+            state:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/state.html.twig'
+                priority: 0
+
+        'sylius_admin.slide.create.content.form.content.sections.translations':
+            title:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/title.html.twig'
+                priority: 600
+            description:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/description.html.twig'
+                priority: 500
+            button_label:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/button_label.html.twig'
+                priority: 400
+            url:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/url.html.twig'
+                priority: 300
+            options:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/options.html.twig'
+                priority: 100
+
+        'sylius_admin.slide.update.content.form.content.sections.translations':
+            title:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/title.html.twig'
+                priority: 600
+            description:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/description.html.twig'
+                priority: 500
+            button_label:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/button_label.html.twig'
+                priority: 400
+            url:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/url.html.twig'
+                priority: 300
+            options:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/options.html.twig'
+                priority: 100

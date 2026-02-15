@@ -1,0 +1,4 @@
+{% set form = hookable_metadata.context.form %}
+{% if form.sliders is defined and not form.sliders.rendered %}
+    <div class="col-12">{{ form_row(form.sliders) }}</div>
+{% endif %}

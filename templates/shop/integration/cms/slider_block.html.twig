@@ -1,0 +1,15 @@
+{#
+   Sylius CMS Plugin integration template.
+   Usage example:
+   {{ sylius_cms_render_block('homepage_slider', '@VanssaSyliusSliderPlugin/shop/integration/cms/slider_block.html.twig', {'slider_code': 'homepage-main'}) }}
+#}
+{% set resolvedSliderCode = slider_code|default(null) %}
+{% set slider = resolvedSliderCode ? sylius_slider_by_code(resolvedSliderCode) : null %}
+
+{% if slider %}
+    {% include '@VanssaSyliusSliderPlugin/shop/slider/_slider.html.twig' with { slider: slider } only %}
+{% else %}
+    {% if app.debug %}
+        <p>SyliusSlider: no slider found for <code>{{ resolvedSliderCode ?? 'null' }}</code>.</p>
+    {% endif %}
+{% endif %}

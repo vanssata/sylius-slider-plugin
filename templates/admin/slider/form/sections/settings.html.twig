@@ -1,0 +1,46 @@
+<div class="tab-pane" id="slider-settings" role="tabpanel" tabindex="0">
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2 class="card-title">{{ 'sylius.ui.settings'|trans }}</h2>
+        </div>
+        <div class="card-body">
+            {% set form = hookable_metadata.context.form.settings %}
+            {% set yellowSwatches = ['rgba(250, 204, 21, 1)', 'rgba(250, 204, 21, 0.75)', 'rgba(250, 204, 21, 0.45)', 'rgba(255, 255, 255, 1)', 'rgba(17, 24, 39, 0.85)'] %}
+            <div class="row">
+                <div class="col-12 col-md-4">{{ form_row(form.containerWidth) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.slideEffect) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.speed) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.overlay) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.showTitle) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.marginTop) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.marginRight) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.marginBottom) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.marginLeft) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.paddingTop) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.paddingRight) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.paddingBottom) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.paddingLeft) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.justifySlideHeight) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.rewind) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.pauseOnHover) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.showNavigation) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.showArrows) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.navigationIcon) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.navigationSize) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.navigationShadow) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.paginationShape) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.paginationSize) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.paginationShadow) }}</div>
+                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.navigationColor, swatches: yellowSwatches } only %}</div>
+                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.navigationBackgroundColor, swatches: yellowSwatches } only %}</div>
+                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.paginationColor, swatches: yellowSwatches } only %}</div>
+                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.paginationActiveColor, swatches: yellowSwatches } only %}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.autoplay.enabled) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.autoplay.interval) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(form.autoplay.pauseOnHover) }}</div>
+                <div class="col-12">{{ form_row(form.channelCodes) }}</div>
+                <div class="col-12">{{ form_row(form.cssClasses) }}</div>
+            </div>
+        </div>
+    </div>
+</div>

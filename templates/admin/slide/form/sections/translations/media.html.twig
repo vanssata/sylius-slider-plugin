@@ -1,0 +1,26 @@
+{% set form = hookable_metadata.context.form %}
+{% set translation = form.vars.data %}
+
+<div class="col-12"><hr></div>
+<div class="col-12"><h3 class="h5 mb-3">{{ 'sylius.ui.media'|trans }}</h3></div>
+<div class="col-12 col-md-4">
+    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+        field: form.slideCoverFile,
+        image_path: translation ? translation.slideCover : null,
+        preview_id: form.vars.id ~ '-desktop-preview'
+    } %}
+</div>
+<div class="col-12 col-md-4">
+    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+        field: form.slideCoverMobileFile,
+        image_path: translation ? translation.slideCoverMobile : null,
+        preview_id: form.vars.id ~ '-mobile-preview'
+    } %}
+</div>
+<div class="col-12 col-md-4">
+    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+        field: form.slideCoverTabletFile,
+        image_path: translation ? translation.slideCoverTablet : null,
+        preview_id: form.vars.id ~ '-tablet-preview'
+    } %}
+</div>

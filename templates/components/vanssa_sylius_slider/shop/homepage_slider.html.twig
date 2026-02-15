@@ -1,0 +1,9 @@
+{% set slider = this.slider %}
+
+{% if slider is not null %}
+    {{ component('vanssa_sylius_slider:shop:slider', {
+        slider: slider,
+        localeCode: app.request.locale,
+        fallbackLocaleCode: sylius.channel.defaultLocale.code|default(null)
+    }) }}
+{% endif %}

@@ -1,0 +1,12 @@
+<div class="tab-pane {% if hookable_metadata.configuration.active|default(false) %}show active{% endif %}" id="slider-general" role="tabpanel" tabindex="0">
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2 class="card-title">{{ 'sylius.ui.general'|trans }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% hook 'general' %}
+            </div>
+        </div>
+    </div>
+</div>

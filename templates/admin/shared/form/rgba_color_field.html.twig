@@ -1,0 +1,29 @@
+{% set field = field %}
+{% set swatches = swatches|default([]) %}
+{% set input_attr = input_attr|default({}) %}
+
+<div
+    {{ stimulus_controller('vanssa-rgba-color-picker', {
+        swatches: swatches
+    }) }}
+>
+    {{ form_label(field) }}
+    <div class="input-group">
+        {{ form_widget(field, {
+            attr: {
+                'data-vanssa-rgba-color-picker-target': 'input',
+                placeholder: 'rgba(255, 255, 255, 1)'
+            }|merge(input_attr)
+        }) }}
+        <button
+            type="button"
+            class="btn vanssa-color-picker-swatch"
+            aria-label="Pick color"
+            {{ stimulus_target('vanssa-rgba-color-picker', 'button') }}
+        >
+            <span class="visually-hidden">Pick</span>
+        </button>
+    </div>
+    {{ form_help(field) }}
+    {{ form_errors(field) }}
+</div>

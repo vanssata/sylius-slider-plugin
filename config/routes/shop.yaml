@@ -1,0 +1,3 @@
+vanssa_sylius_slider_shop:
+    resource: '@VanssaSyliusSliderPlugin/src/Controller/Shop/SliderController.php'
+    type: attribute

@@ -1,0 +1,15 @@
+<div class="card mt-3">
+    <div class="card-header">
+        <h3 class="card-title mb-0">Live preview</h3>
+    </div>
+    <div class="card-body">
+        <div class="vanssa-slide-preview">
+            <div class="vanssa-slide-preview__content is-pos-x-start is-pos-y-bottom" {{ stimulus_target('vanssa-slide-preview', 'previewBox') }}>
+                <div class="vanssa-slide-preview__heading" {{ stimulus_target('vanssa-slide-preview', 'previewHeading') }}>Sample H3</div>
+                <p class="vanssa-slide-preview__description" {{ stimulus_target('vanssa-slide-preview', 'previewDescription') }}>
+                    This preview reflects content alignment, colors, blur and spacing settings.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

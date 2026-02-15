@@ -1,0 +1,22 @@
+# Put your plugin configuration here
+
+imports:
+    - { resource: "grids/**/*.yaml" }
+    - { resource: "twig_hooks/**/*.yaml" }
+    - { resource: "fixtures.yaml" }
+
+sylius_resource:
+    resources:
+        vanssa_sylius_slider.slider:
+            driver: doctrine/orm
+            classes:
+                model: Vanssa\SyliusSliderPlugin\Entity\Slider
+                repository: Vanssa\SyliusSliderPlugin\Repository\SliderRepository
+                form: Vanssa\SyliusSliderPlugin\Form\Type\SliderType
+        vanssa_sylius_slider.slide:
+            driver: doctrine/orm
+            classes:
+                model: Vanssa\SyliusSliderPlugin\Entity\Slide
+                repository: Vanssa\SyliusSliderPlugin\Repository\SlideRepository
+                factory: Vanssa\SyliusSliderPlugin\Factory\SlideFactory
+                form: Vanssa\SyliusSliderPlugin\Form\Type\SlideType

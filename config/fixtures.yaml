@@ -1,0 +1,5 @@
+sylius_fixtures:
+    suites:
+        vanssa_sylius_slider_demo:
+            fixtures:
+                vanssa_slider_demo: ~

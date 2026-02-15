@@ -1,0 +1,7 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block title %}{{ slider.localizedName(localeCode, fallbackLocaleCode) }}{% endblock %}
+
+{% block content %}
+    {% include '@VanssaSyliusSliderPlugin/shop/slider/_slider.html.twig' with { slider: slider, localeCode: localeCode, fallbackLocaleCode: fallbackLocaleCode } %}
+{% endblock %}

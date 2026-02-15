@@ -1,0 +1,44 @@
+vanssa_sylius_slider_admin_slide_create_for_slider:
+    path: /slides/new/{sliderId}
+    methods: [GET, POST]
+    defaults:
+        _controller: vanssa_sylius_slider.controller.slide::createAction
+        _sylius:
+            section: admin
+            permission: true
+            template: '@SyliusAdmin/shared/crud/create.html.twig'
+            redirect: vanssa_sylius_slider_admin_slide_update
+            factory:
+                method: createForSlider
+                arguments:
+                    - 'expr:notFoundOnNull(service("vanssa_sylius_slider.repository.slider").find($sliderId))'
+            vars:
+                route:
+                    parameters:
+                        sliderId: $sliderId
+
+vanssa_sylius_slider_admin_slider:
+    resource: |
+        alias: vanssa_sylius_slider.slider
+        section: admin
+        templates: "@SyliusAdmin\\shared\\crud"
+        except: ['show']
+        redirect: update
+        grid: vanssa_sylius_slider_admin_slider
+        vars:
+            hook_prefix: 'vanssa_sylius_slider_admin.slider'
+        permission: true
+    type: sylius.resource
+
+vanssa_sylius_slider_admin_slide:
+    resource: |
+        alias: vanssa_sylius_slider.slide
+        section: admin
+        templates: "@SyliusAdmin\\shared\\crud"
+        except: ['show']
+        redirect: update
+        grid: vanssa_sylius_slider_admin_slide
+        vars:
+            hook_prefix: 'vanssa_sylius_slider_admin.slide'
+        permission: true
+    type: sylius.resource

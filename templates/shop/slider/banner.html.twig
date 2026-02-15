@@ -1,0 +1,9 @@
+{% extends '@SyliusShop/shared/layout/base.html.twig' %}
+
+{% block title %}{{ slide.localizedName(localeCode, fallbackLocaleCode) }}{% endblock %}
+
+{% block content %}
+    <section class="sylius-banner">
+        {% include '@VanssaSyliusSliderPlugin/shop/slider/slide.html.twig' with { slide: slide, index: 0, localeCode: localeCode, fallbackLocaleCode: fallbackLocaleCode } %}
+    </section>
+{% endblock %}

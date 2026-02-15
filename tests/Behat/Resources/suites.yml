@@ -1,0 +1,18 @@
+# Put your Behat suites definitions here
+
+default:
+    suites:
+        slider_admin:
+            contexts:
+                - vanssa_sylius_slider.context.ui.admin.slide_translations
+                - vanssa_sylius_slider.context.ui.admin.slider_management
+
+            filters:
+                tags: "@slider_admin"
+
+        slider_shop:
+            contexts:
+                - vanssa_sylius_slider.context.ui.shop.slider_frontend
+
+            filters:
+                tags: "@slider_frontend"

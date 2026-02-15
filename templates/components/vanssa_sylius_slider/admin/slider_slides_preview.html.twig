@@ -1,0 +1,83 @@
+<div {{ attributes.defaults(stimulus_controller('vanssa-slider-slides-preview')) }}>
+    {% if this.slides|length == 0 %}
+        <div class="alert alert-info mb-0">No slides assigned yet.</div>
+    {% else %}
+        <div class="vanssa-slider-slides-preview list-group" {{ stimulus_target('vanssa-slider-slides-preview', 'list') }}>
+            {% for slide in this.slides %}
+                {% set slideId = slide.id %}
+                {% set slideTitle = slide.title %}
+                {% set slideDescription = slide.description %}
+                {% set slideName = slide.name %}
+                {% set hasVideo = slide.slideCoverVideo %}
+                {% set hasImage = slide.slideCover %}
+                {% set contentSettings = slide.contentSettings|default({}) %}
+                {% set contentHorizontal = contentSettings.contentHorizontalPosition|default('start') %}
+                {% set contentVertical = contentSettings.contentVerticalPosition|default('bottom') %}
+                <article
+                    class="list-group-item vanssa-slider-slides-preview__item {{ not slide.enabled ? 'is-disabled' : '' }}"
+                    draggable="true"
+                    data-slide-id="{{ slideId }}"
+                    {{ stimulus_target('vanssa-slider-slides-preview', 'item') }}
+                    data-action="dragstart->vanssa-slider-slides-preview#onDragStart dragover->vanssa-slider-slides-preview#onDragOver drop->vanssa-slider-slides-preview#onDrop dragend->vanssa-slider-slides-preview#onDragEnd"
+                >
+                    <div class="vanssa-slider-slides-preview__drag-handle" title="Drag to reorder">⋮⋮</div>
+
+                    <div class="vanssa-slider-slides-preview__media">
+                        {% if hasImage %}
+                            <img src="{{ slide.slideCover }}" alt="{{ slideTitle ?: slideName }}">
+                        {% elseif hasVideo %}
+                            <div class="vanssa-slider-slides-preview__video-placeholder">
+                                <span class="badge bg-blue-lt">Video</span>
+                            </div>
+                        {% else %}
+                            <div class="vanssa-slider-slides-preview__image-placeholder"></div>
+                        {% endif %}
+                    </div>
+
+                    <div class="vanssa-slider-slides-preview__content">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                            <div>
+                                <h4 class="mb-1">{{ slideTitle ?: slideName }}</h4>
+                                <div class="text-muted small">{{ slide.code }}</div>
+                            </div>
+                            <div class="text-muted small text-nowrap">#{{ loop.index }}</div>
+                        </div>
+
+                        {% if slideDescription %}
+                            <p class="mb-2 text-muted small">{{ slideDescription|striptags|u.truncate(140, '...') }}</p>
+                        {% endif %}
+
+                        <div class="small text-muted mb-2">
+                            <span class="me-2">{{ hasVideo ? 'Video' : (hasImage ? 'Image' : 'No media') }}</span>
+                            <span>Content: {{ contentHorizontal }}/{{ contentVertical }}</span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            {% if not slide.enabled %}
+                                <span class="badge bg-danger text-white">Disabled</span>
+                            {% endif %}
+                            <a class="btn btn-outline-primary btn-sm" href="{{ path('vanssa_sylius_slider_admin_slide_update', {'id': slideId}) }}">{{ 'sylius.ui.edit'|trans }}</a>
+                            <button
+                                type="button"
+                                class="btn btn-outline-danger btn-sm"
+                                data-action="live#action:prevent"
+                                data-live-action-param="removeSlide"
+                                data-live-slide-id-param="{{ slideId }}"
+                            >
+                                {{ 'sylius.ui.delete'|trans }}
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+
+        <button
+            type="button"
+            class="d-none"
+            {{ stimulus_target('vanssa-slider-slides-preview', 'reorderTrigger') }}
+            data-action="live#action:prevent"
+            data-live-action-param="reorderSlides"
+        ></button>
+    {% endif %}
+</div>
