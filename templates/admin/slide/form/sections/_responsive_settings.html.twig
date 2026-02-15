@@ -1,0 +1,83 @@
+{% set responsive_form = responsive_form|default(null) %}
+{% set responsive_id = responsive_id|default('slide-responsive') %}
+
+{% if responsive_form is not null %}
+    <ul class="nav nav-pills mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" type="button" data-bs-toggle="tab" data-bs-target="#{{ responsive_id }}-desktop" role="tab">
+                <i class="bi bi-display me-1"></i> Desktop
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" type="button" data-bs-toggle="tab" data-bs-target="#{{ responsive_id }}-tablet" role="tab">
+                <i class="bi bi-tablet me-1"></i> Tablet
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" type="button" data-bs-toggle="tab" data-bs-target="#{{ responsive_id }}-mobile" role="tab">
+                <i class="bi bi-phone me-1"></i> Mobile
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content border rounded p-3">
+        {% for breakpoint in ['desktop', 'tablet', 'mobile'] %}
+            {% set bp = attribute(responsive_form, breakpoint) %}
+            <div class="tab-pane fade {% if breakpoint == 'desktop' %}show active{% endif %}" id="{{ responsive_id }}-{{ breakpoint }}" role="tabpanel">
+                <div class="row mb-3">
+                    <div class="col-12 col-md-6">{{ form_row(bp.title, { attr: {'data-preview-field': 'title'} }) }}</div>
+                    <div class="col-12 col-md-6">{{ form_row(bp.headlineElement, { attr: {'data-preview-field': 'headlineElement'} }) }}</div>
+                    <div class="col-12">{{ form_row(bp.description, { attr: {'data-preview-field': 'description'} }) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(bp.headlineFontSize, { attr: {'data-preview-field': 'headlineFontSize'} }) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(bp.descriptionFontSize, { attr: {'data-preview-field': 'descriptionFontSize'} }) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(bp.buttonFontSize, { attr: {'data-preview-field': 'buttonFontSize'} }) }}</div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-layout-text-window-reverse me-1"></i> Layout</h4></div>
+                    <div class="card-body row">
+                        <div class="col-12 col-md-4">{{ form_row(bp.contentHorizontalPosition, { attr: {'data-preview-field': 'contentHorizontalPosition'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.contentVerticalPosition, { attr: {'data-preview-field': 'contentVerticalPosition'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.contentTextAlign, { attr: {'data-preview-field': 'contentTextAlign'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.contentPadding, { attr: {'data-preview-field': 'contentPadding'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.contentMargin, { attr: {'data-preview-field': 'contentMargin'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.borderRadius, { attr: {'data-preview-field': 'borderRadius'} }) }}</div>
+                        <div class="col-12">{{ form_row(bp.customCssClass) }}</div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-palette me-1"></i> Colors & Surface</h4></div>
+                    <div class="card-body row">
+                        <div class="col-12 col-md-4">{{ form_row(bp.textColor, { attr: {'data-preview-field': 'textColor'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.headlineColor, { attr: {'data-preview-field': 'headlineColor'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.descriptionColor, { attr: {'data-preview-field': 'descriptionColor'} }) }}</div>
+                        <div class="col-12 col-md-6">{{ form_row(bp.backgroundColor, { attr: {'data-preview-field': 'backgroundColor'} }) }}</div>
+                        <div class="col-12 col-md-6">{{ form_row(bp.mediaOverlayColor, { attr: {'data-preview-field': 'mediaOverlayColor'} }) }}</div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-stars me-1"></i> Effects</h4></div>
+                    <div class="card-body row">
+                        <div class="col-12 col-md-4">{{ form_row(bp.contentAnimation, { attr: {'data-preview-field': 'contentAnimation'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.animationDuration, { attr: {'data-preview-field': 'animationDuration'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.animationDelay, { attr: {'data-preview-field': 'animationDelay'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.backgroundBlurPreset, { attr: {'data-preview-field': 'backgroundBlurPreset'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.enableTextBlur, { attr: {'data-preview-field': 'enableTextBlur'} }) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.contentBlurStrength, { attr: {'data-preview-field': 'contentBlurStrength'} }) }}</div>
+                    </div>
+                </div>
+
+                <div class="card mb-0">
+                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-eye-slash me-1"></i> Visibility</h4></div>
+                    <div class="card-body row">
+                        <div class="col-12 col-md-4">{{ form_row(bp.hideTitle) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.hideDescription) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(bp.hideButton) }}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

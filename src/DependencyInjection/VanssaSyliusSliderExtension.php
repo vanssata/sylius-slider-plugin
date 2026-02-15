@@ -18,6 +18,10 @@ final class VanssaSyliusSliderExtension extends AbstractResourceExtension implem
     /** @psalm-suppress UnusedVariable */
     public function load(array $configs, ContainerBuilder $container): void
     {
+        $configuration = $this->getConfiguration($configs, $container);
+        $config = $this->processConfiguration($configuration, $configs);
+        $container->setParameter('vanssa_sylius_slider.presets', $config['presets']);
+
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
 
         $loader->load('services.xml');

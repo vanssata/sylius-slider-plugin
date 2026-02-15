@@ -147,6 +147,51 @@ Notes for Sylius-Standard:
 - Keep your existing controller entries (for example `@symfony/ux-live-component` and `@symfony/ux-autocomplete`) and only add the `@vanssa/sylius-slider-plugin` block.
 - If your project customizes webpack configs, ensure `assets/controllers.json` is the file passed to `enableStimulusBridge(...)`.
 
+## Preset Configuration
+
+The plugin exports slider/slide preset values and defaults via plugin config:
+
+- File: `config/packages/vanssa_sylius_slider.yaml`
+- Root key: `vanssa_sylius_slider.presets`
+
+Each preset contains:
+
+- `values`: allowed values used by form choices
+- `default`: default value used when creating new entities
+
+You can override any preset in your project config.
+
+Color switcher presets are available under:
+
+- `vanssa_sylius_slider.presets.color_switcher.theme`
+- `vanssa_sylius_slider.presets.color_switcher.default_representation`
+- `vanssa_sylius_slider.presets.color_switcher.swatches.text|neutral|accent`
+
+Slider behavior presets also include:
+
+- `vanssa_sylius_slider.presets.slider.parallax_strength`
+  Optional parallax levels (for example: `0.5rem`, `1rem`, `2rem`, `3rem`, `4rem`). If not set, parallax is disabled.
+
+## Reusable Color Picker Field
+
+Use `Vanssa\SyliusSliderPlugin\Form\Type\ColorPickerType` in any form field.
+
+- `picker_swatches`: predefined swatches shown in picker
+- `picker_theme`: Pickr theme (`classic`, `monolith`, `nano`)
+- `picker_options`: raw Pickr options map passed to `Pickr.create(...)`
+- `picker_predefined_only`: allow only colors from `picker_swatches`
+
+Because `picker_options` is passed through, you can configure any supported
+Pickr option from https://github.com/simonwep/pickr.
+
+## Detailed Guides
+
+- [Color Picker Type](docs/COLOR_PICKER_TYPE.md)
+- [Screenshots](docs/SCREENSHOTS.md)
+- [Flex Recipe](docs/FLEX_RECIPE.md)
+- [Extending](docs/EXTENDING.md)
+- [Contributing](docs/CONTRIBUTING.md)
+
 ## Admin Usage
 
 After installation, in admin you can manage:

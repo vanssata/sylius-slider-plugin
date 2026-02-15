@@ -6,10 +6,12 @@ namespace Vanssa\SyliusSliderPlugin\Fixture;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Sylius\Bundle\FixturesBundle\Fixture\AbstractFixture;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Vanssa\SyliusSliderPlugin\Entity\Slide;
 use Vanssa\SyliusSliderPlugin\Entity\Slider;
 use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
 use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
+use Vanssa\SyliusSliderPlugin\Service\UploadedMediaStorage;
 
 final class SliderDemoFixture extends AbstractFixture
 {
@@ -17,6 +19,7 @@ final class SliderDemoFixture extends AbstractFixture
         private readonly EntityManagerInterface $entityManager,
         private readonly SliderRepository $sliderRepository,
         private readonly SlideRepository $slideRepository,
+        private readonly UploadedMediaStorage $uploadedMediaStorage,
     ) {
     }
 
@@ -32,21 +35,21 @@ final class SliderDemoFixture extends AbstractFixture
                 'platform-overview',
                 'Platform Overview',
                 'Unified cockpit software for EV and connected fleets.',
-                '/media/fixtures/automotive/dashboard-hud.svg',
+                1,
                 null,
             ),
             'predictive-service' => $this->createOrUpdateSlide(
                 'predictive-service',
                 'Predictive Service',
                 'AI diagnostics helps prevent workshop downtime.',
-                '/media/fixtures/automotive/service-bay.svg',
+                2,
                 null,
             ),
             'fleet-control' => $this->createOrUpdateSlide(
                 'fleet-control',
                 'Fleet Control',
                 'Live route orchestration for mixed vehicle fleets.',
-                '/media/fixtures/automotive/fleet-control.svg',
+                3,
                 null,
             ),
         ];
@@ -56,21 +59,21 @@ final class SliderDemoFixture extends AbstractFixture
                 'autonomous-loop',
                 'Autonomous Drive Loop',
                 'Synthetic video loop for ADAS showcase.',
-                '/media/fixtures/automotive/diagnostics-ui.svg',
+                1,
                 '/media/fixtures/automotive/autonomous-loop.mp4',
             ),
             'charging-network' => $this->createOrUpdateSlide(
                 'charging-network',
                 'Charging Network',
                 'Synthetic video loop for charging analytics.',
-                '/media/fixtures/automotive/route-analytics.svg',
+                2,
                 '/media/fixtures/automotive/charging-network.mp4',
             ),
         ];
 
-        $s1 = $this->createOrUpdateSlide('ev-cockpit', 'EV Cockpit', 'Driver-focused EV cockpit UX blocks.', '/media/fixtures/automotive/electric-sedan.svg');
-        $s2 = $this->createOrUpdateSlide('battery-lab', 'Battery Lab', 'Battery analytics and thermal charts.', '/media/fixtures/automotive/battery-lab.svg');
-        $s3 = $this->createOrUpdateSlide('assistant', 'In-Car Assistant', 'Voice assistant with contextual commands.', '/media/fixtures/automotive/ai-assistant.svg');
+        $s1 = $this->createOrUpdateSlide('ev-cockpit', 'EV Cockpit', 'Driver-focused EV cockpit UX blocks.', 3);
+        $s2 = $this->createOrUpdateSlide('battery-lab', 'Battery Lab', 'Battery analytics and thermal charts.', 1);
+        $s3 = $this->createOrUpdateSlide('assistant', 'In-Car Assistant', 'Voice assistant with contextual commands.', 2);
 
         $this->entityManager->flush();
 
@@ -141,7 +144,7 @@ final class SliderDemoFixture extends AbstractFixture
         string $code,
         string $title,
         string $description,
-        ?string $cover = null,
+        int $imageSet = 1,
         ?string $video = null,
     ): Slide {
         $slide = $this->slideRepository->findOneBy(['code' => $code]);
@@ -152,17 +155,24 @@ final class SliderDemoFixture extends AbstractFixture
         }
 
         $slide->setName($title);
-        $slide->setTitle($title);
-        $slide->setDescription($description);
         $slide->setEnabled(true);
-        $slide->setSlideCover($cover);
+        $slide->setSlideCover($this->uploadFixtureImage('desktop', $imageSet));
+        $slide->setSlideCoverMobile($this->uploadFixtureImage('mobile', $imageSet));
         $slide->setSlideCoverVideo($video);
         $slide->setSlideSettings(array_merge($slide->getSlideSettings(), [
-            'headlineElement' => 'h3',
-            'contentHorizontalPosition' => 'start',
-            'contentVerticalPosition' => 'bottom',
-            'contentTextAlign' => 'left',
-            'contentAnimation' => 'fade-up',
+            'responsive' => [
+                'desktop' => [
+                    'headlineElement' => 'h3',
+                    'contentHorizontalPosition' => 'start',
+                    'contentVerticalPosition' => 'bottom',
+                    'contentTextAlign' => 'left',
+                    'contentAnimation' => 'fade-up',
+                    'title' => $title,
+                    'description' => $description,
+                ],
+                'tablet' => [],
+                'mobile' => [],
+            ],
         ]));
         $slide->setContentSettings(array_merge($slide->getContentSettings(), [
             'slideCover' => ['alt' => $title, 'title' => $title],
@@ -170,9 +180,45 @@ final class SliderDemoFixture extends AbstractFixture
 
         $translation = $slide->getOrCreateTranslation('en_US');
         $translation->setName($title);
-        $translation->setTitle($title);
-        $translation->setDescription($description);
 
         return $slide;
+    }
+
+    private function uploadFixtureImage(string $device, int $set): ?string
+    {
+        $path = $this->resolveFixtureImagePath($device, $set);
+        if (null === $path || !is_file($path)) {
+            return null;
+        }
+
+        $mimeType = mime_content_type($path) ?: null;
+        $uploadedFile = new UploadedFile($path, basename($path), $mimeType, null, true);
+
+        return $this->uploadedMediaStorage->store($uploadedFile, sprintf('fixtures/%s', $device));
+    }
+
+    private function resolveFixtureImagePath(string $device, int $set): ?string
+    {
+        $basePath = dirname(__DIR__, 2) . '/assets/fixtures/images';
+        $extensions = ['webp', 'jpg', 'jpeg', 'png'];
+        $candidates = [];
+
+        foreach ($extensions as $extension) {
+            $candidates[] = sprintf('%s/%s-%d.%s', $basePath, $device, $set, $extension);
+        }
+
+        if ('mobile' === $device) {
+            foreach ($extensions as $extension) {
+                $candidates[] = sprintf('%s/mobile%d.%s', $basePath, $set, $extension);
+            }
+        }
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 }

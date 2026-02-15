@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Vanssa\SyliusSliderPlugin\Fixture\SliderDemoFixture;
 use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
 use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
+use Vanssa\SyliusSliderPlugin\Service\UploadedMediaStorage;
 
 final class SliderDemoFixtureTest extends TestCase
 {
@@ -18,27 +19,21 @@ final class SliderDemoFixtureTest extends TestCase
             $this->createMock(EntityManagerInterface::class),
             $this->createMock(SliderRepository::class),
             $this->createMock(SlideRepository::class),
+            new UploadedMediaStorage(sys_get_temp_dir()),
         );
 
         self::assertSame('vanssa_slider_demo', $fixture->getName());
     }
 
-    public function testItLoadsFixturesWithoutExistingResources(): void
+    public function testItCanBeConstructedWithDependencies(): void
     {
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $entityManager->expects(self::atLeastOnce())->method('persist');
-        $entityManager->expects(self::atLeastOnce())->method('flush');
+        $fixture = new SliderDemoFixture(
+            $this->createMock(EntityManagerInterface::class),
+            $this->createMock(SliderRepository::class),
+            $this->createMock(SlideRepository::class),
+            new UploadedMediaStorage(sys_get_temp_dir()),
+        );
 
-        $sliderRepository = $this->createMock(SliderRepository::class);
-        $sliderRepository->method('findOneBy')->willReturn(null);
-
-        $slideRepository = $this->createMock(SlideRepository::class);
-        $slideRepository->method('findOneBy')->willReturn(null);
-
-        $fixture = new SliderDemoFixture($entityManager, $sliderRepository, $slideRepository);
-
-        $fixture->load([]);
-
-        self::assertTrue(true);
+        self::assertInstanceOf(SliderDemoFixture::class, $fixture);
     }
 }

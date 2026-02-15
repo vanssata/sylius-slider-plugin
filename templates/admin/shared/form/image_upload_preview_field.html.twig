@@ -1,15 +1,22 @@
 {% set previewId = preview_id|default('preview-' ~ random()) %}
 {% set imageUrl = image_path|default(null) %}
+{% set previewStyle = imageUrl ? "background-image: url('" ~ imageUrl ~ "')" : '' %}
 
-<div class="row g-3 align-items-start mb-3">
+<div class="row g-3 align-items-start mb-3" {{ stimulus_controller('vanssa-image-upload-preview') }}>
     <div class="col-auto">
-        {% if imageUrl %}
-            <span id="{{ previewId }}" class="avatar avatar-xl" style="background-image: url('{{ imageUrl }}')"></span>
-        {% else %}
-            <span id="{{ previewId }}" class="avatar avatar-xl"></span>
-        {% endif %}
+        <span
+            id="{{ previewId }}"
+            class="avatar avatar-xl"
+            style="{{ previewStyle }}"
+            {{ stimulus_target('vanssa-image-upload-preview', 'preview') }}
+        ></span>
     </div>
     <div class="col">
-        {{ form_row(field, { attr: { 'data-preview-target': '#' ~ previewId } }) }}
+        {{ form_row(field, {
+            attr: {
+                'data-action': 'change->vanssa-image-upload-preview#update',
+                'data-vanssa-image-upload-preview-target': 'input'
+            }
+        }) }}
     </div>
 </div>

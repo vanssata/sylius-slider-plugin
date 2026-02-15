@@ -14,6 +14,7 @@
         </service>
 
         <service id="vanssa_sylius_slider.context.ui.shop.slider_frontend" class="Tests\Vanssa\SyliusSliderPlugin\Behat\Context\Ui\Shop\SliderFrontendContext">
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="Vanssa\SyliusSliderPlugin\Fixture\SliderDemoFixture" />
         </service>
     </services>

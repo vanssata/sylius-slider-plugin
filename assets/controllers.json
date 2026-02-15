@@ -3,17 +3,11 @@
         "@vanssa/sylius-slider-plugin": {
             "slider": {
                 "enabled": true,
-                "fetch": "eager",
-                "autoimport": {
-                    "@vanssa/sylius-slider-plugin/shop/styles/slider.css": true
-                }
+                "fetch": "eager"
             },
             "slide-preview": {
                 "enabled": true,
-                "fetch": "eager",
-                "autoimport": {
-                    "@vanssa/sylius-slider-plugin/admin/styles/slide_preview.css": true
-                }
+                "fetch": "eager"
             },
             "slider-settings": {
                 "enabled": true,
@@ -27,7 +21,6 @@
                 "enabled": true,
                 "fetch": "eager",
                 "autoimport": {
-                    "@vanssa/sylius-slider-plugin/admin/styles/rgba_color_picker.css": true,
                     "@simonwep/pickr/dist/themes/classic.min.css": true
                 }
             }

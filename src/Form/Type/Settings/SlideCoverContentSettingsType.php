@@ -14,8 +14,14 @@ final class SlideCoverContentSettingsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('alt', TextType::class, ['required' => false])
-            ->add('title', TextType::class, ['required' => false])
+            ->add('alt', TextType::class, [
+                'required' => false,
+                'help' => 'Alternative text used by screen readers.',
+            ])
+            ->add('title', TextType::class, [
+                'required' => false,
+                'help' => 'Tooltip/title attribute for the image.',
+            ])
         ;
     }
 

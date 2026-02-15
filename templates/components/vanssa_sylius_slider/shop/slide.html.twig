@@ -1,56 +1,157 @@
 {% set slideSettings = this.slide.localizedSlideSettings(this.localeCode, this.fallbackLocaleCode) %}
-{% set contentSettings = this.slide.localizedContentSettings(this.localeCode, this.fallbackLocaleCode) %}
-{% set slideTitle = this.slide.localizedTitle(this.localeCode, this.fallbackLocaleCode) ?: this.slide.localizedName(this.localeCode, this.fallbackLocaleCode) %}
-{% set slideDescription = this.slide.localizedDescription(this.localeCode, this.fallbackLocaleCode) %}
 {% set slideUrl = this.slide.localizedUrl(this.localeCode, this.fallbackLocaleCode) %}
 {% set buttonLabel = this.slide.localizedButtonLabel(this.localeCode, this.fallbackLocaleCode) ?: 'Learn more' %}
-{% set coverAlt = contentSettings.slideCover.alt|default(contentSettings.slideCoverAlt|default(slideTitle)) %}
-{% set coverTitle = contentSettings.slideCover.title|default(contentSettings.slideCoverTitle|default(slideTitle)) %}
+{% set linking = slideSettings.linking|default({}) %}
+{% set buttonAppearance = linking.buttonAppearance|default('primary') %}
+{% set buttonSize = linking.buttonSize|default('md') %}
+{% set buttonPositionRaw = linking.buttonPosition|default('content_left') %}
+{% set openExternal = linking.openExternal|default(false) %}
+{% set slideName = this.slide.localizedName(this.localeCode, this.fallbackLocaleCode) %}
+{% set coverAlt = slideName %}
+{% set coverTitle = slideName %}
 
-{% set headlineTag = slideSettings.headlineElement|default('h3') %}
-{% set rawContentPosX = slideSettings.contentHorizontalPosition|default('start') %}
-{% set rawContentPosY = slideSettings.contentVerticalPosition|default('bottom') %}
-{% set contentPosX = rawContentPosX in ['left', 'start'] ? 'start' : (rawContentPosX in ['right', 'end'] ? 'end' : 'center') %}
-{% set contentPosY = rawContentPosY in ['middle', 'center'] ? 'center' : (rawContentPosY == 'top' ? 'top' : 'bottom') %}
-{% set textAlign = slideSettings.contentTextAlign|default('start') %}
-{% set animation = slideSettings.contentAnimation|default('fade-up') %}
+{% set buttonPosition = buttonPositionRaw == 'content' ? 'content_left' : buttonPositionRaw %}
+{% set contentButtonPositions = ['content_left', 'content_center', 'content_right'] %}
+{% set sliderButtonPositionMap = {
+    'bottom_left': 'slider_bottom_left',
+    'bottom_center': 'slider_bottom_center',
+    'bottom_right': 'slider_bottom_right'
+} %}
+{% set normalizedSliderButtonPosition = buttonPosition in contentButtonPositions ? null : (attribute(sliderButtonPositionMap, buttonPosition)|default(buttonPosition)) %}
+
+{% set responsiveSettings = slideSettings.responsive|default({}) %}
+{% set desktopSettings = responsiveSettings.desktop|default({}) %}
+{% set tabletSettings = responsiveSettings.tablet|default({}) %}
+{% set mobileSettings = responsiveSettings.mobile|default({}) %}
+{% set desktopResolved = desktopSettings is iterable ? desktopSettings : {} %}
+{% set tabletResolved = desktopResolved|merge(tabletSettings is iterable ? tabletSettings : {}) %}
+{% set mobileResolved = tabletResolved|merge(mobileSettings is iterable ? mobileSettings : {}) %}
+{% set slideTitle = desktopResolved.title|default('') %}
+{% set slideDescription = desktopResolved.description|default('') %}
+{% set tabletTitle = tabletResolved.title|default(slideTitle) %}
+{% set mobileTitle = mobileResolved.title|default(tabletTitle) %}
+{% set tabletDescription = tabletResolved.description|default(slideDescription) %}
+{% set mobileDescription = mobileResolved.description|default(tabletDescription) %}
+{% set hasAnyTitle = slideTitle is not empty or tabletTitle is not empty or mobileTitle is not empty %}
+{% set hasAnyDescription = slideDescription is not empty or tabletDescription is not empty or mobileDescription is not empty %}
+
+{% set headlineTag = desktopResolved.headlineElement|default('h3') %}
+{% set animation = desktopResolved.contentAnimation|default('fade-up') %}
 {% set animationClass = animation == 'none' ? '' : 'is-anim-' ~ animation %}
-{% set blurPresetClass = 'is-bg-blur-' ~ (slideSettings.backgroundBlurPreset|default('none')) %}
-{% set mediaOverlayColor = slideSettings.mediaOverlayColor|default(null) %}
+{% set mediaOverlayColor = desktopResolved.mediaOverlayColor|default(null) %}
+
+{% set desktopPosXRaw = desktopResolved.contentHorizontalPosition|default('start') %}
+{% set desktopPosYRaw = desktopResolved.contentVerticalPosition|default('bottom') %}
+{% set desktopPosX = desktopPosXRaw in ['left', 'start', 'left_2_12', 'left_3_12', 'left_4_12'] ? 'flex-start' : (desktopPosXRaw in ['right', 'end', 'right_2_12', 'right_3_12', 'right_4_12'] ? 'flex-end' : 'center') %}
+{% set desktopPosY = desktopPosYRaw in ['middle', 'center'] ? 'center' : (desktopPosYRaw in ['top', 'top_1_5', 'top_2_5', 'top_3_5', 'top_4_5'] ? 'flex-start' : 'flex-end') %}
+{% set desktopTextAlign = desktopResolved.contentTextAlign|default('left') %}
+{% set desktopBlurPreset = desktopResolved.backgroundBlurPreset|default('none') %}
+{% set desktopBgBlur = desktopBlurPreset == 'strong' ? '14px' : (desktopBlurPreset == 'medium' ? '8px' : (desktopBlurPreset == 'soft' ? '4px' : '0px')) %}
+{% set horizontalShiftMap = {'left': '10%', 'start': '10%', 'left_2_12': '16.666%', 'left_3_12': '25%', 'left_4_12': '33.333%', 'right': '-10%', 'end': '-10%', 'right_2_12': '-16.666%', 'right_3_12': '-25%', 'right_4_12': '-33.333%'} %}
+{% set verticalShiftMap = {'top': '10%', 'top_1_5': '20%', 'top_2_5': '40%', 'top_3_5': '60%', 'top_4_5': '80%', 'bottom': '-10%'} %}
+{% set desktopShiftX = attribute(horizontalShiftMap, desktopPosXRaw)|default('0px') %}
+{% set desktopShiftY = attribute(verticalShiftMap, desktopPosYRaw)|default('0px') %}
 
 {% set styleVars = [] %}
-{% if slideSettings.textColor|default(null) %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-text-color: ' ~ slideSettings.textColor]) %}
+{% if desktopResolved.textColor|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-text-color: ' ~ desktopResolved.textColor]) %}
 {% endif %}
-{% if slideSettings.headlineColor|default(null) %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-headline-color: ' ~ slideSettings.headlineColor]) %}
+{% if desktopResolved.headlineColor|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-headline-color: ' ~ desktopResolved.headlineColor]) %}
 {% endif %}
-{% if slideSettings.descriptionColor|default(null) %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-description-color: ' ~ slideSettings.descriptionColor]) %}
+{% if desktopResolved.descriptionColor|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-description-color: ' ~ desktopResolved.descriptionColor]) %}
 {% endif %}
-{% if slideSettings.backgroundColor|default(null) %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-background-color: ' ~ slideSettings.backgroundColor]) %}
+{% if desktopResolved.backgroundColor|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-background-color: ' ~ desktopResolved.backgroundColor]) %}
 {% endif %}
-{% if slideSettings.borderRadius|default(null) is not empty %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-radius: ' ~ slideSettings.borderRadius ~ 'px']) %}
+{% if desktopResolved.borderRadius|default(null) is not empty %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-radius: ' ~ desktopResolved.borderRadius ~ 'px']) %}
 {% endif %}
-{% if slideSettings.contentBlurStrength|default(null) is not empty %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-blur: ' ~ slideSettings.contentBlurStrength ~ 'px']) %}
+{% if desktopResolved.contentBlurStrength|default(null) is not empty %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-blur: ' ~ desktopResolved.contentBlurStrength ~ 'px']) %}
 {% endif %}
-{% if slideSettings.animationDuration|default(null) is not empty %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-animation-duration: ' ~ slideSettings.animationDuration ~ 'ms']) %}
+{% if desktopResolved.animationDuration|default(null) is not empty %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-animation-duration: ' ~ desktopResolved.animationDuration ~ 'ms']) %}
 {% endif %}
-{% if slideSettings.animationDelay|default(null) is not empty %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-animation-delay: ' ~ slideSettings.animationDelay ~ 'ms']) %}
+{% if desktopResolved.animationDelay|default(null) is not empty %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-animation-delay: ' ~ desktopResolved.animationDelay ~ 'ms']) %}
 {% endif %}
-{% if slideSettings.contentPadding|default(null) %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-padding: ' ~ slideSettings.contentPadding]) %}
+{% if desktopResolved.contentPadding|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-padding: ' ~ desktopResolved.contentPadding]) %}
 {% endif %}
-{% if slideSettings.contentMargin|default(null) %}
-    {% set styleVars = styleVars|merge(['--vanssa-slide-margin: ' ~ slideSettings.contentMargin]) %}
+{% if desktopResolved.contentMargin|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-margin: ' ~ desktopResolved.contentMargin]) %}
 {% endif %}
+{% if desktopResolved.headlineFontSize|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-headline-size: ' ~ desktopResolved.headlineFontSize]) %}
+{% endif %}
+{% if desktopResolved.descriptionFontSize|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-description-size: ' ~ desktopResolved.descriptionFontSize]) %}
+{% endif %}
+{% if desktopResolved.buttonFontSize|default(null) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-button-size: ' ~ desktopResolved.buttonFontSize]) %}
+{% endif %}
+{% set styleVars = styleVars|merge([
+    '--vanssa-slide-content-pos-x: ' ~ desktopPosX,
+    '--vanssa-slide-content-pos-y: ' ~ desktopPosY,
+    '--vanssa-slide-content-shift-x: ' ~ desktopShiftX,
+    '--vanssa-slide-content-shift-y: ' ~ desktopShiftY,
+    '--vanssa-slide-text-align: ' ~ desktopTextAlign,
+    '--vanssa-slide-bg-blur: ' ~ desktopBgBlur
+]) %}
 
-<article class="vanssa-slide {{ this.index == 0 ? 'is-active' : '' }} {{ slideSettings.customCssClass|default('') }}" data-slide-code="{{ this.slide.code }}" {{ stimulus_target('vanssa-slider', 'slide') }}>
+{% set tabletVars = [] %}
+{% set mobileVars = [] %}
+{% for settings, target in [[tabletResolved, 'tablet'], [mobileResolved, 'mobile']] %}
+    {% set vars = [] %}
+    {% set rawPosX = settings.contentHorizontalPosition|default('') %}
+    {% if rawPosX is not empty %}
+        {% set vars = vars|merge(['--vanssa-slide-content-pos-x: ' ~ (rawPosX in ['left', 'start', 'left_2_12', 'left_3_12', 'left_4_12'] ? 'flex-start' : (rawPosX in ['right', 'end', 'right_2_12', 'right_3_12', 'right_4_12'] ? 'flex-end' : 'center'))]) %}
+        {% set vars = vars|merge(['--vanssa-slide-content-shift-x: ' ~ attribute(horizontalShiftMap, rawPosX)|default('0px')]) %}
+    {% endif %}
+    {% set rawPosY = settings.contentVerticalPosition|default('') %}
+    {% if rawPosY is not empty %}
+        {% set vars = vars|merge(['--vanssa-slide-content-pos-y: ' ~ (rawPosY in ['middle', 'center'] ? 'center' : (rawPosY in ['top', 'top_1_5', 'top_2_5', 'top_3_5', 'top_4_5'] ? 'flex-start' : 'flex-end'))]) %}
+        {% set vars = vars|merge(['--vanssa-slide-content-shift-y: ' ~ attribute(verticalShiftMap, rawPosY)|default('0px')]) %}
+    {% endif %}
+    {% if settings.contentTextAlign|default('') is not empty %}
+        {% set vars = vars|merge(['--vanssa-slide-text-align: ' ~ settings.contentTextAlign]) %}
+    {% endif %}
+    {% if settings.backgroundBlurPreset|default('') is not empty %}
+        {% set bgPreset = settings.backgroundBlurPreset %}
+        {% set bgBlur = bgPreset == 'strong' ? '14px' : (bgPreset == 'medium' ? '8px' : (bgPreset == 'soft' ? '4px' : '0px')) %}
+        {% set vars = vars|merge(['--vanssa-slide-bg-blur: ' ~ bgBlur]) %}
+    {% endif %}
+    {% if settings.textColor|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-text-color: ' ~ settings.textColor]) %}{% endif %}
+    {% if settings.headlineColor|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-headline-color: ' ~ settings.headlineColor]) %}{% endif %}
+    {% if settings.descriptionColor|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-description-color: ' ~ settings.descriptionColor]) %}{% endif %}
+    {% if settings.backgroundColor|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-background-color: ' ~ settings.backgroundColor]) %}{% endif %}
+    {% if settings.mediaOverlayColor|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-overlay-color: ' ~ settings.mediaOverlayColor]) %}{% endif %}
+    {% if settings.borderRadius|default(null) is not empty %}{% set vars = vars|merge(['--vanssa-slide-radius: ' ~ settings.borderRadius ~ 'px']) %}{% endif %}
+    {% if settings.contentBlurStrength|default(null) is not empty %}{% set vars = vars|merge(['--vanssa-slide-blur: ' ~ settings.contentBlurStrength ~ 'px']) %}{% endif %}
+    {% if settings.animationDuration|default(null) is not empty %}{% set vars = vars|merge(['--vanssa-slide-animation-duration: ' ~ settings.animationDuration ~ 'ms']) %}{% endif %}
+    {% if settings.animationDelay|default(null) is not empty %}{% set vars = vars|merge(['--vanssa-slide-animation-delay: ' ~ settings.animationDelay ~ 'ms']) %}{% endif %}
+    {% if settings.contentPadding|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-padding: ' ~ settings.contentPadding]) %}{% endif %}
+    {% if settings.contentMargin|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-margin: ' ~ settings.contentMargin]) %}{% endif %}
+    {% if settings.headlineFontSize|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-headline-size: ' ~ settings.headlineFontSize]) %}{% endif %}
+    {% if settings.descriptionFontSize|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-description-size: ' ~ settings.descriptionFontSize]) %}{% endif %}
+    {% if settings.buttonFontSize|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-button-size: ' ~ settings.buttonFontSize]) %}{% endif %}
+    {% if target == 'tablet' %}{% set tabletVars = vars %}{% else %}{% set mobileVars = vars %}{% endif %}
+{% endfor %}
+
+{% set visibilityClasses = [] %}
+{% if desktopResolved.hideTitle|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-title-desktop']) %}{% endif %}
+{% if desktopResolved.hideDescription|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-description-desktop']) %}{% endif %}
+{% if desktopResolved.hideButton|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-button-desktop']) %}{% endif %}
+{% if tabletResolved.hideTitle|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-title-tablet']) %}{% endif %}
+{% if tabletResolved.hideDescription|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-description-tablet']) %}{% endif %}
+{% if tabletResolved.hideButton|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-button-tablet']) %}{% endif %}
+{% if mobileResolved.hideTitle|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-title-mobile']) %}{% endif %}
+{% if mobileResolved.hideDescription|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-description-mobile']) %}{% endif %}
+{% if mobileResolved.hideButton|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-button-mobile']) %}{% endif %}
+
+<article class="vanssa-slide {{ this.index == 0 ? 'is-active' : '' }} {{ desktopResolved.customCssClass|default('') }} {{ visibilityClasses|join(' ') }}" data-slide-code="{{ this.slide.code }}" {{ stimulus_target('vanssa-slider', 'slide') }}>
     {% if this.slide.slideCoverVideo %}
         <video class="vanssa-slide__media" {% if this.sliderSettings.autoplay.enabled|default(this.sliderSettings.autoplay.active|default(false)) %}autoplay{% endif %} muted loop playsinline>
             <source src="{{ this.slide.slideCoverVideo }}">
@@ -71,17 +172,51 @@
         <div class="vanssa-slide__overlay" {% if mediaOverlayColor %}style="background: {{ mediaOverlayColor }};"{% endif %}></div>
     {% endif %}
 
-    <div class="vanssa-slide__content is-pos-x-{{ contentPosX }} is-pos-y-{{ contentPosY }}">
-        <div class="vanssa-slide__content-box {{ animationClass }} {{ blurPresetClass }} {{ slideSettings.enableTextBlur|default(false) ? 'is-blurred' : '' }}" style="{{ styleVars|join('; ') }}; text-align: {{ textAlign }};">
-            <{{ headlineTag }} class="vanssa-slide__headline">{{ slideTitle }}</{{ headlineTag }}>
-
-            {% if slideDescription %}
-                <div class="vanssa-slide__description">{{ sylius_slider_render_content(slideDescription) }}</div>
+    <div class="vanssa-slide__content" style="{{ styleVars|join('; ') }};">
+        <div class="vanssa-slide__content-box {{ animationClass }} {{ desktopResolved.enableTextBlur|default(false) ? 'is-blurred' : '' }}">
+            {% if hasAnyTitle %}
+                <{{ headlineTag }} class="vanssa-slide__headline">
+                    <span class="vanssa-breakpoint-text vanssa-breakpoint-text--desktop">{{ slideTitle }}</span>
+                    <span class="vanssa-breakpoint-text vanssa-breakpoint-text--tablet">{{ tabletTitle }}</span>
+                    <span class="vanssa-breakpoint-text vanssa-breakpoint-text--mobile">{{ mobileTitle }}</span>
+                </{{ headlineTag }}>
             {% endif %}
 
-            {% if slideUrl %}
-                <a class="vanssa-slide__button" href="{{ slideUrl }}">{{ buttonLabel }}</a>
+            {% if hasAnyDescription %}
+                <div class="vanssa-slide__description">
+                    <span class="vanssa-breakpoint-text vanssa-breakpoint-text--desktop">{{ sylius_slider_render_content(slideDescription) }}</span>
+                    <span class="vanssa-breakpoint-text vanssa-breakpoint-text--tablet">{{ sylius_slider_render_content(tabletDescription) }}</span>
+                    <span class="vanssa-breakpoint-text vanssa-breakpoint-text--mobile">{{ sylius_slider_render_content(mobileDescription) }}</span>
+                </div>
+            {% endif %}
+
+            {% if slideUrl and buttonPosition in contentButtonPositions %}
+                <div class="vanssa-slide__button-content vanssa-slide__button-content--{{ buttonPosition|replace({'content_': ''}) }}">
+                    <a class="vanssa-slide__button vanssa-slide__button--{{ buttonAppearance }} vanssa-slide__button--{{ buttonSize }}" href="{{ slideUrl }}"{% if openExternal %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ buttonLabel }}</a>
+                </div>
             {% endif %}
         </div>
     </div>
+
+    {% if slideUrl and normalizedSliderButtonPosition is not null %}
+        <div class="vanssa-slide__button-slot vanssa-slide__button-slot--{{ normalizedSliderButtonPosition|replace({'_': '-'}) }}">
+            <a class="vanssa-slide__button vanssa-slide__button--{{ buttonAppearance }} vanssa-slide__button--{{ buttonSize }}" href="{{ slideUrl }}"{% if openExternal %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ buttonLabel }}</a>
+        </div>
+    {% endif %}
 </article>
+{% if tabletVars is not empty or mobileVars is not empty %}
+    <style>
+        {% if tabletVars is not empty %}
+            @media (max-width: 1024px) {
+                .vanssa-slide[data-slide-code="{{ this.slide.code }}"] .vanssa-slide__content { {{ tabletVars|join('; ') }}; }
+                .vanssa-slide[data-slide-code="{{ this.slide.code }}"] .vanssa-slide__overlay { background: var(--vanssa-slide-overlay-color, {{ mediaOverlayColor|default('transparent') }}); }
+            }
+        {% endif %}
+        {% if mobileVars is not empty %}
+            @media (max-width: 767px) {
+                .vanssa-slide[data-slide-code="{{ this.slide.code }}"] .vanssa-slide__content { {{ mobileVars|join('; ') }}; }
+                .vanssa-slide[data-slide-code="{{ this.slide.code }}"] .vanssa-slide__overlay { background: var(--vanssa-slide-overlay-color, {{ mediaOverlayColor|default('transparent') }}); }
+            }
+        {% endif %}
+    </style>
+{% endif %}

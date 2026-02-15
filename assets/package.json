@@ -41,7 +41,6 @@
         "@hotwired/stimulus": "^3.0.0"
     },
     "dependencies": {
-        "@stimulus-components/color-picker": "^2.0.0",
         "@simonwep/pickr": "^1.9.0"
     }
 }

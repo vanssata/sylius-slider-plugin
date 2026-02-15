@@ -1,0 +1,26 @@
+{% block vanssa_color_picker_widget %}
+    {% set attr = attr|merge({
+        'data-vanssa-rgba-color-picker-target': 'input',
+        placeholder: picker_placeholder
+    }) %}
+
+    <div
+        {{ stimulus_controller('vanssa-rgba-color-picker', {
+            theme: picker_theme,
+            swatches: picker_swatches,
+            options: picker_options
+        }) }}
+    >
+        <div class="input-group">
+            {{ block('form_widget_simple') }}
+            <button
+                type="button"
+                class="btn vanssa-color-picker-swatch"
+                aria-label="{{ picker_button_label }}"
+                {{ stimulus_target('vanssa-rgba-color-picker', 'button') }}
+            >
+                <span class="visually-hidden">{{ picker_button_label }}</span>
+            </button>
+        </div>
+    </div>
+{% endblock %}

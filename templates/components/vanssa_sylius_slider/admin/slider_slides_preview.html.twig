@@ -5,14 +5,15 @@
         <div class="vanssa-slider-slides-preview list-group" {{ stimulus_target('vanssa-slider-slides-preview', 'list') }}>
             {% for slide in this.slides %}
                 {% set slideId = slide.id %}
-                {% set slideTitle = slide.title %}
-                {% set slideDescription = slide.description %}
                 {% set slideName = slide.name %}
                 {% set hasVideo = slide.slideCoverVideo %}
                 {% set hasImage = slide.slideCover %}
-                {% set contentSettings = slide.contentSettings|default({}) %}
-                {% set contentHorizontal = contentSettings.contentHorizontalPosition|default('start') %}
-                {% set contentVertical = contentSettings.contentVerticalPosition|default('bottom') %}
+                {% set localizedSettings = slide.localizedSlideSettings(app.request.locale, sylius.channel.defaultLocale.code|default(null)) %}
+                {% set responsiveDesktop = localizedSettings.responsive.desktop|default({}) %}
+                {% set slideTitle = responsiveDesktop.title|default('') %}
+                {% set slideDescription = responsiveDesktop.description|default('') %}
+                {% set contentHorizontal = responsiveDesktop.contentHorizontalPosition|default('start') %}
+                {% set contentVertical = responsiveDesktop.contentVerticalPosition|default('bottom') %}
                 <article
                     class="list-group-item vanssa-slider-slides-preview__item {{ not slide.enabled ? 'is-disabled' : '' }}"
                     draggable="true"

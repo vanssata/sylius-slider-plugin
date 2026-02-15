@@ -39,49 +39,18 @@ sylius_twig_hooks:
                 enabled: false
 
         'sylius_admin.slider.create.content.form.content':
-            side_navigation:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/side_navigation.html.twig'
-                priority: 100
             sections:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections.html.twig'
                 priority: 0
-
-        'sylius_admin.slider.create.content.form.content.side_navigation':
-            general:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/side_navigation/general.html.twig'
-                configuration: { active: true }
-                priority: 400
-            translations:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/side_navigation/translations.html.twig'
-                priority: 200
-            slides:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/side_navigation/slides.html.twig'
-                priority: 100
 
         'sylius_admin.slider.update.content.form.content':
-            side_navigation:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/side_navigation.html.twig'
-                priority: 100
             sections:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections.html.twig'
                 priority: 0
-
-        'sylius_admin.slider.update.content.form.content.side_navigation':
-            general:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/side_navigation/general.html.twig'
-                configuration: { active: true }
-                priority: 400
-            translations:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/side_navigation/translations.html.twig'
-                priority: 200
-            slides:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/side_navigation/slides.html.twig'
-                priority: 100
 
         'sylius_admin.slider.create.content.form.content.sections':
             general:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general.html.twig'
-                configuration: { active: true }
                 priority: 400
             translations:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/translations.html.twig'
@@ -93,7 +62,6 @@ sylius_twig_hooks:
         'sylius_admin.slider.update.content.form.content.sections':
             general:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general.html.twig'
-                configuration: { active: true }
                 priority: 400
             translations:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/translations.html.twig'
@@ -110,7 +78,7 @@ sylius_twig_hooks:
             enabled:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/enabled.html.twig'
                 priority: 300
-            channelCodes:
+            channels:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/channel.html.twig'
                 priority: 200
             cssClasses:
@@ -128,7 +96,7 @@ sylius_twig_hooks:
             enabled:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/enabled.html.twig'
                 priority: 300
-            channelCodes:
+            channels:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/channel.html.twig'
                 priority: 200
             cssClasses:

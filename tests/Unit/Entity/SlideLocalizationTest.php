@@ -9,38 +9,24 @@ use Vanssa\SyliusSliderPlugin\Entity\Slide;
 
 final class SlideLocalizationTest extends TestCase
 {
-    public function testItFallsBackToBaseFieldsWhenTranslationIsMissing(): void
+    public function testItUsesLocalizedNameWithoutTextFallbackFields(): void
     {
         $slide = new Slide();
         $slide->setName('Base name');
-        $slide->setTitle('Base title');
-        $slide->setDescription('Base description');
 
         self::assertSame('Base name', $slide->getLocalizedName('en_US', 'en_US'));
-        self::assertSame('Base title', $slide->getLocalizedTitle('en_US', 'en_US'));
-        self::assertSame('Base description', $slide->getLocalizedDescription('en_US', 'en_US'));
-    }
-
-    public function testItUsesLocaleSpecificTranslationWhenAvailable(): void
-    {
-        $slide = new Slide();
-        $slide->setName('Base name');
-        $slide->setTitle('Base title');
-
-        $translation = $slide->getOrCreateTranslation('bg_BG');
-        $translation->setName('BG name');
-        $translation->setTitle('BG title');
-
-        self::assertSame('BG name', $slide->getLocalizedName('bg_BG', 'en_US'));
-        self::assertSame('BG title', $slide->getLocalizedTitle('bg_BG', 'en_US'));
     }
 
     public function testItMergesLocalizedSlideSettingsWithBaseSettings(): void
     {
         $slide = new Slide();
         $slide->setSlideSettings([
-            'headlineElement' => 'h2',
-            'contentHorizontalPosition' => 'end',
+            'responsive' => [
+                'desktop' => [
+                    'headlineElement' => 'h2',
+                    'contentHorizontalPosition' => 'end',
+                ],
+            ],
             'linking' => [
                 'type' => 'custom',
                 'buttonSize' => 'md',
@@ -49,7 +35,6 @@ final class SlideLocalizationTest extends TestCase
 
         $translation = $slide->getOrCreateTranslation('de_DE');
         $translation->setSlideSettings([
-            'enabled' => true,
             'linking' => [
                 'type' => 'product',
             ],
@@ -57,35 +42,40 @@ final class SlideLocalizationTest extends TestCase
 
         $localized = $slide->getLocalizedSlideSettings('de_DE', 'en_US');
 
-        self::assertSame('h2', $localized['headlineElement']);
-        self::assertSame('end', $localized['contentHorizontalPosition']);
+        self::assertSame('h2', $localized['responsive']['desktop']['headlineElement']);
+        self::assertSame('end', $localized['responsive']['desktop']['contentHorizontalPosition']);
         self::assertSame('product', $localized['linking']['type']);
         self::assertSame('md', $localized['linking']['buttonSize']);
     }
 
-    public function testItFallsBackToFallbackLocaleSettingsWhenCurrentLocaleHasEnabledButEmptyOverrides(): void
+    public function testItFallsBackToFallbackLocaleSettingsWhenCurrentLocaleHasEmptyOverrides(): void
     {
         $slide = new Slide();
         $slide->setSlideSettings([
-            'headlineElement' => 'h3',
-            'contentHorizontalPosition' => 'start',
+            'responsive' => [
+                'desktop' => [
+                    'headlineElement' => 'h3',
+                    'contentHorizontalPosition' => 'start',
+                ],
+            ],
         ]);
 
         $fallbackTranslation = $slide->getOrCreateTranslation('en_US');
         $fallbackTranslation->setSlideSettings([
-            'enabled' => true,
-            'headlineElement' => 'h1',
-            'contentHorizontalPosition' => 'end',
+            'responsive' => [
+                'desktop' => [
+                    'headlineElement' => 'h1',
+                    'contentHorizontalPosition' => 'end',
+                ],
+            ],
         ]);
 
         $currentTranslation = $slide->getOrCreateTranslation('de_DE');
-        $currentTranslation->setSlideSettings([
-            'enabled' => true,
-        ]);
+        $currentTranslation->setSlideSettings([]);
 
         $localized = $slide->getLocalizedSlideSettings('de_DE', 'en_US');
 
-        self::assertSame('h1', $localized['headlineElement']);
-        self::assertSame('end', $localized['contentHorizontalPosition']);
+        self::assertSame('h1', $localized['responsive']['desktop']['headlineElement']);
+        self::assertSame('end', $localized['responsive']['desktop']['contentHorizontalPosition']);
     }
 }

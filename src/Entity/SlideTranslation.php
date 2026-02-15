@@ -33,12 +33,6 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $name = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $title = null;
-
-    #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $description = null;
-
     #[ORM\Column(name: 'button_label', type: 'string', length: 255, nullable: true)]
     private ?string $buttonLabel = null;
 
@@ -128,26 +122,6 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
         $this->name = $name;
     }
 
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(?string $title): void
-    {
-        $this->title = $title;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): void
-    {
-        $this->description = $description;
-    }
-
     public function getButtonLabel(): ?string
     {
         return $this->buttonLabel;
@@ -227,6 +201,33 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
      */
     public function setSlideSettings(array $slideSettings): void
     {
-        $this->slideSettings = $slideSettings;
+        $this->slideSettings = self::normalizeSlideSettings($slideSettings);
+    }
+
+    /**
+     * @param array<string, mixed> $slideSettings
+     *
+     * @return array<string, mixed>
+     */
+    private static function normalizeSlideSettings(array $slideSettings): array
+    {
+        $normalized = [];
+
+        if (isset($slideSettings['linking']) && is_array($slideSettings['linking'])) {
+            $normalized['linking'] = $slideSettings['linking'];
+        }
+
+        $responsive = [];
+        if (isset($slideSettings['responsive']) && is_array($slideSettings['responsive'])) {
+            $responsive = $slideSettings['responsive'];
+        }
+
+        $normalized['responsive'] = [
+            'desktop' => isset($responsive['desktop']) && is_array($responsive['desktop']) ? $responsive['desktop'] : [],
+            'tablet' => isset($responsive['tablet']) && is_array($responsive['tablet']) ? $responsive['tablet'] : [],
+            'mobile' => isset($responsive['mobile']) && is_array($responsive['mobile']) ? $responsive['mobile'] : [],
+        ];
+
+        return $normalized;
     }
 }

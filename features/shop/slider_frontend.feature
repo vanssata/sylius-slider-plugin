@@ -9,3 +9,11 @@ Feature: Rendering slider on storefront
         When I visit the slider page for code "homepage-main"
         Then I should see the storefront slider component
         And I should see slider text "Platform Overview"
+
+    Scenario: Viewing slider with parallax strength configured
+        Given slider demo fixtures are loaded
+        And slider "homepage-main" has parallax strength "2rem"
+        When I visit the slider page for code "homepage-main"
+        Then I should see the storefront slider component
+        And I should see slider with css class "vanssa-slider--parallax"
+        And slider stimulus options should include parallax strength "2rem"
