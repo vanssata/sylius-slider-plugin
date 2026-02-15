@@ -1,0 +1,37 @@
+{
+    "controllers": {
+        "@vanssa/sylius-slider-plugin": {
+            "slider": {
+                "enabled": true,
+                "fetch": "eager",
+                "autoimport": {
+                    "@vanssa/sylius-slider-plugin/shop/styles/slider.css": true
+                }
+            },
+            "slide-preview": {
+                "enabled": true,
+                "fetch": "eager",
+                "autoimport": {
+                    "@vanssa/sylius-slider-plugin/admin/styles/slide_preview.css": true
+                }
+            },
+            "slider-settings": {
+                "enabled": true,
+                "fetch": "eager"
+            },
+            "slider-slides-preview": {
+                "enabled": true,
+                "fetch": "eager"
+            },
+            "rgba-color-picker": {
+                "enabled": true,
+                "fetch": "eager",
+                "autoimport": {
+                    "@vanssa/sylius-slider-plugin/admin/styles/rgba_color_picker.css": true,
+                    "@simonwep/pickr/dist/themes/classic.min.css": true
+                }
+            }
+        }
+    },
+    "entrypoints": []
+}
