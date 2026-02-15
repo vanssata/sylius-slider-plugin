@@ -9,11 +9,15 @@ A Sylius plugin for building and managing rich storefront sliders with:
 - Twig Hooks integration for Sylius Admin/Shop
 - Optional integrations with Sylius CMS Plugin and Sylius Rich Editor Plugin
 
-## Requirements
+## System Requirements
 
-- PHP 8.2+
-- Sylius 2.x
-- Symfony 7.4+
+| Dependency | Version |
+| --- | --- |
+| PHP | `>= 8.3` |
+| Sylius | `^2.2` |
+| Symfony | `^7.4` |
+| Node.js | `>= 20` |
+| Yarn | `>= 1.22` |
 
 ## Installation in a Sylius Project
 
@@ -59,23 +63,52 @@ vanssa_sylius_slider_shop:
 bin/console doctrine:migrations:migrate -n
 ```
 
-6. Register plugin frontend entries in your Encore config (example):
-
-```js
-// webpack.config.js
-const path = require('path');
-
-// In your app.shop build:
-.addEntry('plugin-shop-entry', path.resolve(__dirname, 'vendor/vanssa/sylius-slider-plugin/assets/shop/entrypoint.js'))
-
-// In your app.admin build:
-.addEntry('plugin-admin-entry', path.resolve(__dirname, 'vendor/vanssa/sylius-slider-plugin/assets/admin/entrypoint.js'))
-```
-
-7. Install additional frontend libraries required by plugin assets:
+6. Register plugin frontend package in your project:
 
 ```bash
-yarn add @hotwired/stimulus @symfony/stimulus-bridge @stimulus-components/color-picker @simonwep/pickr
+yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/assets
+```
+
+7. Register plugin Stimulus controllers in `assets/controllers.json`:
+
+```json
+{
+  "controllers": {
+    "@vanssa/sylius-slider-plugin": {
+      "slider": {
+        "enabled": true,
+        "fetch": "eager",
+        "autoimport": {
+          "@vanssa/sylius-slider-plugin/shop/styles/slider.css": true
+        }
+      },
+      "slide-preview": {
+        "enabled": true,
+        "fetch": "eager",
+        "autoimport": {
+          "@vanssa/sylius-slider-plugin/admin/styles/slide_preview.css": true
+        }
+      },
+      "slider-settings": {
+        "enabled": true,
+        "fetch": "eager"
+      },
+      "slider-slides-preview": {
+        "enabled": true,
+        "fetch": "eager"
+      },
+      "rgba-color-picker": {
+        "enabled": true,
+        "fetch": "eager",
+        "autoimport": {
+          "@vanssa/sylius-slider-plugin/admin/styles/rgba_color_picker.css": true,
+          "@simonwep/pickr/dist/themes/classic.min.css": true
+        }
+      }
+    }
+  },
+  "entrypoints": []
+}
 ```
 
 8. Build frontend assets (if your project uses Encore build pipeline):
@@ -101,6 +134,13 @@ sylius_twig_hooks:
                 priority: 400
  
 ```
+
+### Sylius Standard 2.2: Controller Setup
+
+In a standard Sylius `2.2` project, edit `assets/controllers.json` and add the
+`@vanssa/sylius-slider-plugin` block from step `7` above. This is required so
+the app bootstrap (`startStimulusApp(...)`) can discover and register plugin
+controllers like `vanssa-slider` and `vanssa-slide-preview`.
 
 ## Admin Usage
 
