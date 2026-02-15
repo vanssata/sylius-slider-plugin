@@ -10,7 +10,6 @@
     ],
     "license": "MIT",
     "minimum-stability": "stable",
-    "version": "2.2.2",
     "require": {
         "php": ">=8.3",
         "sylius/sylius": "^2.2"
