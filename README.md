@@ -79,14 +79,14 @@ yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/as
         "enabled": true,
         "fetch": "eager",
         "autoimport": {
-          "@vanssa/sylius-slider-plugin/shop/styles/slider.css": true
+          "@vanssa/sylius-slider-plugin/shop/styles/slider.scss": true
         }
       },
       "slide-preview": {
         "enabled": true,
         "fetch": "eager",
         "autoimport": {
-          "@vanssa/sylius-slider-plugin/admin/styles/slide_preview.css": true
+          "@vanssa/sylius-slider-plugin/admin/styles/slide_preview.scss": true
         }
       },
       "slider-settings": {
@@ -101,7 +101,7 @@ yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/as
         "enabled": true,
         "fetch": "eager",
         "autoimport": {
-          "@vanssa/sylius-slider-plugin/admin/styles/rgba_color_picker.css": true,
+          "@vanssa/sylius-slider-plugin/admin/styles/rgba_color_picker.scss": true,
           "@simonwep/pickr/dist/themes/classic.min.css": true
         }
       }
