@@ -5,3 +5,13 @@ vanssa_sylius_slider:
         slide: Slide
         slides: Slides
         section: Slider Management
+
+vanssa:
+    sylius:
+        slider:
+            admin:
+                menu:
+                    sliders: Slider Management
+sylius:
+    ui:
+        link: "Add button/link"
