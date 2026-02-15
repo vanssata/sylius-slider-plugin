@@ -1,7 +1,6 @@
 {% set form = hookable_metadata.context.form %}
 <div class="col-12">
     <div class="card card-body" data-controller="slider-settings">
-        {% set yellowSwatches = ['rgba(250, 204, 21, 1)', 'rgba(250, 204, 21, 0.75)', 'rgba(250, 204, 21, 0.45)', 'rgba(255, 255, 255, 1)', 'rgba(17, 24, 39, 0.85)'] %}
         <div class="row mb-3">
             <div class="col-12 col-md-6">{{ form_row(form.settings.enabled) }}</div>
             <div class="col-12 col-md-6">{{ form_row(form.settings.channelCodes) }}</div>
@@ -33,10 +32,10 @@
             <div class="col-12 col-md-4">{{ form_row(form.settings.paginationShape) }}</div>
             <div class="col-12 col-md-4">{{ form_row(form.settings.paginationSize) }}</div>
             <div class="col-12 col-md-4">{{ form_row(form.settings.paginationShadow) }}</div>
-            <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.settings.navigationColor, swatches: yellowSwatches } only %}</div>
-            <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.settings.navigationBackgroundColor, swatches: yellowSwatches } only %}</div>
-            <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.settings.paginationColor, swatches: yellowSwatches } only %}</div>
-            <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.settings.paginationActiveColor, swatches: yellowSwatches } only %}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.settings.navigationColor) }}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.settings.navigationBackgroundColor) }}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.settings.paginationColor) }}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.settings.paginationActiveColor) }}</div>
             <div class="col-12 col-md-4">{{ form_row(form.settings.autoplay.enabled) }}</div>
             <div class="col-12 col-md-4">{{ form_row(form.settings.autoplay.interval) }}</div>
             <div class="col-12 col-md-4">{{ form_row(form.settings.autoplay.pauseOnHover) }}</div>

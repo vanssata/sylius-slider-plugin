@@ -9,13 +9,17 @@ A Sylius plugin for building and managing rich storefront sliders with:
 - Twig Hooks integration for Sylius Admin/Shop
 - Optional integrations with Sylius CMS Plugin and Sylius Rich Editor Plugin
 
-## Requirements
+## System Requirements
 
-- PHP 8.2+
-- Sylius 2.x
-- Symfony 7.4+
+| Dependency | Version |
+| --- | --- |
+| PHP | `>= 8.3` |
+| Sylius | `^2.2` |
+| Symfony | `^7.4` |
+| Node.js | `>= 20` |
+| Yarn | `>= 1.22` |
 
-## Installation in a Sylius Project
+## Installation in Sylius-Standard (2.2)
 
 1. Install the package:
 
@@ -59,33 +63,69 @@ vanssa_sylius_slider_shop:
 bin/console doctrine:migrations:migrate -n
 ```
 
-6. Register plugin frontend entries in your Encore config (example):
-
-```js
-// webpack.config.js
-const path = require('path');
-
-// In your app.shop build:
-.addEntry('plugin-shop-entry', path.resolve(__dirname, 'vendor/vanssa/sylius-slider-plugin/assets/shop/entrypoint.js'))
-
-// In your app.admin build:
-.addEntry('plugin-admin-entry', path.resolve(__dirname, 'vendor/vanssa/sylius-slider-plugin/assets/admin/entrypoint.js'))
-```
-
-7. Install additional frontend libraries required by plugin assets:
+6. Add plugin frontend package in your Sylius-Standard project:
 
 ```bash
-yarn add @hotwired/stimulus @symfony/stimulus-bridge @stimulus-components/color-picker @simonwep/pickr
+yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/assets
 ```
 
-8. Build frontend assets (if your project uses Encore build pipeline):
+7. Register plugin Stimulus controllers in `assets/controllers.json`:
+
+```json
+{
+  "controllers": {
+    "@vanssa/sylius-slider-plugin": {
+      "slider": {
+        "enabled": true,
+        "fetch": "eager",
+        "autoimport": {
+          "@vanssa/sylius-slider-plugin/shop/styles/slider.css": true
+        }
+      },
+      "slide-preview": {
+        "enabled": true,
+        "fetch": "eager",
+        "autoimport": {
+          "@vanssa/sylius-slider-plugin/admin/styles/slide_preview.css": true
+        }
+      },
+      "slider-settings": {
+        "enabled": true,
+        "fetch": "eager"
+      },
+      "slider-slides-preview": {
+        "enabled": true,
+        "fetch": "eager"
+      },
+      "rgba-color-picker": {
+        "enabled": true,
+        "fetch": "eager",
+        "autoimport": {
+          "@vanssa/sylius-slider-plugin/admin/styles/rgba_color_picker.css": true,
+          "@simonwep/pickr/dist/themes/classic.min.css": true
+        }
+      }
+    }
+  },
+  "entrypoints": []
+}
+```
+
+8. Build frontend assets:
 
 ```bash
 yarn install
 yarn build
 bin/console assets:install
 ```
-9. Add slider on homepage (optional):
+
+9. Clear cache:
+
+```bash
+bin/console cache:clear
+```
+
+10. Add slider on homepage (optional):
 ```yaml 
 # config/packages/vanssa_sylius_slider.yaml
 ...
@@ -101,6 +141,56 @@ sylius_twig_hooks:
                 priority: 400
  
 ```
+
+Notes for Sylius-Standard:
+
+- Keep your existing controller entries (for example `@symfony/ux-live-component` and `@symfony/ux-autocomplete`) and only add the `@vanssa/sylius-slider-plugin` block.
+- If your project customizes webpack configs, ensure `assets/controllers.json` is the file passed to `enableStimulusBridge(...)`.
+
+## Preset Configuration
+
+The plugin exports slider/slide preset values and defaults via plugin config:
+
+- File: `config/packages/vanssa_sylius_slider.yaml`
+- Root key: `vanssa_sylius_slider.presets`
+
+Each preset contains:
+
+- `values`: allowed values used by form choices
+- `default`: default value used when creating new entities
+
+You can override any preset in your project config.
+
+Color switcher presets are available under:
+
+- `vanssa_sylius_slider.presets.color_switcher.theme`
+- `vanssa_sylius_slider.presets.color_switcher.default_representation`
+- `vanssa_sylius_slider.presets.color_switcher.swatches.text|neutral|accent`
+
+Slider behavior presets also include:
+
+- `vanssa_sylius_slider.presets.slider.parallax_strength`
+  Optional parallax levels (for example: `0.5rem`, `1rem`, `2rem`, `3rem`, `4rem`). If not set, parallax is disabled.
+
+## Reusable Color Picker Field
+
+Use `Vanssa\SyliusSliderPlugin\Form\Type\ColorPickerType` in any form field.
+
+- `picker_swatches`: predefined swatches shown in picker
+- `picker_theme`: Pickr theme (`classic`, `monolith`, `nano`)
+- `picker_options`: raw Pickr options map passed to `Pickr.create(...)`
+- `picker_predefined_only`: allow only colors from `picker_swatches`
+
+Because `picker_options` is passed through, you can configure any supported
+Pickr option from https://github.com/simonwep/pickr.
+
+## Detailed Guides
+
+- [Color Picker Type](docs/COLOR_PICKER_TYPE.md)
+- [Screenshots](docs/SCREENSHOTS.md)
+- [Flex Recipe](docs/FLEX_RECIPE.md)
+- [Extending](docs/EXTENDING.md)
+- [Contributing](docs/CONTRIBUTING.md)
 
 ## Admin Usage
 

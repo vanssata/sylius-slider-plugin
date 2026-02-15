@@ -1,8 +1,5 @@
 {
     "dependencies": {
-        "@stimulus-components/color-picker": "^2.0.0"
-    },
-    "devDependencies": {
-        "@simonwep/pickr": "^1.9.0"
+        "@vanssa/sylius-slider-plugin": "file:../../../assets"
     }
 }

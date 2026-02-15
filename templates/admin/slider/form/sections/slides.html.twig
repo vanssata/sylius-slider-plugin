@@ -1,22 +1,20 @@
 {% set form = hookable_metadata.context.form %}
 {% set slider = form.vars.data %}
 
-<div class="tab-pane" id="slider-slides" role="tabpanel" tabindex="0">
-    <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="card-title mb-0">{{ 'sylius.ui.slides'|trans }}</h2>
-            {% if slider.id is null %}
-                <a class="btn btn-primary disabled" href="#" aria-disabled="true">{{ 'sylius.ui.create'|trans }}</a>
-            {% else %}
-                <a class="btn btn-primary" href="{{ path('vanssa_sylius_slider_admin_slide_create_for_slider', {'sliderId': slider.id}) }}">{{ 'sylius.ui.create'|trans }}</a>
-            {% endif %}
-        </div>
-        <div class="card-body">
-            {% if slider.id is null %}
-                <div class="alert alert-info mb-0">Save slider first to preview related slides.</div>
-            {% else %}
-                {{ component('vanssa_sylius_slider:admin:slider_slides_preview', { sliderId: slider.id }) }}
-            {% endif %}
-        </div>
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="card-title mb-0">{{ 'sylius.ui.slides'|trans }}</h2>
+        {% if slider.id is null %}
+            <a class="btn btn-primary disabled" href="#" aria-disabled="true">{{ 'sylius.ui.create'|trans }}</a>
+        {% else %}
+            <a class="btn btn-primary" href="{{ path('vanssa_sylius_slider_admin_slide_create_for_slider', {'sliderId': slider.id}) }}">{{ 'sylius.ui.create'|trans }}</a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if slider.id is null %}
+            <div class="alert alert-info mb-0">Save slider first to preview related slides.</div>
+        {% else %}
+            {{ component('vanssa_sylius_slider:admin:slider_slides_preview', { sliderId: slider.id }) }}
+        {% endif %}
     </div>
 </div>

@@ -1,10 +1,13 @@
 {% set settings = this.settings %}
 {% set slides = this.enabledSlides %}
 {% set autoplay = settings.autoplay|default({}) %}
+{% set parallax = settings.parallax|default({}) %}
+{% set parallaxStrength = parallax.strength|default('')|trim %}
 {% set showTitle = settings.showTitle|default(false) %}
 {% set showNavigation = settings.showNavigation|default(true) %}
 {% set showArrows = settings.showArrows|default(true) %}
 {% set cssClasses = settings.cssClasses|default('') %}
+{% set maxHeight = settings.maxHeight|default('')|trim %}
 {% set navigationIcon = settings.navigationIcon|default('chevron') %}
 {% set navigationSizeRaw = settings.navigationSize|default('1.5rem') %}
 {% set navigationSize = navigationSizeRaw in ['sm', 'md', 'lg']
@@ -43,6 +46,8 @@
     'vanssa-slider',
     settings.overlay|default(false) ? 'vanssa-slider--overlay' : '',
     settings.justifySlideHeight|default(true) ? 'vanssa-slider--justify-height' : '',
+    parallaxStrength is not empty ? 'vanssa-slider--parallax' : '',
+    maxHeight is not empty ? 'vanssa-slider--custom-max-height' : '',
     settings.containerWidth|default('content') == 'content' ? 'vanssa-slider--container-content' : 'vanssa-slider--container-full',
     cssClasses
 ] %}
@@ -55,6 +60,7 @@
         interval: autoplay.interval|default(5000),
         pauseOnHover: autoplay.pauseOnHover|default(true)
     },
+    parallax: { strength: parallaxStrength },
     paginationShape: paginationShape,
     paginationSize: paginationSize
 } %}
@@ -79,6 +85,7 @@
         --vanssa-slider-padding-right: {{ settings.paddingRight|default('0') }};
         --vanssa-slider-padding-bottom: {{ settings.paddingBottom|default('0') }};
         --vanssa-slider-padding-left: {{ settings.paddingLeft|default('0') }};
+        {% if maxHeight is not empty %}--vanssa-slider-max-height: {{ maxHeight }};{% endif %}
     "
     {{ stimulus_controller('vanssa-slider', { options: sliderOptions }) }}
 >

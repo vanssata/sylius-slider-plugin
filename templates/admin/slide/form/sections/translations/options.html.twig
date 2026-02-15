@@ -1,86 +1,44 @@
 {% set form = hookable_metadata.context.form %}
-{% set textSwatches = ['rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 0.92)', 'rgba(245, 245, 245, 1)', 'rgba(230, 230, 230, 1)'] %}
-{% set colorSwatches = ['rgba(0, 0, 0, 0)', 'rgba(15, 23, 42, 0.75)', 'rgba(17, 24, 39, 0.9)', 'rgba(31, 41, 55, 0.85)', 'rgba(59, 130, 246, 0.85)', 'rgba(244, 114, 182, 0.85)', 'rgba(16, 185, 129, 0.85)', 'rgba(245, 158, 11, 0.85)'] %}
 
 <div class="col-12"><hr></div>
 <div class="col-12" {{ stimulus_controller('vanssa-slide-preview') }}>
-    <div class="row mb-3">
-        <div class="col-12 col-md-6">{{ form_row(form.settings.enabled) }}</div>
-    </div>
-    <div data-translation-settings-fields>
-        <div class="accordion" id="slide-translation-options-accordion">
-            <div class="accordion-item">
-                <h3 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#slide-translation-options-content">
-                        {{ 'sylius.ui.content'|trans }}
-                    </button>
-                </h3>
-                <div id="slide-translation-options-content" class="accordion-collapse collapse show" data-bs-parent="#slide-translation-options-accordion">
-                    <div class="accordion-body">
-                        <div class="card mb-3">
-                            <div class="card-header"><h4 class="card-title mb-0">Title</h4></div>
-                            <div class="card-body row">
-                                <div class="col-12 col-md-6">{{ form_row(form.settings.headlineElement, { attr: {'data-preview-field': 'headlineElement'} }) }}</div>
-                                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.settings.headlineColor, swatches: colorSwatches, input_attr: {'data-preview-field': 'headlineColor'} } only %}</div>
-                            </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-header"><h4 class="card-title mb-0">Content</h4></div>
-                            <div class="card-body row">
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.contentHorizontalPosition, { attr: {'data-preview-field': 'contentHorizontalPosition'} }) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.contentVerticalPosition, { attr: {'data-preview-field': 'contentVerticalPosition'} }) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.contentTextAlign, { attr: {'data-preview-field': 'contentTextAlign'} }) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.settings.contentPadding, { attr: {'data-preview-field': 'contentPadding'} }) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.settings.contentMargin, { attr: {'data-preview-field': 'contentMargin'} }) }}</div>
-                                <div class="col-12 col-md-4">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.settings.textColor, swatches: textSwatches, input_attr: {'data-preview-field': 'textColor'} } only %}</div>
-                                <div class="col-12 col-md-4">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.settings.descriptionColor, swatches: colorSwatches, input_attr: {'data-preview-field': 'descriptionColor'} } only %}</div>
-                                <div class="col-12 col-md-4">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.settings.backgroundColor, swatches: colorSwatches, input_attr: {'data-preview-field': 'backgroundColor'} } only %}</div>
-                            </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-header"><h4 class="card-title mb-0">Effects</h4></div>
-                            <div class="card-body row">
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.contentAnimation) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.animationDuration) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.animationDelay) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.enableTextBlur, { attr: {'data-preview-field': 'enableTextBlur'} }) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.contentBlurStrength, { attr: {'data-preview-field': 'contentBlurStrength'} }) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.backgroundBlurPreset, { attr: {'data-preview-field': 'backgroundBlurPreset'} }) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.settings.borderRadius, { attr: {'data-preview-field': 'borderRadius'} }) }}</div>
-                                <div class="col-12 col-md-8">{{ form_row(form.settings.customCssClass) }}</div>
-                            </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-header"><h4 class="card-title mb-0">Media</h4></div>
-                            <div class="card-body row">
-                                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.settings.mediaOverlayColor, swatches: colorSwatches } only %}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.content.slideCover.alt) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.content.slideCover.title) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.content.slideCoverAlt) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.content.slideCoverTitle) }}</div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' %}</div>
-                        </div>
+    <div class="accordion" id="slide-translation-options-accordion">
+        <div class="accordion-item">
+            <h3 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#slide-translation-options-responsive">
+                    <i class="bi bi-laptop me-1"></i> Responsive
+                </button>
+            </h3>
+            <div id="slide-translation-options-responsive" class="accordion-collapse collapse show" data-bs-parent="#slide-translation-options-accordion">
+                <div class="accordion-body">
+                    {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_responsive_settings.html.twig' with {
+                        responsive_form: form.settings.responsive,
+                        responsive_id: form.vars.id ~ '-responsive'
+                    } %}
+
+                    <div class="row mt-3">
+                        <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' %}</div>
                     </div>
                 </div>
             </div>
-            <div class="accordion-item">
-                <h3 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#slide-translation-options-linking">
-                        {{ 'sylius.ui.link'|trans }}
-                    </button>
-                </h3>
-                <div id="slide-translation-options-linking" class="accordion-collapse collapse" data-bs-parent="#slide-translation-options-accordion">
-                    <div class="accordion-body row">
-                        <div class="col-12 col-md-4">{{ form_row(form.settings.linking.type) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonAppearance) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonSize) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(form.settings.linking.overlay) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(form.settings.linking.openExternal) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(form.settings.linking.showProductFocusImage) }}</div>
-                    </div>
+        </div>
+        <div class="accordion-item">
+            <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#slide-translation-options-linking">
+                    {{ 'sylius.ui.link'|trans }}
+                </button>
+            </h3>
+            <div id="slide-translation-options-linking" class="accordion-collapse collapse" data-bs-parent="#slide-translation-options-accordion">
+                <div class="accordion-body row">
+                    <div class="col-12 col-md-6">{{ form_row(form.buttonLabel) }}</div>
+                    <div class="col-12 col-md-6">{{ form_row(form.url) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.type) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonAppearance) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonSize) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonPosition) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.overlay) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.openExternal) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.showProductFocusImage) }}</div>
                 </div>
             </div>
         </div>

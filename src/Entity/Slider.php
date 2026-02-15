@@ -11,12 +11,14 @@ use Doctrine\ORM\Mapping as ORM;
 use Sylius\Resource\Model\ResourceInterface;
 use Sylius\Resource\Model\TranslatableInterface;
 use Sylius\Resource\Model\TranslationInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: SliderRepository::class)]
 #[ORM\Table(
     name: 'vanssa_sylius_slider',
     uniqueConstraints: [new ORM\UniqueConstraint(name: 'uniq_844454b177153098', columns: ['code'])]
 )]
+#[UniqueEntity(fields: ['code'], message: 'This slider code is already in use.')]
 class Slider implements ResourceInterface, TranslatableInterface
 {
     #[ORM\Id]
@@ -139,14 +141,35 @@ class Slider implements ResourceInterface, TranslatableInterface
 
     public function isAvailableForChannel(string $channelCode, string $locale, ?string $fallbackLocale = null): bool
     {
-        $settings = $this->getLocalizedSettings($locale, $fallbackLocale);
-        $channels = $settings['channelCodes'] ?? [];
-
-        if (!is_array($channels) || [] === $channels) {
+        if ([] === $this->getChannelCodes()) {
             return true;
         }
 
-        return in_array($channelCode, $channels, true);
+        return in_array($channelCode, $this->getChannelCodes(), true);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getChannelCodes(): array
+    {
+        $settings = $this->getSettings();
+        $channels = $settings['channelCodes'] ?? [];
+        if (!is_array($channels)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter($channels, static fn (mixed $code): bool => is_string($code) && '' !== $code)));
+    }
+
+    /**
+     * @param array<int, string> $channelCodes
+     */
+    public function setChannelCodes(array $channelCodes): void
+    {
+        $settings = $this->getSettings();
+        $settings['channelCodes'] = array_values(array_unique(array_filter($channelCodes, static fn (mixed $code): bool => is_string($code) && '' !== $code)));
+        $this->setSettings($settings);
     }
 
     /**

@@ -11,12 +11,14 @@ use Doctrine\ORM\Mapping as ORM;
 use Sylius\Resource\Model\ResourceInterface;
 use Sylius\Resource\Model\TranslatableInterface;
 use Sylius\Resource\Model\TranslationInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: SlideRepository::class)]
 #[ORM\Table(
     name: 'vanssa_sylius_slide',
     uniqueConstraints: [new ORM\UniqueConstraint(name: 'uniq_876619a677153098', columns: ['code'])]
 )]
+#[UniqueEntity(fields: ['code'], message: 'This slide code is already in use.')]
 class Slide implements ResourceInterface, TranslatableInterface
 {
     #[ORM\Id]
@@ -38,12 +40,6 @@ class Slide implements ResourceInterface, TranslatableInterface
 
     #[ORM\Column(type: 'string', length: 255)]
     private string $name = '';
-
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $title = null;
-
-    #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $description = null;
 
     #[ORM\Column(name: 'button_label', type: 'string', length: 255, nullable: true)]
     private ?string $buttonLabel = null;
@@ -184,36 +180,6 @@ class Slide implements ResourceInterface, TranslatableInterface
     public function getLocalizedName(string $locale, ?string $fallbackLocale = null): string
     {
         return $this->getTranslation($locale, $fallbackLocale)?->getName() ?: $this->name;
-    }
-
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(?string $title): void
-    {
-        $this->title = $title;
-    }
-
-    public function getLocalizedTitle(string $locale, ?string $fallbackLocale = null): ?string
-    {
-        return $this->getTranslation($locale, $fallbackLocale)?->getTitle() ?: $this->title;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): void
-    {
-        $this->description = $description;
-    }
-
-    public function getLocalizedDescription(string $locale, ?string $fallbackLocale = null): ?string
-    {
-        return $this->getTranslation($locale, $fallbackLocale)?->getDescription() ?: $this->description;
     }
 
     public function getButtonLabel(): ?string
@@ -379,7 +345,7 @@ class Slide implements ResourceInterface, TranslatableInterface
      */
     public function setSlideSettings(array $slideSettings): void
     {
-        $this->slideSettings = $slideSettings;
+        $this->slideSettings = self::normalizeSlideSettings($slideSettings);
     }
 
     /**
@@ -387,7 +353,7 @@ class Slide implements ResourceInterface, TranslatableInterface
      */
     public function getLocalizedSlideSettings(string $locale, ?string $fallbackLocale = null): array
     {
-        $base = $this->slideSettings;
+        $base = self::normalizeSlideSettings($this->slideSettings);
         $fallbackOverrides = null;
         $currentOverrides = null;
 
@@ -397,9 +363,9 @@ class Slide implements ResourceInterface, TranslatableInterface
 
         $currentOverrides = $this->resolveTranslationSettingsOverride($locale, false);
 
-        $settings = self::mergeLocalizedSettings($base, $fallbackOverrides ?? []);
+        $settings = self::mergeLocalizedSettings($base, self::normalizeSlideSettings($fallbackOverrides ?? []));
 
-        return self::mergeLocalizedSettings($settings, $currentOverrides ?? []);
+        return self::mergeLocalizedSettings($settings, self::normalizeSlideSettings($currentOverrides ?? []));
     }
 
     /**
@@ -521,7 +487,7 @@ class Slide implements ResourceInterface, TranslatableInterface
 
         $translation = new SlideTranslation();
         $translation->setLocaleCode($locale);
-        $translation->setSlideSettings(['enabled' => false]);
+        $translation->setSlideSettings([]);
         $translation->setContentSettings([]);
         $this->addTranslation($translation);
 
@@ -589,6 +555,10 @@ class Slide implements ResourceInterface, TranslatableInterface
         $merged = $baseSettings;
 
         foreach ($localizedSettings as $key => $value) {
+            if (is_array($value) && [] === $value) {
+                continue;
+            }
+
             if (
                 is_string($key)
                 && isset($baseSettings[$key], $localizedSettings[$key])
@@ -622,17 +592,37 @@ class Slide implements ResourceInterface, TranslatableInterface
             return null;
         }
 
-        $slideSettings = $translation->getSlideSettings();
-        $isEnabled = (bool) ($slideSettings['enabled'] ?? false);
-        if (!$isEnabled) {
-            return null;
-        }
-
-        $settings = $contentSettings ? $translation->getContentSettings() : $slideSettings;
-        if (!$contentSettings) {
-            unset($settings['enabled']);
-        }
+        $settings = $contentSettings ? $translation->getContentSettings() : $translation->getSlideSettings();
 
         return [] === $settings ? null : $settings;
+    }
+
+    /**
+     * Keep only responsive/linking settings for slide configuration.
+     *
+     * @param array<string, mixed> $slideSettings
+     *
+     * @return array<string, mixed>
+     */
+    private static function normalizeSlideSettings(array $slideSettings): array
+    {
+        $normalized = [];
+
+        if (isset($slideSettings['linking']) && is_array($slideSettings['linking'])) {
+            $normalized['linking'] = $slideSettings['linking'];
+        }
+
+        $responsive = [];
+        if (isset($slideSettings['responsive']) && is_array($slideSettings['responsive'])) {
+            $responsive = $slideSettings['responsive'];
+        }
+
+        $normalized['responsive'] = [
+            'desktop' => isset($responsive['desktop']) && is_array($responsive['desktop']) ? $responsive['desktop'] : [],
+            'tablet' => isset($responsive['tablet']) && is_array($responsive['tablet']) ? $responsive['tablet'] : [],
+            'mobile' => isset($responsive['mobile']) && is_array($responsive['mobile']) ? $responsive['mobile'] : [],
+        ];
+
+        return $normalized;
     }
 }

@@ -1,0 +1,46 @@
+{
+    "name": "@vanssa/sylius-slider-plugin",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "symfony": {
+        "controllers": {
+            "slider": {
+                "main": "shop/controllers/slider_controller.js",
+                "name": "vanssa-slider",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "slide-preview": {
+                "main": "admin/controllers/slide_preview_controller.js",
+                "name": "vanssa-slide-preview",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "slider-settings": {
+                "main": "admin/controllers/slider_settings_controller.js",
+                "name": "slider-settings",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "slider-slides-preview": {
+                "main": "admin/controllers/slider_slides_preview_controller.js",
+                "name": "vanssa-slider-slides-preview",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "rgba-color-picker": {
+                "main": "admin/controllers/rgba_color_picker_controller.js",
+                "name": "vanssa-rgba-color-picker",
+                "fetch": "eager",
+                "enabled": true
+            }
+        }
+    },
+    "peerDependencies": {
+        "@hotwired/stimulus": "^3.0.0"
+    },
+    "dependencies": {
+        "@simonwep/pickr": "^1.9.0"
+    }
+}

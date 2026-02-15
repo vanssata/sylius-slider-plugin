@@ -18,12 +18,13 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class SlideType extends AbstractType
 {
@@ -35,6 +36,8 @@ final class SlideType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->addCodeField($builder, false);
+
         $builder
             ->add('sliders', EntityType::class, [
                 'class' => Slider::class,
@@ -44,9 +47,6 @@ final class SlideType extends AbstractType
                 'autocomplete' => true,
                 'by_reference' => false,
             ])
-            ->add('code', TextType::class)
-            ->add('title', TextType::class, ['required' => false])
-            ->add('description', self::resolveDescriptionTypeClass(), ['required' => false])
             ->add('channels', EntityType::class, [
                 'class' => Channel::class,
                 'choice_label' => 'name',
@@ -85,6 +85,8 @@ final class SlideType extends AbstractType
                 return;
             }
 
+            $this->addCodeField($event->getForm(), null !== $slide->getId());
+
             $codes = $slide->getChannelCodes();
             if ([] === $codes) {
                 return;
@@ -115,8 +117,7 @@ final class SlideType extends AbstractType
             $slide->setChannelCodes(array_values(array_unique($codes)));
 
             if ('' === trim($slide->getName())) {
-                $fallbackName = $slide->getTitle() ?? $slide->getCode();
-                $slide->setName($fallbackName);
+                $slide->setName($slide->getCode());
             }
 
             /** @var UploadedFile|null $cover */
@@ -151,6 +152,22 @@ final class SlideType extends AbstractType
         });
     }
 
+    private function addCodeField(FormBuilderInterface|FormInterface $form, bool $disabled): void
+    {
+        $form->add('code', TextType::class, [
+            'label' => 'sylius.ui.code',
+            'disabled' => $disabled,
+            'constraints' => [
+                new Assert\NotBlank(),
+                new Assert\Length(['max' => 64]),
+                new Assert\Regex([
+                    'pattern' => '/^[A-Za-z0-9][A-Za-z0-9_-]*$/',
+                    'message' => 'Code may contain only letters, numbers, dashes and underscores.',
+                ]),
+            ],
+        ]);
+    }
+
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
@@ -160,13 +177,6 @@ final class SlideType extends AbstractType
                 'data-controller' => 'slider-settings',
             ],
         ]);
-    }
-
-    public static function resolveDescriptionTypeClass(): string
-    {
-        return class_exists('MonsieurBiz\\SyliusRichEditorPlugin\\Form\\Type\\RichEditorType')
-            ? 'MonsieurBiz\\SyliusRichEditorPlugin\\Form\\Type\\RichEditorType'
-            : TextareaType::class;
     }
 
 }

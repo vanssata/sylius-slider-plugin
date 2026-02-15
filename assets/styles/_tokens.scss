@@ -1,0 +1,22 @@
+$color-slate-950: #020617;
+$color-slate-900: #0f172a;
+$color-slate-800: #1e293b;
+$color-slate-700: #334155;
+$color-slate-100: #f1f5f9;
+$color-amber-400: #facc15;
+$color-white: #fff;
+
+$radius-sm: 0.45rem;
+$radius-md: 0.5rem;
+$radius-lg: 0.75rem;
+
+$bp-tablet: 1024px;
+$bp-mobile: 767px;
+$bp-mobile-wide: 768px;
+$bp-admin-md: 991px;
+
+@mixin down($breakpoint) {
+    @media (max-width: $breakpoint) {
+        @content;
+    }
+}

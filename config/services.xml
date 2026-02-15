@@ -12,6 +12,7 @@
     <services>
         <defaults autowire="true" autoconfigure="true" public="false">
             <bind key="$projectDir">%kernel.project_dir%</bind>
+            <bind key="$sliderPresets">%vanssa_sylius_slider.presets%</bind>
         </defaults>
 
         <prototype namespace="Vanssa\SyliusSliderPlugin\" resource="../src/*" exclude="../src/{DependencyInjection,Entity,Factory,Migrations,VanssaSyliusSliderPlugin.php}" />

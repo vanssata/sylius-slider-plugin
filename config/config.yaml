@@ -5,6 +5,135 @@ imports:
     - { resource: "twig_hooks/**/*.yaml" }
     - { resource: "fixtures.yaml" }
 
+twig:
+    form_themes:
+        - '@VanssaSyliusSliderPlugin/form/theme/color_picker.html.twig'
+
+vanssa_sylius_slider:
+    presets:
+        slider:
+            container_width:
+                values: [content, full]
+                default: full
+            spacing:
+                values: ['0', '0.5rem', '1rem', '1.5rem', '2rem', '4rem']
+                default: '0'
+            slide_effect:
+                values: [slide, fade, zoom, lift, flip]
+                default: slide
+            navigation_icon:
+                values: [chevron, angle, square]
+                default: chevron
+            navigation_size:
+                values: ['1.5rem', '3rem', '4rem', '6rem']
+                default: '3rem'
+            navigation_shadow:
+                values: [none, soft, medium, strong, glow]
+                default: none
+            pagination_shape:
+                values: [circle, square]
+                default: circle
+            pagination_size:
+                values: ['0.5rem', '0.625rem', '0.8rem', '1rem']
+                default: '0.625rem'
+            pagination_shadow:
+                values: [none, soft, medium, strong, glow]
+                default: none
+            autoplay_interval:
+                values: [2000, 3000, 5000, 8000, 10000]
+                default: 5000
+            parallax_strength:
+                values: ['0.5rem', '1rem', '2rem', '3rem', '4rem']
+                default: null
+        slide:
+            headline_element:
+                values: [div, h1, h2, h3, h4, h5, h6]
+                default: h1
+            content_horizontal_position:
+                values: [start, left_2_12, left_3_12, left_4_12, center, right_2_12, right_3_12, right_4_12, end]
+                default: start
+            content_vertical_position:
+                values: [top, center, bottom]
+                default: center
+            content_text_align:
+                values: [left, center, right]
+                default: center
+            content_animation:
+                values: [fade-up, fade-right, zoom-in, none]
+                default: fade-up
+            animation_duration:
+                values: [250, 400, 500, 700, 1000]
+                default: 500
+            animation_delay:
+                values: [0, 100, 200, 350, 500]
+                default: 0
+            background_blur_preset:
+                values: [none, soft, medium, strong]
+                default: none
+            content_blur_strength:
+                values: [4, 8, 12, 16, 24]
+                default: 12
+            content_padding:
+                values: ['0', '0.75rem', '1rem', '1.5rem', '2rem']
+                default: '1rem'
+            content_margin:
+                values: ['0', '0.5rem', '1rem', '1.5rem', '2rem']
+                default: '0'
+            border_radius:
+                values: [0, 6, 10, 16, 24]
+                default: 0
+            headline_font_size:
+                values: ['0.8rem', '1rem', '1.2rem', '1.5rem', '2rem', '2.5rem', '3rem']
+                default: '1.5rem'
+            description_font_size:
+                values: ['0.8rem', '1rem', '1.2rem', '1.5rem', '2rem', '2.5rem', '3rem']
+                default: '1rem'
+            button_font_size:
+                values: ['0.8rem', '1rem', '1.2rem', '1.5rem', '2rem', '2.5rem', '3rem']
+                default: '1.2rem'
+            linking_type:
+                values: [custom, product, category]
+                default: custom
+            button_appearance:
+                values: [primary, secondary, success, danger]
+                default: primary
+            button_size:
+                values: [sm, md, lg]
+                default: md
+            button_position:
+                values: [content_left, content_center, content_right, slider_bottom_left, slider_bottom_left_2_12, slider_bottom_left_3_12, slider_bottom_left_4_12, slider_bottom_center, slider_bottom_right, slider_bottom_right_2_12, slider_bottom_right_3_12, slider_bottom_right_4_12]
+                default: content_left
+        color_switcher:
+            theme:
+                values: [classic, monolith, nano]
+                default: classic
+            default_representation:
+                values: [HEX, RGBA, HSLA, HSVA, CMYK]
+                default: RGBA
+            swatches:
+                text:
+                    - 'rgba(0, 0, 0, 0)'
+                    - 'rgba(255, 255, 255, 1)'
+                    - 'rgba(255, 255, 255, 0.92)'
+                    - 'rgba(245, 245, 245, 1)'
+                    - 'rgba(230, 230, 230, 1)'
+                    - 'rgba(0, 0, 0, 1)'
+                neutral:
+                    - 'rgba(0, 0, 0, 0)'
+                    - 'rgba(15, 23, 42, 0.75)'
+                    - 'rgba(17, 24, 39, 0.9)'
+                    - 'rgba(31, 41, 55, 0.85)'
+                    - 'rgba(255, 255, 255, 1)'
+                accent:
+                    - 'rgba(0, 0, 0, 0)'
+                    - 'rgba(250, 204, 21, 1)'
+                    - 'rgba(250, 204, 21, 0.75)'
+                    - 'rgba(250, 204, 21, 0.45)'
+                    - 'rgba(59, 130, 246, 0.85)'
+                    - 'rgba(244, 114, 182, 0.85)'
+                    - 'rgba(16, 185, 129, 0.85)'
+                    - 'rgba(245, 158, 11, 0.85)'
+
 sylius_resource:
     resources:
         vanssa_sylius_slider.slider:

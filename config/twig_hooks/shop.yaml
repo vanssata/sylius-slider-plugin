@@ -1,11 +1,2 @@
 sylius_twig_hooks:
-    hooks:
-        'sylius_shop.base#stylesheets':
-            vanssa_sylius_slider_styles:
-                template: '@VanssaSyliusSliderPlugin/shop/shared/layout/base/styles.html.twig'
-                priority: -100
-
-        'sylius_shop.base#javascripts':
-            vanssa_sylius_slider_scripts:
-                template: '@VanssaSyliusSliderPlugin/shop/shared/layout/base/scripts.html.twig'
-                priority: -100
+    hooks: { }

@@ -5,7 +5,6 @@
         </div>
         <div class="card-body">
             {% set form = hookable_metadata.context.form.settings %}
-            {% set yellowSwatches = ['rgba(250, 204, 21, 1)', 'rgba(250, 204, 21, 0.75)', 'rgba(250, 204, 21, 0.45)', 'rgba(255, 255, 255, 1)', 'rgba(17, 24, 39, 0.85)'] %}
             <div class="row">
                 <div class="col-12 col-md-4">{{ form_row(form.containerWidth) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(form.slideEffect) }}</div>
@@ -31,10 +30,10 @@
                 <div class="col-12 col-md-4">{{ form_row(form.paginationShape) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(form.paginationSize) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(form.paginationShadow) }}</div>
-                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.navigationColor, swatches: yellowSwatches } only %}</div>
-                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.navigationBackgroundColor, swatches: yellowSwatches } only %}</div>
-                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.paginationColor, swatches: yellowSwatches } only %}</div>
-                <div class="col-12 col-md-6">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/rgba_color_field.html.twig' with { field: form.paginationActiveColor, swatches: yellowSwatches } only %}</div>
+                <div class="col-12 col-md-6">{{ form_row(form.navigationColor) }}</div>
+                <div class="col-12 col-md-6">{{ form_row(form.navigationBackgroundColor) }}</div>
+                <div class="col-12 col-md-6">{{ form_row(form.paginationColor) }}</div>
+                <div class="col-12 col-md-6">{{ form_row(form.paginationActiveColor) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(form.autoplay.enabled) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(form.autoplay.interval) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(form.autoplay.pauseOnHover) }}</div>

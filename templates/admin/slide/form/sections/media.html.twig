@@ -1,48 +1,46 @@
 {% set form = hookable_metadata.context.form %}
 {% set slide = hookable_metadata.context.resource %}
 
-<div class="tab-pane" id="slide-media" role="tabpanel" tabindex="0">
-    <div class="card mb-3">
-        <div class="card-header">
-            <h2 class="card-title">{{ 'sylius.ui.media'|trans }}</h2>
-        </div>
-        <div class="card-body">
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#slide-media-desktop" type="button" role="tab">Desktop</button></li>
-                <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-mobile" type="button" role="tab">Mobile</button></li>
-                <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-tablet" type="button" role="tab">Tablet</button></li>
-                <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-video" type="button" role="tab">Video</button></li>
-                <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-presentation" type="button" role="tab">Presentation</button></li>
-            </ul>
+<div class="card mb-3">
+    <div class="card-header">
+        <h2 class="card-title">{{ 'sylius.ui.media'|trans }}</h2>
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#slide-media-desktop" type="button" role="tab">Desktop</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-mobile" type="button" role="tab">Mobile</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-tablet" type="button" role="tab">Tablet</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-video" type="button" role="tab">Video</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-presentation" type="button" role="tab">Presentation</button></li>
+        </ul>
 
-            <div class="tab-content pt-4">
-                <div class="tab-pane fade show active" id="slide-media-desktop" role="tabpanel">
-                    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
-                        field: form.slideCoverFile,
-                        image_path: slide.slideCover,
-                        preview_id: form.vars.id ~ '-desktop-preview'
-                    } %}
-                </div>
-                <div class="tab-pane fade" id="slide-media-mobile" role="tabpanel">
-                    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
-                        field: form.slideCoverMobileFile,
-                        image_path: slide.slideCoverMobile,
-                        preview_id: form.vars.id ~ '-mobile-preview'
-                    } %}
-                </div>
-                <div class="tab-pane fade" id="slide-media-tablet" role="tabpanel">
-                    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
-                        field: form.slideCoverTabletFile,
-                        image_path: slide.slideCoverTablet,
-                        preview_id: form.vars.id ~ '-tablet-preview'
-                    } %}
-                </div>
-                <div class="tab-pane fade" id="slide-media-video" role="tabpanel">
-                    {{ form_row(form.slideCoverVideoFile) }}
-                </div>
-                <div class="tab-pane fade" id="slide-media-presentation" role="tabpanel">
-                    {{ form_row(form.presentationMediaFile) }}
-                </div>
+        <div class="tab-content pt-4">
+            <div class="tab-pane fade show active" id="slide-media-desktop" role="tabpanel">
+                {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                    field: form.slideCoverFile,
+                    image_path: slide.slideCover,
+                    preview_id: form.vars.id ~ '-desktop-preview'
+                } %}
+            </div>
+            <div class="tab-pane fade" id="slide-media-mobile" role="tabpanel">
+                {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                    field: form.slideCoverMobileFile,
+                    image_path: slide.slideCoverMobile,
+                    preview_id: form.vars.id ~ '-mobile-preview'
+                } %}
+            </div>
+            <div class="tab-pane fade" id="slide-media-tablet" role="tabpanel">
+                {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                    field: form.slideCoverTabletFile,
+                    image_path: slide.slideCoverTablet,
+                    preview_id: form.vars.id ~ '-tablet-preview'
+                } %}
+            </div>
+            <div class="tab-pane fade" id="slide-media-video" role="tabpanel">
+                {{ form_row(form.slideCoverVideoFile) }}
+            </div>
+            <div class="tab-pane fade" id="slide-media-presentation" role="tabpanel">
+                {{ form_row(form.presentationMediaFile) }}
             </div>
         </div>
     </div>

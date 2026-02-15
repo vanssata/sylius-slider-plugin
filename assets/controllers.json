@@ -1,0 +1,30 @@
+{
+    "controllers": {
+        "@vanssa/sylius-slider-plugin": {
+            "slider": {
+                "enabled": true,
+                "fetch": "eager"
+            },
+            "slide-preview": {
+                "enabled": true,
+                "fetch": "eager"
+            },
+            "slider-settings": {
+                "enabled": true,
+                "fetch": "eager"
+            },
+            "slider-slides-preview": {
+                "enabled": true,
+                "fetch": "eager"
+            },
+            "rgba-color-picker": {
+                "enabled": true,
+                "fetch": "eager",
+                "autoimport": {
+                    "@simonwep/pickr/dist/themes/classic.min.css": true
+                }
+            }
+        }
+    },
+    "entrypoints": []
+}
