@@ -41,6 +41,10 @@ node-shell:
 node-watch:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm -i nodejs "(cd vendor/sylius/test-application && yarn install && yarn watch)"
 
+node-build:
+	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm -i nodejs "(cd vendor/sylius/test-application && yarn install && yarn build)"
+
+
 docker-compose-check:
 	@$(DOCKER_COMPOSE) version >/dev/null 2>&1 || (echo "Please install docker compose binary or set DOCKER_COMPOSE=\"docker-compose\" for legacy binary" && exit 1)
 	@echo "You are using \"$(DOCKER_COMPOSE)\" binary"
@@ -63,6 +67,7 @@ load-slider-fixtures:
 
 cc:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/console c:c -n
+
 mig:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/console d:m:mNa -n
 
