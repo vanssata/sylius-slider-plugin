@@ -17,3 +17,13 @@ doctrine:
                         type: attribute
                         dir: '%kernel.project_dir%/../../../tests/TestApplication/src/Entity'
                         prefix: Tests\Vanssa\SyliusSliderPlugin
+sylius_twig_hooks:
+    hooks:
+        'sylius_shop.homepage.index':
+            banner:
+                enabled: false
+            vanssa_sylius_slider_homepage:
+                component: 'vanssa_sylius_slider:shop:homepage_slider'
+                props:
+                    code: 'homepage-main'
+                priority: 400
