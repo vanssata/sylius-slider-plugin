@@ -59,12 +59,47 @@ vanssa_sylius_slider_shop:
 bin/console doctrine:migrations:migrate -n
 ```
 
-6. Build frontend assets (if your project uses Encore build pipeline):
+6. Register plugin frontend entries in your Encore config (example):
+
+```js
+// webpack.config.js
+const path = require('path');
+
+// In your app.shop build:
+.addEntry('plugin-shop-entry', path.resolve(__dirname, 'vendor/vanssa/sylius-slider-plugin/assets/shop/entrypoint.js'))
+
+// In your app.admin build:
+.addEntry('plugin-admin-entry', path.resolve(__dirname, 'vendor/vanssa/sylius-slider-plugin/assets/admin/entrypoint.js'))
+```
+
+7. Install additional frontend libraries required by plugin assets:
+
+```bash
+yarn add @hotwired/stimulus @symfony/stimulus-bridge @stimulus-components/color-picker @simonwep/pickr
+```
+
+8. Build frontend assets (if your project uses Encore build pipeline):
 
 ```bash
 yarn install
 yarn build
 bin/console assets:install
+```
+9. Add slider on homepage (optional):
+```yaml 
+# config/packages/vanssa_sylius_slider.yaml
+...
+sylius_twig_hooks:
+    hooks:
+        'sylius_shop.homepage.index':
+            banner:
+                enabled: false
+            vanssa_sylius_slider_homepage:
+                component: 'vanssa_sylius_slider:shop:homepage_slider'
+                props:
+                    code: 'homepage-main'
+                priority: 400
+ 
 ```
 
 ## Admin Usage

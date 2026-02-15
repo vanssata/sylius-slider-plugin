@@ -6,5 +6,5 @@ sylius_twig_hooks:
             vanssa_sylius_slider_homepage:
                 component: 'vanssa_sylius_slider:shop:homepage_slider'
                 props:
-                    code: 'first_slider'
+                    code: 'homepage-main'
                 priority: 400
