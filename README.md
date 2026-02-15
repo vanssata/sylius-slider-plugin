@@ -19,7 +19,7 @@ A Sylius plugin for building and managing rich storefront sliders with:
 | Node.js | `>= 20` |
 | Yarn | `>= 1.22` |
 
-## Installation in a Sylius Project
+## Installation in Sylius-Standard (2.2)
 
 1. Install the package:
 
@@ -63,7 +63,7 @@ vanssa_sylius_slider_shop:
 bin/console doctrine:migrations:migrate -n
 ```
 
-6. Register plugin frontend package in your project:
+6. Add plugin frontend package in your Sylius-Standard project:
 
 ```bash
 yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/assets
@@ -111,14 +111,21 @@ yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/as
 }
 ```
 
-8. Build frontend assets (if your project uses Encore build pipeline):
+8. Build frontend assets:
 
 ```bash
 yarn install
 yarn build
 bin/console assets:install
 ```
-9. Add slider on homepage (optional):
+
+9. Clear cache:
+
+```bash
+bin/console cache:clear
+```
+
+10. Add slider on homepage (optional):
 ```yaml 
 # config/packages/vanssa_sylius_slider.yaml
 ...
@@ -135,12 +142,10 @@ sylius_twig_hooks:
  
 ```
 
-### Sylius Standard 2.2: Controller Setup
+Notes for Sylius-Standard:
 
-In a standard Sylius `2.2` project, edit `assets/controllers.json` and add the
-`@vanssa/sylius-slider-plugin` block from step `7` above. This is required so
-the app bootstrap (`startStimulusApp(...)`) can discover and register plugin
-controllers like `vanssa-slider` and `vanssa-slide-preview`.
+- Keep your existing controller entries (for example `@symfony/ux-live-component` and `@symfony/ux-autocomplete`) and only add the `@vanssa/sylius-slider-plugin` block.
+- If your project customizes webpack configs, ensure `assets/controllers.json` is the file passed to `enableStimulusBridge(...)`.
 
 ## Admin Usage
 

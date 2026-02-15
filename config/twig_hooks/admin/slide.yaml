@@ -1,15 +1,5 @@
 sylius_twig_hooks:
     hooks:
-        'sylius_admin.slide.create#javascripts':
-            image_preview_script:
-                template: '@VanssaSyliusSliderPlugin/admin/shared/form/image_preview_script.html.twig'
-                priority: 0
-
-        'sylius_admin.slide.update#javascripts':
-            image_preview_script:
-                template: '@VanssaSyliusSliderPlugin/admin/shared/form/image_preview_script.html.twig'
-                priority: 0
-
         'sylius_admin.slide.create.content':
             form:
                template: '@VanssaSyliusSliderPlugin/admin/shared/form/form.html.twig'

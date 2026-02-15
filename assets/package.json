@@ -1,5 +1,6 @@
 {
     "name": "@vanssa/sylius-slider-plugin",
+    "version": "1.0.0",
     "private": true,
     "type": "module",
     "symfony": {
