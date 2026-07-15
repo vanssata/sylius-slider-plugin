@@ -19,7 +19,9 @@
 
         <service id="Vanssa\SyliusSliderPlugin\Controller\Shop\SliderController" public="true" />
 
-        <service id="Vanssa\SyliusSliderPlugin\Controller\Admin\SliderPreviewController" public="true" />
+        <service id="Vanssa\SyliusSliderPlugin\Controller\Admin\SliderPreviewController" public="true">
+            <argument key="$profiler" type="service" id="profiler" on-invalid="null" />
+        </service>
 
         <service id="Vanssa\SyliusSliderPlugin\Context\Admin\PreviewChannelContext">
             <tag name="sylius.context.channel" priority="192" />

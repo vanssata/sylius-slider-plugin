@@ -10,6 +10,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Twig\Environment;
 use Vanssa\SyliusSliderPlugin\Context\Admin\PreviewChannelContext;
 use Vanssa\SyliusSliderPlugin\Entity\Slider;
@@ -28,11 +29,16 @@ final readonly class SliderPreviewController
         private Environment $twig,
         #[Autowire(param: 'vanssa_sylius_slider.preview.shop_entrypoints')]
         private array $shopEntrypoints,
+        private ?Profiler $profiler = null,
     ) {
     }
 
     public function __invoke(Request $request, int $id): Response
     {
+        // The preview is embedded in an iframe; keep the web debug toolbar
+        // out of it in dev environments.
+        $this->profiler?->disable();
+
         $slider = $this->sliderRepository->find($id);
         if (!$slider instanceof Slider) {
             throw new NotFoundHttpException(sprintf('Slider "%d" does not exist.', $id));
