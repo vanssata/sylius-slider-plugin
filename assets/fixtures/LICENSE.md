@@ -1,9 +1,10 @@
 # Fixture Media License
 
-All media files bundled under `assets/fixtures/` are dedicated to the public
-domain under **CC0 1.0 Universal** (https://creativecommons.org/publicdomain/zero/1.0/).
-You may use, modify, and redistribute them without attribution. Sources are
-listed below for reference.
+Unless noted otherwise below, all media files bundled under `assets/fixtures/`
+are dedicated to the public domain under **CC0 1.0 Universal**
+(https://creativecommons.org/publicdomain/zero/1.0/). You may use, modify,
+and redistribute them without attribution. Sources are listed below for
+reference.
 
 ## Images (`images/`)
 
@@ -27,3 +28,9 @@ the public domain under CC0 1.0 (re-encoded to 5 s muted H.264 clips):
 
 - `autonomous-loop.mp4`
 - `charging-network.mp4`
+
+Exception — licensed under **CC BY 3.0**
+(https://creativecommons.org/licenses/by/3.0/), re-encoded to a 5 s muted
+H.264 clip from the [Big Buck Bunny trailer on Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Big_Buck_Bunny_Trailer_400p.ogv):
+
+- `big-buck-bunny.mp4` — © 2008 Blender Foundation / www.bigbuckbunny.org

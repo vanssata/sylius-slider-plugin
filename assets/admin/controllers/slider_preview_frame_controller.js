@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['channel', 'locale', 'frame', 'frameWrapper', 'placeholder', 'sizeButton'];
+    static targets = ['channel', 'locale', 'frame', 'frameWrapper', 'placeholder', 'sizeButton', 'openTab'];
     static values = {
         urlTemplate: String,
     };
@@ -33,6 +33,10 @@ export default class extends Controller {
             this.frameWrapperTarget.classList.toggle('d-none', !ready);
         }
 
+        if (this.hasOpenTabTarget) {
+            this.openTabTarget.classList.toggle('d-none', !ready);
+        }
+
         if (!ready || !this.hasFrameTarget) {
             return;
         }
@@ -40,6 +44,10 @@ export default class extends Controller {
         const url = this.urlTemplateValue
             .replace('__CHANNEL__', encodeURIComponent(channelCode))
             .replace('__LOCALE__', encodeURIComponent(localeCode));
+
+        if (this.hasOpenTabTarget) {
+            this.openTabTarget.setAttribute('href', url);
+        }
 
         if (this.frameTarget.getAttribute('src') !== url) {
             this.frameTarget.setAttribute('src', url);

@@ -62,7 +62,7 @@ final class SliderDemoFixtureTest extends TestCase
 
         $this->createFixture($entityManager)->load([]);
 
-        self::assertCount(8, $persistedSlides);
+        self::assertCount(9, $persistedSlides);
 
         $byCode = [];
         foreach ($persistedSlides as $slide) {
@@ -78,7 +78,7 @@ final class SliderDemoFixtureTest extends TestCase
             );
         }
 
-        foreach (['autonomous-loop', 'charging-network'] as $code) {
+        foreach (['autonomous-loop', 'charging-network', 'big-buck-bunny'] as $code) {
             $video = $byCode[$code]->getSlideCoverVideo();
             self::assertNotNull($video, sprintf('Slide "%s" must get an uploaded video.', $code));
             self::assertStringStartsWith('/media/fixtures/videos/', (string) $video);

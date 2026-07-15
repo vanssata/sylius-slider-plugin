@@ -1,9 +1,20 @@
+{% set slide = slide|default(null) %}
+{% set preview_cover = slide ? (slide.slideCover ?: slide.slideCoverTablet ?: slide.slideCoverMobile) : null %}
+{% set preview_video = slide ? slide.slideCoverVideo : null %}
+
 <div class="card mt-3">
     <div class="card-header">
         <h3 class="card-title mb-0">Live preview</h3>
     </div>
     <div class="card-body">
-        <div class="vanssa-slide-preview">
+        <div class="vanssa-slide-preview{{ (preview_video or preview_cover) ? ' has-media' : '' }}">
+            {% if preview_video %}
+                <video class="vanssa-slide-preview__media" autoplay muted loop playsinline preload="metadata">
+                    <source src="{{ preview_video }}">
+                </video>
+            {% elseif preview_cover %}
+                <img class="vanssa-slide-preview__media" src="{{ preview_cover }}" alt="">
+            {% endif %}
             <div class="vanssa-slide-preview__content is-pos-x-start is-pos-y-bottom" {{ stimulus_target('vanssa-slide-preview', 'previewBox') }}>
                 <div class="vanssa-slide-preview__heading" {{ stimulus_target('vanssa-slide-preview', 'previewHeading') }}>Sample H3</div>
                 <p class="vanssa-slide-preview__description" {{ stimulus_target('vanssa-slide-preview', 'previewDescription') }}>

@@ -18,9 +18,48 @@
             margin: 0;
             background: #f4f5f7;
         }
+
+        .vanssa-slider-preview-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.6rem 1rem;
+            background: #1f2937;
+            color: #f9fafb;
+            font: 500 0.9rem/1.4 system-ui, sans-serif;
+        }
+
+        .vanssa-slider-preview-topbar a {
+            color: #facc15;
+            text-decoration: none;
+            border: 1px solid rgb(250 204 21 / 60%);
+            border-radius: 6px;
+            padding: 0.3rem 0.8rem;
+        }
+
+        .vanssa-slider-preview-topbar a:hover {
+            background: rgb(250 204 21 / 15%);
+        }
     </style>
 </head>
 <body class="vanssa-slider-preview-body">
+    <div class="vanssa-slider-preview-topbar" hidden data-vanssa-preview-topbar>
+        <span>
+            {{ slider.localizedName(localeCode, fallbackLocaleCode) }}
+            — {{ channel.name }} ({{ localeCode }})
+        </span>
+        <a href="{{ path('vanssa_sylius_slider_admin_slider_update', { id: slider.id }) }}">
+            Edit slider
+        </a>
+    </div>
+    <script>
+        // Show the edit bar only when the preview is opened as a full page,
+        // never inside the admin preview iframe.
+        if (window.top === window.self) {
+            document.querySelector('[data-vanssa-preview-topbar]').hidden = false;
+        }
+    </script>
     {{ component('vanssa_sylius_slider:shop:slider', {
         slider: slider,
         localeCode: localeCode,

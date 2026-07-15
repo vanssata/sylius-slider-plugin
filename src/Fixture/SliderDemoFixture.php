@@ -74,6 +74,13 @@ final class SliderDemoFixture extends AbstractFixture
         $s1 = $this->createOrUpdateSlide('ev-cockpit', 'EV Cockpit', 'Driver-focused EV cockpit UX blocks.', 3);
         $s2 = $this->createOrUpdateSlide('battery-lab', 'Battery Lab', 'Battery analytics and thermal charts.', 1);
         $s3 = $this->createOrUpdateSlide('assistant', 'In-Car Assistant', 'Voice assistant with contextual commands.', 2);
+        $bigBuckBunny = $this->createOrUpdateSlide(
+            'big-buck-bunny',
+            'Big Buck Bunny',
+            'Sample video slide for playback testing (CC BY 3.0, Blender Foundation).',
+            3,
+            'big-buck-bunny',
+        );
 
         $this->entityManager->flush();
 
@@ -94,6 +101,7 @@ final class SliderDemoFixture extends AbstractFixture
         $service = $this->createOrUpdateSlider('service-ops', 'Service Operations Slider', [
             $shared['predictive-service'],
             $s3,
+            $bigBuckBunny,
             $shared['fleet-control'],
         ]);
 

@@ -21,7 +21,7 @@
                             } %}
 
                             <div class="row mt-3">
-                                <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' %}</div>
+                                <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with { slide: form.vars.data } %}</div>
                             </div>
                         </div>
                     </div>
