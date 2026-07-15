@@ -153,7 +153,7 @@
 
 <article class="vanssa-slide {{ this.index == 0 ? 'is-active' : '' }} {{ desktopResolved.customCssClass|default('') }} {{ visibilityClasses|join(' ') }}" data-slide-code="{{ this.slide.code }}" {{ stimulus_target('vanssa-slider', 'slide') }}>
     {% if this.slide.slideCoverVideo %}
-        <video class="vanssa-slide__media" {% if this.sliderSettings.autoplay.enabled|default(this.sliderSettings.autoplay.active|default(false)) %}autoplay{% endif %} muted loop playsinline>
+        <video class="vanssa-slide__media" {% if this.sliderSettings.autoplay.enabled|default(this.sliderSettings.autoplay.active|default(false)) %}autoplay{% endif %} muted loop playsinline{% if this.lazyLoad %} preload="none"{% endif %}>
             <source src="{{ this.slide.slideCoverVideo }}">
         </video>
     {% elseif this.slide.localizedSlideCover(this.localeCode, this.fallbackLocaleCode) or this.slide.localizedSlideCoverMobile(this.localeCode, this.fallbackLocaleCode) or this.slide.localizedSlideCoverTablet(this.localeCode, this.fallbackLocaleCode) %}
@@ -164,7 +164,7 @@
             {% if this.slide.localizedSlideCoverTablet(this.localeCode, this.fallbackLocaleCode) %}
                 <source media="(max-width: 1024px)" srcset="{{ this.slide.localizedSlideCoverTablet(this.localeCode, this.fallbackLocaleCode) }}">
             {% endif %}
-            <img class="vanssa-slide__media" src="{{ this.slide.localizedSlideCover(this.localeCode, this.fallbackLocaleCode) ?: this.slide.localizedSlideCoverTablet(this.localeCode, this.fallbackLocaleCode) ?: this.slide.localizedSlideCoverMobile(this.localeCode, this.fallbackLocaleCode) }}" alt="{{ coverAlt }}" title="{{ coverTitle }}">
+            <img class="vanssa-slide__media" src="{{ this.slide.localizedSlideCover(this.localeCode, this.fallbackLocaleCode) ?: this.slide.localizedSlideCoverTablet(this.localeCode, this.fallbackLocaleCode) ?: this.slide.localizedSlideCoverMobile(this.localeCode, this.fallbackLocaleCode) }}" alt="{{ coverAlt }}" title="{{ coverTitle }}"{% if this.lazyLoad %} loading="lazy" fetchpriority="low"{% endif %}>
         </picture>
     {% endif %}
 

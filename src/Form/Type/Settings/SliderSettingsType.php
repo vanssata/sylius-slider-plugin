@@ -32,6 +32,10 @@ final class SliderSettingsType extends AbstractType
         $navigationIconValues = $this->settingsPresetProvider->values('slider', 'navigation_icon', ['chevron', 'angle', 'square']);
         $navigationSizeValues = $this->settingsPresetProvider->values('slider', 'navigation_size', ['1.5rem', '3rem', '4rem', '6rem']);
         $navigationShadowValues = $this->settingsPresetProvider->values('slider', 'navigation_shadow', ['none', 'soft', 'medium', 'strong', 'glow']);
+        $arrowsPositionValues = $this->settingsPresetProvider->values('slider', 'arrows_position', ['overlay', 'outside', 'bottom']);
+        $arrowsVerticalAlignValues = $this->settingsPresetProvider->values('slider', 'arrows_vertical_align', ['center', 'top', 'bottom']);
+        $paginationPositionValues = $this->settingsPresetProvider->values('slider', 'pagination_position', ['bottom-inside', 'bottom-outside', 'top', 'left', 'right']);
+        $paginationStyleValues = $this->settingsPresetProvider->values('slider', 'pagination_style', ['dots', 'lines', 'numbers']);
         $paginationShapeValues = $this->settingsPresetProvider->values('slider', 'pagination_shape', ['circle', 'square']);
         $paginationSizeValues = $this->settingsPresetProvider->values('slider', 'pagination_size', ['0.5rem', '0.625rem', '0.8rem', '1rem']);
         $paginationShadowValues = $this->settingsPresetProvider->values('slider', 'pagination_shadow', ['none', 'soft', 'medium', 'strong', 'glow']);
@@ -189,6 +193,20 @@ final class SliderSettingsType extends AbstractType
                 'required' => false,
                 'help' => 'Show previous/next arrow buttons.',
             ])
+            ->add('arrowsPosition', ChoiceType::class, [
+                'choices' => self::labeledChoices($arrowsPositionValues),
+                'help' => 'Where the previous/next arrows are placed.',
+                'constraints' => [
+                    new Assert\Choice(['choices' => $arrowsPositionValues]),
+                ],
+            ])
+            ->add('arrowsVerticalAlign', ChoiceType::class, [
+                'choices' => self::labeledChoices($arrowsVerticalAlignValues),
+                'help' => 'Vertical alignment of overlay arrows.',
+                'constraints' => [
+                    new Assert\Choice(['choices' => $arrowsVerticalAlignValues]),
+                ],
+            ])
             ->add('navigationIcon', ChoiceType::class, [
                 'choices' => self::labeledChoices($navigationIconValues),
                 'help' => 'Arrow icon style for navigation buttons.',
@@ -227,6 +245,20 @@ final class SliderSettingsType extends AbstractType
                 'help' => 'Shadow preset for navigation buttons.',
                 'constraints' => [
                     new Assert\Choice(['choices' => $navigationShadowValues]),
+                ],
+            ])
+            ->add('paginationPosition', ChoiceType::class, [
+                'choices' => self::labeledChoices($paginationPositionValues),
+                'help' => 'Where pagination indicators are placed.',
+                'constraints' => [
+                    new Assert\Choice(['choices' => $paginationPositionValues]),
+                ],
+            ])
+            ->add('paginationStyle', ChoiceType::class, [
+                'choices' => self::labeledChoices($paginationStyleValues),
+                'help' => 'Indicator style: dots, lines or slide numbers.',
+                'constraints' => [
+                    new Assert\Choice(['choices' => $paginationStyleValues]),
                 ],
             ])
             ->add('paginationShape', ChoiceType::class, [
@@ -269,6 +301,22 @@ final class SliderSettingsType extends AbstractType
                      'picker_predefined_only' => true,
                 ],
                 'constraints' => [new Assert\CssColor()],
+            ])
+            ->add('showProgressBar', CheckboxType::class, [
+                'required' => false,
+                'help' => 'Show an autoplay progress bar (requires autoplay).',
+            ])
+            ->add('keyboardNavigation', CheckboxType::class, [
+                'required' => false,
+                'help' => 'Allow switching slides with the left/right arrow keys.',
+            ])
+            ->add('touchSwipe', CheckboxType::class, [
+                'required' => false,
+                'help' => 'Allow switching slides by swiping on touch devices.',
+            ])
+            ->add('lazyLoadMedia', CheckboxType::class, [
+                'required' => false,
+                'help' => 'Lazy-load images and videos of non-visible slides.',
             ])
         ;
 
@@ -335,6 +383,8 @@ final class SliderSettingsType extends AbstractType
                 ],
                 'showNavigation' => true,
                 'showArrows' => true,
+                'arrowsPosition' => $this->settingsPresetProvider->safeDefault('slider', 'arrows_position', 'overlay', $this->settingsPresetProvider->values('slider', 'arrows_position', ['overlay', 'outside', 'bottom'])),
+                'arrowsVerticalAlign' => $this->settingsPresetProvider->safeDefault('slider', 'arrows_vertical_align', 'center', $this->settingsPresetProvider->values('slider', 'arrows_vertical_align', ['center', 'top', 'bottom'])),
                 'navigationIcon' => $this->settingsPresetProvider->safeDefault('slider', 'navigation_icon', 'chevron', $this->settingsPresetProvider->values('slider', 'navigation_icon', ['chevron', 'angle', 'square'])),
                 'navigationSize' => $this->settingsPresetProvider->safeDefault('slider', 'navigation_size', '3rem', $this->settingsPresetProvider->values('slider', 'navigation_size', ['1.5rem', '3rem', '4rem', '6rem'])),
                 'navigationColor' => 'rgba(250, 204, 21, 1)',
@@ -345,6 +395,12 @@ final class SliderSettingsType extends AbstractType
                 'paginationShadow' => $this->settingsPresetProvider->safeDefault('slider', 'pagination_shadow', 'none', $this->settingsPresetProvider->values('slider', 'pagination_shadow', ['none', 'soft', 'medium', 'strong', 'glow'])),
                 'paginationColor' => 'rgba(250, 204, 21, 0.45)',
                 'paginationActiveColor' => 'rgba(250, 204, 21, 1)',
+                'paginationPosition' => $this->settingsPresetProvider->safeDefault('slider', 'pagination_position', 'bottom-inside', $this->settingsPresetProvider->values('slider', 'pagination_position', ['bottom-inside', 'bottom-outside', 'top', 'left', 'right'])),
+                'paginationStyle' => $this->settingsPresetProvider->safeDefault('slider', 'pagination_style', 'dots', $this->settingsPresetProvider->values('slider', 'pagination_style', ['dots', 'lines', 'numbers'])),
+                'showProgressBar' => false,
+                'keyboardNavigation' => true,
+                'touchSwipe' => true,
+                'lazyLoadMedia' => true,
             ],
             'allow_extra_fields' => true,
             'attr' => [

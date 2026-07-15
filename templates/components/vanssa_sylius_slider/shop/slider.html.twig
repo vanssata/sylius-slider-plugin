@@ -42,6 +42,14 @@
                 ? 'none'
                 : '0 3px 9px rgba(15, 23, 42, 0.3)')))
 %}
+{% set arrowsPosition = settings.arrowsPosition|default('overlay') %}
+{% set arrowsVerticalAlign = settings.arrowsVerticalAlign|default('center') %}
+{% set paginationPosition = settings.paginationPosition|default('bottom-inside') %}
+{% set paginationStyle = settings.paginationStyle|default('dots') %}
+{% set keyboardNavigation = settings.keyboardNavigation|default(true) %}
+{% set touchSwipe = settings.touchSwipe|default(true) %}
+{% set showProgressBar = settings.showProgressBar|default(false) and autoplay.enabled|default(autoplay.active|default(false)) %}
+{% set lazyLoadMedia = settings.lazyLoadMedia|default(true) %}
 {% set sliderClasses = [
     'vanssa-slider',
     settings.overlay|default(false) ? 'vanssa-slider--overlay' : '',
@@ -49,6 +57,9 @@
     parallaxStrength is not empty ? 'vanssa-slider--parallax' : '',
     maxHeight is not empty ? 'vanssa-slider--custom-max-height' : '',
     settings.containerWidth|default('content') == 'content' ? 'vanssa-slider--container-content' : 'vanssa-slider--container-full',
+    'vanssa-slider--arrows-' ~ arrowsPosition,
+    'vanssa-slider--arrows-align-' ~ arrowsVerticalAlign,
+    'vanssa-slider--pagination-' ~ paginationPosition,
     cssClasses
 ] %}
 {% set sliderOptions = {
@@ -62,7 +73,11 @@
     },
     parallax: { strength: parallaxStrength },
     paginationShape: paginationShape,
-    paginationSize: paginationSize
+    paginationSize: paginationSize,
+    paginationStyle: paginationStyle,
+    keyboardNavigation: keyboardNavigation,
+    touchSwipe: touchSwipe,
+    showProgressBar: showProgressBar
 } %}
 
 <section
@@ -88,6 +103,10 @@
         {% if maxHeight is not empty %}--vanssa-slider-max-height: {{ maxHeight }};{% endif %}
     "
     {{ stimulus_controller('vanssa-slider', { options: sliderOptions }) }}
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="{{ this.slider.localizedName(this.localeCode, this.fallbackLocaleCode) }}"
+    {% if keyboardNavigation %}tabindex="0"{% endif %}
 >
     <div class="vanssa-slider__container">
         {% if showTitle %}
@@ -105,7 +124,8 @@
                             index: loop.index0,
                             localeCode: this.localeCode,
                             fallbackLocaleCode: this.fallbackLocaleCode,
-                            sliderSettings: settings
+                            sliderSettings: settings,
+                            lazyLoad: lazyLoadMedia and loop.index0 > 0
                         }) }}
                     {% endfor %}
                 </div>
@@ -123,6 +143,12 @@
 
                 {% if showNavigation and slides|length > 1 %}
                     <div class="vanssa-slider__pagination" aria-label="Slider pagination" {{ stimulus_target('vanssa-slider', 'pagination') }}></div>
+                {% endif %}
+
+                {% if showProgressBar and slides|length > 1 %}
+                    <div class="vanssa-slider__progress" aria-hidden="true">
+                        <div class="vanssa-slider__progress-bar" {{ stimulus_target('vanssa-slider', 'progressBar') }}></div>
+                    </div>
                 {% endif %}
             </div>
             <span class="visually-hidden" aria-live="polite" {{ stimulus_target('vanssa-slider', 'liveUpdate') }}></span>

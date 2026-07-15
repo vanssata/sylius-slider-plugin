@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['slide', 'pagination', 'liveUpdate', 'prevButton', 'nextButton'];
+    static targets = ['slide', 'pagination', 'liveUpdate', 'prevButton', 'nextButton', 'progressBar'];
     static values = {
         options: Object,
     };
@@ -13,6 +13,11 @@ export default class extends Controller {
         this.parallaxWrapper = null;
         this.parallaxMoveBound = null;
         this.parallaxLeaveBound = null;
+        this.keydownBound = null;
+        this.pointerDownBound = null;
+        this.pointerUpBound = null;
+        this.pointerCancelBound = null;
+        this.swipeStart = null;
 
         if (this.totalSlides <= 0) {
             return;
@@ -20,6 +25,8 @@ export default class extends Controller {
 
         this.setupPagination();
         this.bindButtons();
+        this.setupKeyboard();
+        this.setupSwipe();
         this.applyCurrentSlide(0);
         this.startAutoplay();
         this.initParallax();
@@ -41,6 +48,8 @@ export default class extends Controller {
             this.element.removeEventListener('mouseleave', this.startAutoplayBound);
         }
 
+        this.teardownKeyboard();
+        this.teardownSwipe();
         this.teardownParallax();
     }
 
@@ -80,15 +89,113 @@ export default class extends Controller {
 
         this.paginationTarget.innerHTML = '';
         const shape = this.optionsValue?.paginationShape ?? 'circle';
+        const style = this.paginationStyle();
         this.slideTargets.forEach((_, index) => {
             const bullet = document.createElement('button');
             bullet.type = 'button';
-            bullet.className = `vanssa-slider__bullet vanssa-slider__bullet--${shape}`;
+            bullet.className = `vanssa-slider__bullet vanssa-slider__bullet--style-${style}`;
+            if (style === 'dots') {
+                bullet.classList.add(`vanssa-slider__bullet--${shape}`);
+            }
+            if (style === 'numbers') {
+                bullet.textContent = `${index + 1}`;
+            }
             bullet.setAttribute('aria-label', `Go to slide ${index + 1}`);
             bullet.dataset.index = `${index}`;
             bullet.addEventListener('click', () => this.goTo(index));
             this.paginationTarget.appendChild(bullet);
         });
+    }
+
+    paginationStyle() {
+        const style = this.optionsValue?.paginationStyle ?? 'dots';
+
+        return ['dots', 'lines', 'numbers'].includes(style) ? style : 'dots';
+    }
+
+    setupKeyboard() {
+        if (this.optionsValue?.keyboardNavigation === false || this.totalSlides <= 1) {
+            return;
+        }
+
+        this.keydownBound = (event) => {
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                this.previous();
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                this.next();
+            }
+        };
+        this.element.addEventListener('keydown', this.keydownBound);
+    }
+
+    teardownKeyboard() {
+        if (this.keydownBound) {
+            this.element.removeEventListener('keydown', this.keydownBound);
+            this.keydownBound = null;
+        }
+    }
+
+    setupSwipe() {
+        if (this.optionsValue?.touchSwipe === false || this.totalSlides <= 1) {
+            return;
+        }
+
+        this.pointerDownBound = (event) => {
+            if (event.pointerType === 'mouse' || event.target.closest('a, button')) {
+                this.swipeStart = null;
+
+                return;
+            }
+
+            this.swipeStart = { x: event.clientX, y: event.clientY };
+        };
+        this.pointerUpBound = (event) => {
+            if (!this.swipeStart) {
+                return;
+            }
+
+            const deltaX = event.clientX - this.swipeStart.x;
+            const deltaY = event.clientY - this.swipeStart.y;
+            this.swipeStart = null;
+
+            if (Math.abs(deltaX) < 40 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+                return;
+            }
+
+            if (deltaX > 0) {
+                this.previous();
+            } else {
+                this.next();
+            }
+        };
+        this.pointerCancelBound = () => {
+            this.swipeStart = null;
+        };
+
+        this.element.addEventListener('pointerdown', this.pointerDownBound);
+        this.element.addEventListener('pointerup', this.pointerUpBound);
+        this.element.addEventListener('pointercancel', this.pointerCancelBound);
+    }
+
+    teardownSwipe() {
+        if (this.pointerDownBound) {
+            this.element.removeEventListener('pointerdown', this.pointerDownBound);
+            this.pointerDownBound = null;
+        }
+
+        if (this.pointerUpBound) {
+            this.element.removeEventListener('pointerup', this.pointerUpBound);
+            this.pointerUpBound = null;
+        }
+
+        if (this.pointerCancelBound) {
+            this.element.removeEventListener('pointercancel', this.pointerCancelBound);
+            this.pointerCancelBound = null;
+        }
+
+        this.swipeStart = null;
     }
 
     bindButtons() {
@@ -139,6 +246,8 @@ export default class extends Controller {
         this.timer = window.setInterval(() => {
             this.goTo(this.currentIndex + 1);
         }, this.autoplayInterval());
+
+        this.renderProgress();
     }
 
     stopAutoplay() {
@@ -148,6 +257,31 @@ export default class extends Controller {
 
         window.clearInterval(this.timer);
         this.timer = null;
+        this.resetProgress();
+    }
+
+    renderProgress() {
+        if (!this.hasProgressBarTarget || this.optionsValue?.showProgressBar !== true) {
+            return;
+        }
+
+        const bar = this.progressBarTarget;
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        // Force a reflow so the width reset applies before the animation starts.
+        void bar.offsetWidth;
+        bar.style.transition = `width ${this.autoplayInterval()}ms linear`;
+        bar.style.width = '100%';
+    }
+
+    resetProgress() {
+        if (!this.hasProgressBarTarget) {
+            return;
+        }
+
+        const bar = this.progressBarTarget;
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
     }
 
     restartAutoplay() {

@@ -100,6 +100,116 @@
         &--circle {
             border-radius: 999px;
         }
+
+        &--style-lines {
+            width: 2.2em;
+            height: 0.4em;
+            border-radius: 999px;
+        }
+
+        &--style-numbers {
+            width: auto;
+            height: auto;
+            min-width: 1.8em;
+            padding: 0.25em 0.55em;
+            border-radius: 0.3rem;
+            font-size: max(0.75rem, 1em);
+            line-height: 1.2;
+            color: #fff;
+        }
+    }
+
+    // Arrows placement variants
+    &--arrows-outside {
+        padding-inline: max(var(--vanssa-slider-padding-left, 0), 3.25rem) max(var(--vanssa-slider-padding-right, 0), 3.25rem);
+
+        .vanssa-slider__action--prev {
+            left: -2.75rem;
+        }
+
+        .vanssa-slider__action--next {
+            right: -2.75rem;
+        }
+    }
+
+    &--arrows-align-top .vanssa-slider__action {
+        top: 1rem;
+        transform: none;
+    }
+
+    &--arrows-align-bottom .vanssa-slider__action {
+        top: auto;
+        bottom: 1rem;
+        transform: none;
+    }
+
+    &--arrows-bottom {
+        .vanssa-slider__action {
+            top: auto;
+            bottom: 0.85rem;
+            transform: none;
+        }
+
+        .vanssa-slider__action--prev {
+            left: auto;
+            right: calc(0.55rem + 2.35em);
+        }
+
+        .vanssa-slider__action--next {
+            right: 0.55rem;
+        }
+    }
+
+    // Pagination placement variants
+    &--pagination-bottom-outside .vanssa-slider__pagination {
+        position: static;
+        transform: none;
+        justify-content: center;
+        padding: 0.85rem 0;
+    }
+
+    &--pagination-top .vanssa-slider__pagination {
+        top: 0.85rem;
+        bottom: auto;
+    }
+
+    &--pagination-left .vanssa-slider__pagination,
+    &--pagination-right .vanssa-slider__pagination {
+        flex-direction: column;
+        left: auto;
+        bottom: auto;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    &--pagination-left .vanssa-slider__pagination {
+        left: 0.85rem;
+    }
+
+    &--pagination-right .vanssa-slider__pagination {
+        right: 0.85rem;
+    }
+
+    // Autoplay progress bar
+    &__progress {
+        position: absolute;
+        z-index: 5;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 0.25rem;
+        overflow: hidden;
+        background: rgb(255 255 255 / 18%);
+    }
+
+    &__progress-bar {
+        width: 0;
+        height: 100%;
+        background: var(--vanssa-slider-pagination-active, rgb(250 204 21));
+
+        @media (prefers-reduced-motion: reduce) {
+            transition: none !important;
+        }
     }
 }
 

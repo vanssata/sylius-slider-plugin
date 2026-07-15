@@ -20,4 +20,6 @@ final class SlideComponent
 
     /** @var array<string, mixed> */
     public array $sliderSettings = [];
+
+    public bool $lazyLoad = false;
 }
