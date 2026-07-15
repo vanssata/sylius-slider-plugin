@@ -60,14 +60,14 @@ final class SliderDemoFixture extends AbstractFixture
                 'Autonomous Drive Loop',
                 'Synthetic video loop for ADAS showcase.',
                 1,
-                '/media/fixtures/automotive/autonomous-loop.mp4',
+                'autonomous-loop',
             ),
             'charging-network' => $this->createOrUpdateSlide(
                 'charging-network',
                 'Charging Network',
                 'Synthetic video loop for charging analytics.',
                 2,
-                '/media/fixtures/automotive/charging-network.mp4',
+                'charging-network',
             ),
         ];
 
@@ -158,7 +158,7 @@ final class SliderDemoFixture extends AbstractFixture
         $slide->setEnabled(true);
         $slide->setSlideCover($this->uploadFixtureImage('desktop', $imageSet));
         $slide->setSlideCoverMobile($this->uploadFixtureImage('mobile', $imageSet));
-        $slide->setSlideCoverVideo($video);
+        $slide->setSlideCoverVideo(null !== $video ? $this->uploadFixtureVideo($video) : null);
         $slide->setSlideSettings(array_merge($slide->getSlideSettings(), [
             'responsive' => [
                 'desktop' => [
@@ -187,14 +187,34 @@ final class SliderDemoFixture extends AbstractFixture
     private function uploadFixtureImage(string $device, int $set): ?string
     {
         $path = $this->resolveFixtureImagePath($device, $set);
+
+        return $this->uploadFixtureFile($path, sprintf('fixtures/%s', $device));
+    }
+
+    private function uploadFixtureVideo(string $name): ?string
+    {
+        $path = $this->resolveFixtureVideoPath($name);
+
+        return $this->uploadFixtureFile($path, 'fixtures/videos');
+    }
+
+    private function uploadFixtureFile(?string $path, string $subDir): ?string
+    {
         if (null === $path || !is_file($path)) {
             return null;
         }
 
-        $mimeType = mime_content_type($path) ?: null;
-        $uploadedFile = new UploadedFile($path, basename($path), $mimeType, null, true);
+        // Work on a temporary copy: UploadedMediaStorage::store() moves the
+        // file, which would otherwise delete the bundled asset from the plugin.
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'vanssa_slider_fixture_');
+        if (false === $temporaryPath || !copy($path, $temporaryPath)) {
+            return null;
+        }
 
-        return $this->uploadedMediaStorage->store($uploadedFile, sprintf('fixtures/%s', $device));
+        $mimeType = mime_content_type($path) ?: null;
+        $uploadedFile = new UploadedFile($temporaryPath, basename($path), $mimeType, null, true);
+
+        return $this->uploadedMediaStorage->store($uploadedFile, $subDir);
     }
 
     private function resolveFixtureImagePath(string $device, int $set): ?string
@@ -214,6 +234,20 @@ final class SliderDemoFixture extends AbstractFixture
         }
 
         foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private function resolveFixtureVideoPath(string $name): ?string
+    {
+        $basePath = dirname(__DIR__, 2) . '/assets/fixtures/videos';
+
+        foreach (['mp4', 'webm'] as $extension) {
+            $candidate = sprintf('%s/%s.%s', $basePath, $name, $extension);
             if (is_file($candidate)) {
                 return $candidate;
             }
