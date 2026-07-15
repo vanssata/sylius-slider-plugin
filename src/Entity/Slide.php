@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Entity;
 
-use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,11 +11,12 @@ use Sylius\Resource\Model\ResourceInterface;
 use Sylius\Resource\Model\TranslatableInterface;
 use Sylius\Resource\Model\TranslationInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
 
 #[ORM\Entity(repositoryClass: SlideRepository::class)]
 #[ORM\Table(
     name: 'vanssa_sylius_slide',
-    uniqueConstraints: [new ORM\UniqueConstraint(name: 'uniq_876619a677153098', columns: ['code'])]
+    uniqueConstraints: [new ORM\UniqueConstraint(name: 'uniq_876619a677153098', columns: ['code'])],
 )]
 #[UniqueEntity(fields: ['code'], message: 'This slide code is already in use.')]
 class Slide implements ResourceInterface, TranslatableInterface
@@ -26,9 +26,7 @@ class Slide implements ResourceInterface, TranslatableInterface
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    /**
-     * @var Collection<int, Slider>
-     */
+    /** @var Collection<int, Slider> */
     #[ORM\ManyToMany(targetEntity: Slider::class, inversedBy: 'slides')]
     #[ORM\JoinTable(name: 'vanssa_sylius_slide_slider')]
     #[ORM\JoinColumn(name: 'slide_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
@@ -71,27 +69,19 @@ class Slide implements ResourceInterface, TranslatableInterface
     #[ORM\Column(type: 'boolean')]
     private bool $enabled = true;
 
-    /**
-     * @var array<int, string>
-     */
+    /** @var array<int, string> */
     #[ORM\Column(name: 'channel_codes', type: 'json')]
     private array $channelCodes = [];
 
-    /**
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> */
     #[ORM\Column(name: 'slide_settings', type: 'json')]
     private array $slideSettings = [];
 
-    /**
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> */
     #[ORM\Column(name: 'content_settings', type: 'json')]
     private array $contentSettings = [];
 
-    /**
-     * @var Collection<int, SlideTranslation>
-     */
+    /** @var Collection<int, SlideTranslation> */
     #[ORM\OneToMany(mappedBy: 'slide', targetEntity: SlideTranslation::class, cascade: ['persist', 'remove'], orphanRemoval: true, indexBy: 'localeCode')]
     private Collection $translations;
 
@@ -560,12 +550,12 @@ class Slide implements ResourceInterface, TranslatableInterface
             }
 
             if (
-                is_string($key)
-                && isset($baseSettings[$key], $localizedSettings[$key])
-                && is_array($baseSettings[$key])
-                && is_array($value)
-                && !array_is_list($baseSettings[$key])
-                && !array_is_list($value)
+                is_string($key) &&
+                isset($baseSettings[$key], $localizedSettings[$key]) &&
+                is_array($baseSettings[$key]) &&
+                is_array($value) &&
+                !array_is_list($baseSettings[$key]) &&
+                !array_is_list($value)
             ) {
                 /** @var array<string, mixed> $baseNested */
                 $baseNested = $baseSettings[$key];

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Controller\Shop;
 
-use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
-use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
+use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 
 final class SliderController extends AbstractController
 {
@@ -65,6 +65,7 @@ final class SliderController extends AbstractController
             foreach ($slide->getSliders() as $slider) {
                 if ($slider->isAvailableForChannel($channel->getCode(), $localeCode, $fallbackLocaleCode)) {
                     $isAvailableInAnySlider = true;
+
                     break;
                 }
             }

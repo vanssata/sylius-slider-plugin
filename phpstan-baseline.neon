@@ -1,0 +1,216 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to an undefined method Sylius\\\\Component\\\\Channel\\\\Model\\\\ChannelInterface\\:\\:getDefaultLocale\\(\\)\\.$#"
+			count: 2
+			path: src/Controller/Shop/SliderController.php
+
+		-
+			message: "#^Parameter \\#1 \\$channelCode of method Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\Slider\\:\\:isAvailableForChannel\\(\\) expects string, string\\|null given\\.$#"
+			count: 1
+			path: src/Controller/Shop/SliderController.php
+
+		-
+			message: "#^Parameter \\#2 \\$channelCode of method Vanssa\\\\SyliusSliderPlugin\\\\Repository\\\\SliderRepository\\:\\:findEnabledOneByCodeForChannel\\(\\) expects string, string\\|null given\\.$#"
+			count: 1
+			path: src/Controller/Shop/SliderController.php
+
+		-
+			message: "#^Call to an undefined method Sylius\\\\Resource\\\\Model\\\\TranslationInterface\\:\\:getButtonLabel\\(\\)\\.$#"
+			count: 1
+			path: src/Entity/Slide.php
+
+		-
+			message: "#^Call to an undefined method Sylius\\\\Resource\\\\Model\\\\TranslationInterface\\:\\:getName\\(\\)\\.$#"
+			count: 1
+			path: src/Entity/Slide.php
+
+		-
+			message: "#^Call to an undefined method Sylius\\\\Resource\\\\Model\\\\TranslationInterface\\:\\:getUrl\\(\\)\\.$#"
+			count: 1
+			path: src/Entity/Slide.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of method Doctrine\\\\Common\\\\Collections\\\\Collection\\<int,Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\SlideTranslation\\>\\:\\:remove\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: src/Entity/Slide.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of method Doctrine\\\\Common\\\\Collections\\\\Collection\\<int,Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\SlideTranslation\\>\\:\\:set\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: src/Entity/Slide.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of method Doctrine\\\\Common\\\\Collections\\\\ReadableCollection\\<int,Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\SlideTranslation\\>\\:\\:containsKey\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: src/Entity/Slide.php
+
+		-
+			message: "#^Return type \\(Doctrine\\\\Common\\\\Collections\\\\Collection\\<int, Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\SlideTranslation\\>\\) of method Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\Slide\\:\\:getTranslations\\(\\) should be compatible with return type \\(Doctrine\\\\Common\\\\Collections\\\\Collection\\<\\(int\\|string\\), Sylius\\\\Resource\\\\Model\\\\TranslationInterface\\>\\) of method Sylius\\\\Resource\\\\Model\\\\TranslatableInterface\\:\\:getTranslations\\(\\)$#"
+			count: 1
+			path: src/Entity/Slide.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Sylius\\\\Resource\\\\Model\\\\TranslationInterface\\. Use \\-\\> instead\\.$#"
+			count: 3
+			path: src/Entity/Slide.php
+
+		-
+			message: "#^Call to an undefined method Sylius\\\\Resource\\\\Model\\\\TranslationInterface\\:\\:getName\\(\\)\\.$#"
+			count: 1
+			path: src/Entity/Slider.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of method Doctrine\\\\Common\\\\Collections\\\\Collection\\<int,Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\SliderTranslation\\>\\:\\:remove\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: src/Entity/Slider.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of method Doctrine\\\\Common\\\\Collections\\\\Collection\\<int,Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\SliderTranslation\\>\\:\\:set\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: src/Entity/Slider.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of method Doctrine\\\\Common\\\\Collections\\\\ReadableCollection\\<int,Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\SliderTranslation\\>\\:\\:containsKey\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: src/Entity/Slider.php
+
+		-
+			message: "#^Return type \\(Doctrine\\\\Common\\\\Collections\\\\Collection\\<int, Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\SliderTranslation\\>\\) of method Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\Slider\\:\\:getTranslations\\(\\) should be compatible with return type \\(Doctrine\\\\Common\\\\Collections\\\\Collection\\<\\(int\\|string\\), Sylius\\\\Resource\\\\Model\\\\TranslationInterface\\>\\) of method Sylius\\\\Resource\\\\Model\\\\TranslatableInterface\\:\\:getTranslations\\(\\)$#"
+			count: 1
+			path: src/Entity/Slider.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type Sylius\\\\Resource\\\\Model\\\\TranslationInterface\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: src/Entity/Slider.php
+
+		-
+			message: "#^Class Vanssa\\\\SyliusSliderPlugin\\\\Form\\\\DataTransformer\\\\JsonArrayTransformer implements generic interface Symfony\\\\Component\\\\Form\\\\DataTransformerInterface but does not specify its types\\: TValue, TTransformedValue$#"
+			count: 1
+			path: src/Form/DataTransformer/JsonArrayTransformer.php
+
+		-
+			message: "#^Cannot access offset 'allowedSwatches' on mixed\\.$#"
+			count: 1
+			path: src/Form/Type/ColorPickerType.php
+
+		-
+			message: "#^Cannot access offset 'defaultRepresentati…' on mixed\\.$#"
+			count: 2
+			path: src/Form/Type/ColorPickerType.php
+
+		-
+			message: "#^Cannot access offset 'onlyPredefinedSwatc…' on mixed\\.$#"
+			count: 1
+			path: src/Form/Type/ColorPickerType.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 2
+			path: src/Form/Type/ColorPickerType.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/Form/Type/Settings/AutoplaySettingsType.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 3
+			path: src/Form/Type/Settings/SlideResponsiveBreakpointSettingsType.php
+
+		-
+			message: "#^Parameter \\#1 \\$values of static method Vanssa\\\\SyliusSliderPlugin\\\\Form\\\\Type\\\\Settings\\\\SlideResponsiveBreakpointSettingsType\\:\\:contentHorizontalChoices\\(\\) expects array\\<int, string\\>, array\\<int, bool\\|float\\|int\\|string\\> given\\.$#"
+			count: 1
+			path: src/Form/Type/Settings/SlideResponsiveBreakpointSettingsType.php
+
+		-
+			message: "#^Parameter \\#1 \\$values of static method Vanssa\\\\SyliusSliderPlugin\\\\Form\\\\Type\\\\Settings\\\\SlideResponsiveBreakpointSettingsType\\:\\:contentVerticalChoices\\(\\) expects array\\<int, string\\>, array\\<int, bool\\|float\\|int\\|string\\> given\\.$#"
+			count: 1
+			path: src/Form/Type/Settings/SlideResponsiveBreakpointSettingsType.php
+
+		-
+			message: "#^Parameter \\#1 \\$values of static method Vanssa\\\\SyliusSliderPlugin\\\\Form\\\\Type\\\\Settings\\\\SlideResponsiveBreakpointSettingsType\\:\\:headlineChoices\\(\\) expects array\\<int, string\\>, array\\<int, bool\\|float\\|int\\|string\\> given\\.$#"
+			count: 1
+			path: src/Form/Type/Settings/SlideResponsiveBreakpointSettingsType.php
+
+		-
+			message: "#^Parameter \\#1 \\$values of static method Vanssa\\\\SyliusSliderPlugin\\\\Form\\\\Type\\\\Settings\\\\SlideResponsiveBreakpointSettingsType\\:\\:labeledChoices\\(\\) expects array\\<int, string\\>, array\\<int, bool\\|float\\|int\\|string\\> given\\.$#"
+			count: 8
+			path: src/Form/Type/Settings/SlideResponsiveBreakpointSettingsType.php
+
+		-
+			message: "#^Parameter \\#1 \\$values of static method Vanssa\\\\SyliusSliderPlugin\\\\Form\\\\Type\\\\Settings\\\\SlideResponsiveBreakpointSettingsType\\:\\:millisecondsChoices\\(\\) expects array\\<int, int\\>, array\\<int, bool\\|float\\|int\\|string\\> given\\.$#"
+			count: 2
+			path: src/Form/Type/Settings/SlideResponsiveBreakpointSettingsType.php
+
+		-
+			message: "#^Parameter \\#1 \\$values of static method Vanssa\\\\SyliusSliderPlugin\\\\Form\\\\Type\\\\Settings\\\\SlideResponsiveBreakpointSettingsType\\:\\:pixelChoices\\(\\) expects array\\<int, int\\>, array\\<int, bool\\|float\\|int\\|string\\> given\\.$#"
+			count: 2
+			path: src/Form/Type/Settings/SlideResponsiveBreakpointSettingsType.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 3
+			path: src/Form/Type/Settings/SlideSettingsType.php
+
+		-
+			message: "#^Parameter \\#1 \\$channelCodes of method Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\Slide\\:\\:setChannelCodes\\(\\) expects array\\<int, string\\>, array\\<int, string\\|null\\> given\\.$#"
+			count: 1
+			path: src/Form/Type/SlideType.php
+
+		-
+			message: "#^Parameter \\#1 \\$channelCodes of method Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\Slider\\:\\:setChannelCodes\\(\\) expects array\\<int, string\\>, array\\<int\\<0, max\\>, string\\|null\\> given\\.$#"
+			count: 1
+			path: src/Form/Type/SliderType.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between null and Knp\\\\Menu\\\\ItemInterface will always evaluate to false\\.$#"
+			count: 1
+			path: src/Menu/AdminMenuListener.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/Migrations/Version20260215123000.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/Migrations/Version20260215195500.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/Migrations/Version20260215220000.php
+
+		-
+			message: "#^Method Vanssa\\\\SyliusSliderPlugin\\\\Repository\\\\SlideRepository\\:\\:findEnabledOneByCode\\(\\) should return Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\Slide\\|null but returns mixed\\.$#"
+			count: 1
+			path: src/Repository/SlideRepository.php
+
+		-
+			message: "#^Method Vanssa\\\\SyliusSliderPlugin\\\\Repository\\\\SliderRepository\\:\\:findEnabledOneByCode\\(\\) should return Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\Slider\\|null but returns mixed\\.$#"
+			count: 1
+			path: src/Repository/SliderRepository.php
+
+		-
+			message: "#^Call to an undefined method Sylius\\\\Component\\\\Channel\\\\Model\\\\ChannelInterface\\:\\:getDefaultLocale\\(\\)\\.$#"
+			count: 1
+			path: src/Twig/Component/Shop/HomepageSliderComponent.php
+
+		-
+			message: "#^Parameter \\#2 \\$channelCode of method Vanssa\\\\SyliusSliderPlugin\\\\Repository\\\\SliderRepository\\:\\:findEnabledOneByCodeForChannel\\(\\) expects string, string\\|null given\\.$#"
+			count: 1
+			path: src/Twig/Component/Shop/HomepageSliderComponent.php
+
+		-
+			message: "#^Parameter \\#1 \\$channelCode of method Vanssa\\\\SyliusSliderPlugin\\\\Entity\\\\Slide\\:\\:isAvailableForChannel\\(\\) expects string, string\\|null given\\.$#"
+			count: 1
+			path: src/Twig/Component/Shop/SliderComponent.php
+
+		-
+			message: "#^Call to an undefined method Symfony\\\\Component\\\\BrowserKit\\\\AbstractBrowser\\:\\:loginUser\\(\\)\\.$#"
+			count: 1
+			path: tests/Behat/Context/Ui/Admin/SlideTranslationsContext.php

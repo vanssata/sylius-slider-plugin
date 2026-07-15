@@ -53,7 +53,7 @@ final class Version20260215195500 extends AbstractMigration
     private function indexExists(string $table, string $index): bool
     {
         return (int) $this->connection->fetchOne(
-            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND INDEX_NAME = :index",
+            'SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND INDEX_NAME = :index',
             ['table' => $table, 'index' => $index],
         ) > 0;
     }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Entity;
 
-use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,11 +11,12 @@ use Sylius\Resource\Model\ResourceInterface;
 use Sylius\Resource\Model\TranslatableInterface;
 use Sylius\Resource\Model\TranslationInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 
 #[ORM\Entity(repositoryClass: SliderRepository::class)]
 #[ORM\Table(
     name: 'vanssa_sylius_slider',
-    uniqueConstraints: [new ORM\UniqueConstraint(name: 'uniq_844454b177153098', columns: ['code'])]
+    uniqueConstraints: [new ORM\UniqueConstraint(name: 'uniq_844454b177153098', columns: ['code'])],
 )]
 #[UniqueEntity(fields: ['code'], message: 'This slider code is already in use.')]
 class Slider implements ResourceInterface, TranslatableInterface
@@ -35,22 +35,16 @@ class Slider implements ResourceInterface, TranslatableInterface
     #[ORM\Column(type: 'boolean')]
     private bool $enabled = true;
 
-    /**
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> */
     #[ORM\Column(type: 'json')]
     private array $settings = [];
 
-    /**
-     * @var Collection<int, Slide>
-     */
+    /** @var Collection<int, Slide> */
     #[ORM\ManyToMany(targetEntity: Slide::class, mappedBy: 'sliders', cascade: ['persist'])]
     #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
     private Collection $slides;
 
-    /**
-     * @var Collection<int, SliderTranslation>
-     */
+    /** @var Collection<int, SliderTranslation> */
     #[ORM\OneToMany(mappedBy: 'slider', targetEntity: SliderTranslation::class, cascade: ['persist', 'remove'], orphanRemoval: true, indexBy: 'localeCode')]
     private Collection $translations;
 
@@ -429,5 +423,4 @@ class Slider implements ResourceInterface, TranslatableInterface
 
         return null;
     }
-
 }

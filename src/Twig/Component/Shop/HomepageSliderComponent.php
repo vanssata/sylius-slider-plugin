@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Twig\Component\Shop;
 
-use Vanssa\SyliusSliderPlugin\Entity\Slider;
-use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Vanssa\SyliusSliderPlugin\Entity\Slider;
+use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 
 #[AsLiveComponent(name: 'vanssa_sylius_slider:shop:homepage_slider', template: '@VanssaSyliusSliderPlugin/components/vanssa_sylius_slider/shop/homepage_slider.html.twig')]
 final class HomepageSliderComponent

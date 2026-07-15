@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Vanssa\SyliusSliderPlugin\Twig\Component\Admin;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Vanssa\SyliusSliderPlugin\Entity\Slide;
-use Vanssa\SyliusSliderPlugin\Entity\Slider;
-use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
-use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Vanssa\SyliusSliderPlugin\Entity\Slide;
+use Vanssa\SyliusSliderPlugin\Entity\Slider;
+use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
+use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 
 #[AsLiveComponent(name: 'vanssa_sylius_slider:admin:slider_slides_preview', template: '@VanssaSyliusSliderPlugin/components/vanssa_sylius_slider/admin/slider_slides_preview.html.twig')]
 final class SliderSlidesPreviewComponent

@@ -15,9 +15,9 @@ final readonly class SliderExtension
 {
     public function __construct(
         private SliderRepository $sliderRepository,
-        private SlideRepository  $slideRepository,
-        private RouterInterface  $router,
-        private Environment      $twig,
+        private SlideRepository $slideRepository,
+        private RouterInterface $router,
+        private Environment $twig,
     ) {
     }
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Repository;
 
-use Vanssa\SyliusSliderPlugin\Entity\Slider;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
+use Vanssa\SyliusSliderPlugin\Entity\Slider;
 
 class SliderRepository extends EntityRepository
 {

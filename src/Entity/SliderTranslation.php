@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Vanssa\SyliusSliderPlugin\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Sylius\Resource\Model\TranslatableInterface;
 use Sylius\Resource\Model\ResourceInterface;
+use Sylius\Resource\Model\TranslatableInterface;
 use Sylius\Resource\Model\TranslationInterface;
 use Webmozart\Assert\Assert;
 
 #[ORM\Entity]
 #[ORM\Table(
     name: 'vanssa_sylius_slider_translation',
-    indexes: [new ORM\Index(name: 'idx_3f40008748d6cc1e', columns: ['slider_id'])]
+    indexes: [new ORM\Index(name: 'idx_3f40008748d6cc1e', columns: ['slider_id'])],
 )]
 #[ORM\UniqueConstraint(name: 'uniq_slider_locale', columns: ['slider_id', 'locale_code'])]
 class SliderTranslation implements ResourceInterface, TranslationInterface
@@ -33,9 +33,7 @@ class SliderTranslation implements ResourceInterface, TranslationInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $name = null;
 
-    /**
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> */
     #[ORM\Column(type: 'json')]
     private array $settings = [];
 

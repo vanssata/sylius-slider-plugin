@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Form\Type\Settings;
 
-use Vanssa\SyliusSliderPlugin\Preset\SettingsPresetProvider;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Vanssa\SyliusSliderPlugin\Preset\SettingsPresetProvider;
 
 final class SlideSettingsType extends AbstractType
 {

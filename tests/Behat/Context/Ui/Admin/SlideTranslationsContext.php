@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Vanssa\SyliusSliderPlugin\Behat\Context\Ui\Admin;
 
 use Behat\Behat\Context\Context;
-use Behat\MinkExtension\Context\RawMinkContext;
 use Behat\Mink\Driver\BrowserKitDriver;
+use Behat\MinkExtension\Context\RawMinkContext;
 use Doctrine\ORM\EntityManagerInterface;
 use Sylius\Component\Core\Model\AdminUser;
 use Sylius\Component\Locale\Model\Locale;

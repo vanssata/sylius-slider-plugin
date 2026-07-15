@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Twig\Component\Shop;
 
-use Vanssa\SyliusSliderPlugin\Entity\Slide;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
+use Vanssa\SyliusSliderPlugin\Entity\Slide;
 
 #[AsTwigComponent(name: 'vanssa_sylius_slider:shop:slide', template: '@VanssaSyliusSliderPlugin/components/vanssa_sylius_slider/shop/slide.html.twig')]
 final class SlideComponent
@@ -18,8 +18,6 @@ final class SlideComponent
 
     public ?string $fallbackLocaleCode = null;
 
-    /**
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> */
     public array $sliderSettings = [];
 }

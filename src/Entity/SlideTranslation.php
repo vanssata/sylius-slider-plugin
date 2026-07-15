@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Vanssa\SyliusSliderPlugin\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Sylius\Resource\Model\TranslatableInterface;
 use Sylius\Resource\Model\ResourceInterface;
+use Sylius\Resource\Model\TranslatableInterface;
 use Sylius\Resource\Model\TranslationInterface;
 use Webmozart\Assert\Assert;
 
 #[ORM\Entity]
 #[ORM\Table(
     name: 'vanssa_sylius_slide_translation',
-    indexes: [new ORM\Index(name: 'idx_95a50d9998e46b87', columns: ['slide_id'])]
+    indexes: [new ORM\Index(name: 'idx_95a50d9998e46b87', columns: ['slide_id'])],
 )]
 #[ORM\UniqueConstraint(name: 'uniq_slide_locale', columns: ['slide_id', 'locale_code'])]
 class SlideTranslation implements ResourceInterface, TranslationInterface
@@ -48,15 +48,11 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
     #[ORM\Column(name: 'slide_cover_tablet', type: 'string', length: 1024, nullable: true)]
     private ?string $slideCoverTablet = null;
 
-    /**
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> */
     #[ORM\Column(name: 'content_settings', type: 'json')]
     private array $contentSettings = [];
 
-    /**
-     * @var array<string, mixed>
-     */
+    /** @var array<string, mixed> */
     #[ORM\Column(name: 'slide_settings', type: 'json')]
     private array $slideSettings = [];
 

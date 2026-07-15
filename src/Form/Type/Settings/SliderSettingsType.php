@@ -209,7 +209,7 @@ final class SliderSettingsType extends AbstractType
                 'picker_swatches' => $accentSwatches,
                 'picker_options' => [
                     'defaultRepresentation' => 'RGBA',
-                     'picker_predefined_only' => true
+                     'picker_predefined_only' => true,
                 ],
                 'constraints' => [new Assert\CssColor()],
             ])
@@ -256,7 +256,7 @@ final class SliderSettingsType extends AbstractType
                 'picker_swatches' => $accentSwatches,
                 'picker_options' => [
                     'defaultRepresentation' => 'RGBA',
-                    'picker_predefined_only' => true
+                    'picker_predefined_only' => true,
                 ],
                 'constraints' => [new Assert\CssColor()],
             ])
@@ -266,7 +266,7 @@ final class SliderSettingsType extends AbstractType
                 'picker_swatches' => $accentSwatches,
                 'picker_options' => [
                     'defaultRepresentation' => 'RGBA',
-                     'picker_predefined_only' => true
+                     'picker_predefined_only' => true,
                 ],
                 'constraints' => [new Assert\CssColor()],
             ])

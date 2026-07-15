@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Form\Type\Translation;
 
-use Vanssa\SyliusSliderPlugin\Entity\SliderTranslation;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Vanssa\SyliusSliderPlugin\Entity\SliderTranslation;
 
 final class SliderTranslationType extends AbstractType
 {

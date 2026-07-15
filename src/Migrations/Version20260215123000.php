@@ -28,7 +28,7 @@ final class Version20260215123000 extends AbstractMigration
 
         if ($schemaManager->tablesExist(['vanssa_sylius_slide']) && $schemaManager->tablesExist(['vanssa_sylius_slider'])) {
             $constraintExists = (int) $this->connection->fetchOne(
-                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'vanssa_sylius_slide' AND CONSTRAINT_NAME = 'FK_876619A648D6CC1E'"
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'vanssa_sylius_slide' AND CONSTRAINT_NAME = 'FK_876619A648D6CC1E'",
             ) > 0;
 
             if ($constraintExists) {

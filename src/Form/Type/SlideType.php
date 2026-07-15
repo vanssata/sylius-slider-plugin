@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Form\Type;
 
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Vanssa\SyliusSliderPlugin\Entity\Slide;
-use Vanssa\SyliusSliderPlugin\Entity\Slider;
-use Vanssa\SyliusSliderPlugin\Form\Type\Translation\SlideTranslationType;
-use Vanssa\SyliusSliderPlugin\Service\UploadedMediaStorage;
-use Sylius\Component\Core\Model\Channel;
-use Sylius\Bundle\ResourceBundle\Form\Type\ResourceTranslationsType;
 use Doctrine\Persistence\ManagerRegistry;
+use Sylius\Bundle\ResourceBundle\Form\Type\ResourceTranslationsType;
+use Sylius\Component\Core\Model\Channel;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -25,6 +20,10 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vanssa\SyliusSliderPlugin\Entity\Slide;
+use Vanssa\SyliusSliderPlugin\Entity\Slider;
+use Vanssa\SyliusSliderPlugin\Form\Type\Translation\SlideTranslationType;
+use Vanssa\SyliusSliderPlugin\Service\UploadedMediaStorage;
 
 final class SlideType extends AbstractType
 {
@@ -70,7 +69,7 @@ final class SlideType extends AbstractType
                 'choices' => [
                     'Yes' => true,
                     'No' => false,
-                ]
+                ],
             ])
             ->add('translations', ResourceTranslationsType::class, [
                 'entry_type' => SlideTranslationType::class,
@@ -178,5 +177,4 @@ final class SlideType extends AbstractType
             ],
         ]);
     }
-
 }

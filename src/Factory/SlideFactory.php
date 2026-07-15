@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Factory;
 
+use Sylius\Resource\Factory\FactoryInterface;
 use Vanssa\SyliusSliderPlugin\Entity\Slide;
 use Vanssa\SyliusSliderPlugin\Entity\Slider;
-use Sylius\Resource\Factory\FactoryInterface;
 
 /**
  * @implements FactoryInterface<Slide>

@@ -18,7 +18,6 @@ final class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('vanssa_sylius_slider');
         $rootNode = $treeBuilder->getRootNode();
         /** @var ArrayNodeDefinition $rootNode */
-
         $rootNode
             ->children()
                 ->arrayNode('presets')
