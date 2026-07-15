@@ -69,4 +69,69 @@ final class SliderManagementContext extends RawMinkContext implements Context
             throw new \RuntimeException(sprintf('Expected slide code "%s" not found in slider preview.', $slideCode));
         }
     }
+
+    /**
+     * @Given the slider :code is configured with :key set to :value
+     */
+    public function theSliderIsConfiguredWithSetTo(string $code, string $key, string $value): void
+    {
+        /** @var Slider|null $slider */
+        $slider = $this->entityManager->getRepository(Slider::class)->findOneBy(['code' => $code]);
+        if (null === $slider) {
+            throw new \RuntimeException(sprintf('Cannot find slider by code "%s".', $code));
+        }
+
+        $settings = $slider->getSettings();
+        $settings[$key] = match ($value) {
+            'true' => true,
+            'false' => false,
+            default => $value,
+        };
+        $slider->setSettings($settings);
+
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @Then the slider settings field :field should be present
+     */
+    public function theSliderSettingsFieldShouldBePresent(string $field): void
+    {
+        $element = $this->getSession()->getPage()->find('css', sprintf('[name*="[settings][%s]"]', $field));
+        if (null === $element) {
+            throw new \RuntimeException(sprintf('Slider settings field "%s" was not found on the page.', $field));
+        }
+    }
+
+    /**
+     * @Then the slider settings field :field should have selected value :value
+     */
+    public function theSliderSettingsFieldShouldHaveSelectedValue(string $field, string $value): void
+    {
+        $element = $this->getSession()->getPage()->find('css', sprintf('[name*="[settings][%s]"]', $field));
+        if (null === $element) {
+            throw new \RuntimeException(sprintf('Slider settings field "%s" was not found on the page.', $field));
+        }
+
+        $actual = $element->getValue();
+        if ($actual !== $value) {
+            throw new \RuntimeException(sprintf(
+                'Expected field "%s" to have value "%s", got "%s".',
+                $field,
+                $value,
+                is_scalar($actual) ? (string) $actual : get_debug_type($actual),
+            ));
+        }
+    }
+
+    /**
+     * @Then I should see the slider preview panel
+     */
+    public function iShouldSeeTheSliderPreviewPanel(): void
+    {
+        $panel = $this->getSession()->getPage()->find('css', '[data-controller~="vanssa-slider-preview-frame"]');
+        if (null === $panel) {
+            throw new \RuntimeException('Slider preview panel was not found on the page.');
+        }
+    }
 }

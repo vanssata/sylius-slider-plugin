@@ -4,8 +4,8 @@
 {% set parallax = settings.parallax|default({}) %}
 {% set parallaxStrength = parallax.strength|default('')|trim %}
 {% set showTitle = settings.showTitle|default(false) %}
-{% set showNavigation = settings.showNavigation|default(true) %}
-{% set showArrows = settings.showArrows|default(true) %}
+{% set showNavigation = settings.showNavigation ?? true %}
+{% set showArrows = settings.showArrows ?? true %}
 {% set cssClasses = settings.cssClasses|default('') %}
 {% set maxHeight = settings.maxHeight|default('')|trim %}
 {% set navigationIcon = settings.navigationIcon|default('chevron') %}
@@ -46,14 +46,14 @@
 {% set arrowsVerticalAlign = settings.arrowsVerticalAlign|default('center') %}
 {% set paginationPosition = settings.paginationPosition|default('bottom-inside') %}
 {% set paginationStyle = settings.paginationStyle|default('dots') %}
-{% set keyboardNavigation = settings.keyboardNavigation|default(true) %}
-{% set touchSwipe = settings.touchSwipe|default(true) %}
+{% set keyboardNavigation = settings.keyboardNavigation ?? true %}
+{% set touchSwipe = settings.touchSwipe ?? true %}
 {% set showProgressBar = settings.showProgressBar|default(false) and autoplay.enabled|default(autoplay.active|default(false)) %}
-{% set lazyLoadMedia = settings.lazyLoadMedia|default(true) %}
+{% set lazyLoadMedia = settings.lazyLoadMedia ?? true %}
 {% set sliderClasses = [
     'vanssa-slider',
     settings.overlay|default(false) ? 'vanssa-slider--overlay' : '',
-    settings.justifySlideHeight|default(true) ? 'vanssa-slider--justify-height' : '',
+    (settings.justifySlideHeight ?? true) ? 'vanssa-slider--justify-height' : '',
     parallaxStrength is not empty ? 'vanssa-slider--parallax' : '',
     maxHeight is not empty ? 'vanssa-slider--custom-max-height' : '',
     settings.containerWidth|default('content') == 'content' ? 'vanssa-slider--container-content' : 'vanssa-slider--container-full',
@@ -65,11 +65,11 @@
 {% set sliderOptions = {
     effect: settings.slideEffect|default('slide'),
     speed: settings.speed|default(400),
-    rewind: settings.rewind|default(true),
+    rewind: settings.rewind ?? true,
     autoplay: {
         enabled: autoplay.enabled|default(autoplay.active|default(false)),
         interval: autoplay.interval|default(5000),
-        pauseOnHover: autoplay.pauseOnHover|default(true)
+        pauseOnHover: autoplay.pauseOnHover ?? true
     },
     parallax: { strength: parallaxStrength },
     paginationShape: paginationShape,

@@ -59,6 +59,77 @@ final class SliderFrontendContext extends RawMinkContext implements Context
     }
 
     /**
+     * @Given slider :code has setting :key set to :value
+     */
+    public function sliderHasSettingSetTo(string $code, string $key, string $value): void
+    {
+        /** @var Slider|null $slider */
+        $slider = $this->entityManager->getRepository(Slider::class)->findOneBy(['code' => $code]);
+        if (null === $slider) {
+            throw new \RuntimeException(sprintf('Cannot find slider by code "%s".', $code));
+        }
+
+        $settings = $slider->getSettings();
+        $settings[$key] = self::coerceValue($value);
+        $slider->setSettings($settings);
+
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @Given slider :code has autoplay enabled
+     */
+    public function sliderHasAutoplayEnabled(string $code): void
+    {
+        /** @var Slider|null $slider */
+        $slider = $this->entityManager->getRepository(Slider::class)->findOneBy(['code' => $code]);
+        if (null === $slider) {
+            throw new \RuntimeException(sprintf('Cannot find slider by code "%s".', $code));
+        }
+
+        $settings = $slider->getSettings();
+        $settings['autoplay'] = ['enabled' => true, 'interval' => 3000, 'pauseOnHover' => false];
+        $slider->setSettings($settings);
+
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @Then slider stimulus options should include :key with value :value
+     */
+    public function sliderStimulusOptionsShouldIncludeWithValue(string $key, string $value): void
+    {
+        $options = $this->sliderOptionsAttribute();
+        $fragment = sprintf('"%s":%s', $key, json_encode(self::coerceValue($value), \JSON_THROW_ON_ERROR));
+
+        if (!str_contains($options, $fragment)) {
+            throw new \RuntimeException(sprintf('Fragment %s not found in slider Stimulus options: %s', $fragment, $options));
+        }
+    }
+
+    /**
+     * @Then I should see a lazy loaded slide image
+     */
+    public function iShouldSeeALazyLoadedSlideImage(): void
+    {
+        $page = $this->getSession()->getPage();
+        if (null === $page->find('css', '.vanssa-slide img[loading="lazy"]')) {
+            throw new \RuntimeException('No lazily loaded slide image was found.');
+        }
+    }
+
+    /**
+     * @Then I should see the autoplay progress bar
+     */
+    public function iShouldSeeTheAutoplayProgressBar(): void
+    {
+        $page = $this->getSession()->getPage();
+        if (null === $page->find('css', '.vanssa-slider__progress-bar')) {
+            throw new \RuntimeException('Autoplay progress bar was not found.');
+        }
+    }
+
+    /**
      * @Then I should see the storefront slider component
      */
     public function iShouldSeeTheStorefrontSliderComponent(): void
@@ -96,6 +167,14 @@ final class SliderFrontendContext extends RawMinkContext implements Context
      */
     public function sliderStimulusOptionsShouldIncludeParallaxStrength(string $strength): void
     {
+        $options = $this->sliderOptionsAttribute();
+        if (!str_contains($options, sprintf('"strength":"%s"', $strength))) {
+            throw new \RuntimeException(sprintf('Parallax strength "%s" not found in slider Stimulus options.', $strength));
+        }
+    }
+
+    private function sliderOptionsAttribute(): string
+    {
         $page = $this->getSession()->getPage();
         $slider = $page->find('css', 'section.vanssa-slider');
         if (null === $slider) {
@@ -103,8 +182,27 @@ final class SliderFrontendContext extends RawMinkContext implements Context
         }
 
         $options = $slider->getAttribute('data-vanssa-slider-options-value');
-        if (!is_string($options) || !str_contains($options, sprintf('"strength":"%s"', $strength))) {
-            throw new \RuntimeException(sprintf('Parallax strength "%s" not found in slider Stimulus options.', $strength));
+        if (!is_string($options)) {
+            throw new \RuntimeException('Slider Stimulus options attribute was not found.');
         }
+
+        return $options;
+    }
+
+    private static function coerceValue(string $value): bool|int|string
+    {
+        if ('true' === $value) {
+            return true;
+        }
+
+        if ('false' === $value) {
+            return false;
+        }
+
+        if (is_numeric($value) && (string) (int) $value === $value) {
+            return (int) $value;
+        }
+
+        return $value;
     }
 }

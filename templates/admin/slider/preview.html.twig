@@ -6,7 +6,12 @@
     <meta name="robots" content="noindex, nofollow">
     <title>{{ slider.localizedName(localeCode, fallbackLocaleCode) }} — {{ channel.name }} ({{ localeCode }})</title>
     {% for entrypoint in shopEntrypoints %}
-        {{ encore_entry_link_tags(entrypoint) }}
+        {% set entry_parts = entrypoint|split(':') %}
+        {% if entry_parts|length > 1 %}
+            {{ encore_entry_link_tags(entry_parts[1], null, entry_parts[0]) }}
+        {% else %}
+            {{ encore_entry_link_tags(entry_parts[0]) }}
+        {% endif %}
     {% endfor %}
     <style>
         body.vanssa-slider-preview-body {
@@ -23,7 +28,12 @@
     }) }}
 
     {% for entrypoint in shopEntrypoints %}
-        {{ encore_entry_script_tags(entrypoint) }}
+        {% set entry_parts = entrypoint|split(':') %}
+        {% if entry_parts|length > 1 %}
+            {{ encore_entry_script_tags(entry_parts[1], null, entry_parts[0]) }}
+        {% else %}
+            {{ encore_entry_script_tags(entry_parts[0]) }}
+        {% endif %}
     {% endfor %}
 </body>
 </html>
