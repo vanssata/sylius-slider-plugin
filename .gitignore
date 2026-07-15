@@ -21,3 +21,12 @@
 
 /tests/TestApplication/.env.local
 /tests/TestApplication/.env.*.local
+
+# Local AI tooling (kept out of git, functional on disk)
+/.claude/
+/.ai/
+/mate/
+/bin/codex
+/bin/codex.bat
+/mcp.json
+/.mcp.json
