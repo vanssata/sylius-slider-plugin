@@ -18,5 +18,11 @@
         <prototype namespace="Vanssa\SyliusSliderPlugin\" resource="../src/*" exclude="../src/{DependencyInjection,Entity,Factory,Migrations,VanssaSyliusSliderPlugin.php}" />
 
         <service id="Vanssa\SyliusSliderPlugin\Controller\Shop\SliderController" public="true" />
+
+        <service id="Vanssa\SyliusSliderPlugin\Controller\Admin\SliderPreviewController" public="true" />
+
+        <service id="Vanssa\SyliusSliderPlugin\Context\Admin\PreviewChannelContext">
+            <tag name="sylius.context.channel" priority="192" />
+        </service>
     </services>
 </container>

@@ -1,3 +1,14 @@
+vanssa_sylius_slider_admin_slider_preview:
+    path: /sliders/{id}/preview
+    methods: [GET]
+    requirements:
+        id: '\d+'
+    defaults:
+        _controller: Vanssa\SyliusSliderPlugin\Controller\Admin\SliderPreviewController
+        _sylius:
+            section: admin
+            permission: true
+
 vanssa_sylius_slider_admin_slide_create_for_slider:
     path: /slides/new/{sliderId}
     methods: [GET, POST]

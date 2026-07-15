@@ -2,6 +2,7 @@
 {% set responsive_id = responsive_id|default('slide-responsive') %}
 
 {% if responsive_form is not null %}
+    <div data-controller="vanssa-responsive-copy">
     <ul class="nav nav-pills mb-3" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" type="button" data-bs-toggle="tab" data-bs-target="#{{ responsive_id }}-desktop" role="tab">
@@ -24,6 +25,18 @@
         {% for breakpoint in ['desktop', 'tablet', 'mobile'] %}
             {% set bp = attribute(responsive_form, breakpoint) %}
             <div class="tab-pane fade {% if breakpoint == 'desktop' %}show active{% endif %}" id="{{ responsive_id }}-{{ breakpoint }}" role="tabpanel">
+                {% if breakpoint != 'desktop' %}
+                    <div class="d-flex justify-content-end mb-3">
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            data-action="vanssa-responsive-copy#copyFromDesktop"
+                            data-vanssa-responsive-copy-breakpoint-param="{{ breakpoint }}"
+                        >
+                            <i class="bi bi-copy me-1"></i> Copy from desktop
+                        </button>
+                    </div>
+                {% endif %}
                 <div class="row mb-3">
                     <div class="col-12 col-md-6">{{ form_row(bp.title, { attr: {'data-preview-field': 'title'} }) }}</div>
                     <div class="col-12 col-md-6">{{ form_row(bp.headlineElement, { attr: {'data-preview-field': 'headlineElement'} }) }}</div>
@@ -79,5 +92,6 @@
                 </div>
             </div>
         {% endfor %}
+    </div>
     </div>
 {% endif %}

@@ -20,6 +20,16 @@ final class Configuration implements ConfigurationInterface
         /** @var ArrayNodeDefinition $rootNode */
         $rootNode
             ->children()
+                ->arrayNode('preview')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->arrayNode('shop_entrypoints')
+                            ->info('Webpack Encore entrypoints included in the admin slider preview so it is styled like the storefront (channel theme).')
+                            ->scalarPrototype()->end()
+                            ->defaultValue(['app-shop-entry', 'plugin-shop-entry'])
+                        ->end()
+                    ->end()
+                ->end()
                 ->arrayNode('presets')
                     ->addDefaultsIfNotSet()
                     ->children()

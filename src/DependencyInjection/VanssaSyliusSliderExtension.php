@@ -21,6 +21,7 @@ final class VanssaSyliusSliderExtension extends AbstractResourceExtension implem
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
         $container->setParameter('vanssa_sylius_slider.presets', $config['presets']);
+        $container->setParameter('vanssa_sylius_slider.preview.shop_entrypoints', $config['preview']['shop_entrypoints']);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
 

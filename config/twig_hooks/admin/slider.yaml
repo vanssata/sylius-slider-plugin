@@ -69,6 +69,9 @@ sylius_twig_hooks:
             slides:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/slides.html.twig'
                 priority: 100
+            preview:
+                template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/preview.html.twig'
+                priority: 50
 
         'sylius_admin.slider.create.content.form.content.sections.general':
             default: { enabled: false }

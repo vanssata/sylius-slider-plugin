@@ -23,6 +23,14 @@
                 "autoimport": {
                     "@simonwep/pickr/dist/themes/classic.min.css": true
                 }
+            },
+            "responsive-copy": {
+                "enabled": true,
+                "fetch": "eager"
+            },
+            "slider-preview-frame": {
+                "enabled": true,
+                "fetch": "eager"
             }
         }
     },

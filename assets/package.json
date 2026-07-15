@@ -34,6 +34,18 @@
                 "name": "vanssa-rgba-color-picker",
                 "fetch": "eager",
                 "enabled": true
+            },
+            "responsive-copy": {
+                "main": "admin/controllers/responsive_copy_controller.js",
+                "name": "vanssa-responsive-copy",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "slider-preview-frame": {
+                "main": "admin/controllers/slider_preview_frame_controller.js",
+                "name": "vanssa-slider-preview-frame",
+                "fetch": "eager",
+                "enabled": true
             }
         }
     },
