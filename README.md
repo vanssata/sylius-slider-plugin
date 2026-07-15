@@ -14,18 +14,22 @@ A Sylius plugin for building and managing rich storefront sliders with:
 | Dependency | Version |
 | --- | --- |
 | PHP | `>= 8.3` |
-| Sylius | `^2.2` |
+| Sylius | `^2.1` |
 | Symfony | `^7.4` |
 | Node.js | `>= 20` |
 | Yarn | `>= 1.22` |
 
-## Installation in Sylius-Standard (2.2)
+## Installation in Sylius-Standard
 
 1. Install the package:
 
 ```bash
 composer require vanssa/sylius-slider-plugin
 ```
+
+If your project uses a Flex endpoint that serves this plugin's recipe (see
+[Flex Recipe](docs/FLEX_RECIPE.md)), steps 2–4 are performed automatically
+by Symfony Flex on `composer require`; continue with step 5.
 
 2. Enable the bundle (if not handled by your Flex recipe):
 
@@ -97,6 +101,14 @@ yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/as
         "enabled": true,
         "fetch": "eager"
       },
+      "responsive-copy": {
+        "enabled": true,
+        "fetch": "eager"
+      },
+      "slider-preview-frame": {
+        "enabled": true,
+        "fetch": "eager"
+      },
       "rgba-color-picker": {
         "enabled": true,
         "fetch": "eager",
@@ -146,6 +158,62 @@ Notes for Sylius-Standard:
 
 - Keep your existing controller entries (for example `@symfony/ux-live-component` and `@symfony/ux-autocomplete`) and only add the `@vanssa/sylius-slider-plugin` block.
 - If your project customizes webpack configs, ensure `assets/controllers.json` is the file passed to `enableStimulusBridge(...)`.
+
+## Upgrading with Rector
+
+The plugin ships a [Rector](https://getrector.com) upgrade set for projects
+migrating from pre-2.2 releases (the `Acme\SyliusSliderPlugin` namespace era):
+
+```bash
+vendor/bin/rector process src \
+    --config vendor/vanssa/sylius-slider-plugin/rector/sets/slider-plugin-2-2.php
+```
+
+`sylius/sylius-rector` is already part of this plugin's dev toolchain
+(`make rector` / `make rector-fix` inside this repository).
+
+## Slider Options Reference
+
+All options live on the slider (Admin → Sliders → edit → Settings) and are
+stored in the settings JSON — existing sliders keep working and fall back to
+the defaults below.
+
+| Option | Values | Default | Description |
+| --- | --- | --- | --- |
+| `arrowsPosition` | `overlay`, `outside`, `bottom` | `overlay` | Placement of the prev/next arrows |
+| `arrowsVerticalAlign` | `center`, `top`, `bottom` | `center` | Vertical alignment of overlay arrows |
+| `paginationPosition` | `bottom-inside`, `bottom-outside`, `top`, `left`, `right` | `bottom-inside` | Placement of the pagination indicators |
+| `paginationStyle` | `dots`, `lines`, `numbers` | `dots` | Indicator style |
+| `keyboardNavigation` | bool | `true` | Left/right arrow keys switch slides (slider is a focusable region) |
+| `touchSwipe` | bool | `true` | Swipe gestures on touch devices |
+| `showProgressBar` | bool | `false` | Autoplay progress bar (only with autoplay enabled; respects reduced motion) |
+| `lazyLoadMedia` | bool | `true` | `loading="lazy"` / `preload="none"` for non-first slides |
+
+Additionally: effects (`slide/fade/zoom/lift/flip`), speed, rewind, autoplay,
+parallax, arrow icon/size/colors/shadow and pagination shape/size/colors/shadow.
+Content blur ("blur on content") is configured **per slide and breakpoint**
+(Slide → Options → Effects: `backgroundBlurPreset`, `enableTextBlur`,
+`contentBlurStrength`).
+
+## Admin Slider Preview
+
+The slider edit page includes a live preview panel: pick a **channel** and a
+**language** first, then the slider renders in an iframe using the storefront
+styles of that channel (its theme assets), with a desktop / tablet / mobile
+resolution switcher.
+
+The preview page includes your storefront Webpack Encore entrypoints. If your
+project uses different build/entry names, configure them (format
+`"build:entry"` or `"entry"`):
+
+```yaml
+vanssa_sylius_slider:
+    preview:
+        shop_entrypoints:
+            - 'shop:shop-entry'
+            - 'app.shop:app-shop-entry'
+            - 'app.shop:plugin-shop-entry'
+```
 
 ## Preset Configuration
 
@@ -244,22 +312,32 @@ Load demo fixtures:
 bin/console sylius:fixtures:load --suite=vanssa_sylius_slider_demo -n
 ```
 
-This creates 3 sliders with shared and non-shared slides, including image and video examples.
+This creates 3 sliders with shared and non-shared slides, including real
+photo covers (desktop + mobile variants) and two video slides.
 
-Fixture media is shipped in:
+Fixture media (CC0 photos from Wikimedia Commons and generated video clips)
+is bundled with the plugin in:
 
-- `tests/TestApplication/public/media/fixtures/automotive`
+- `assets/fixtures/images` and `assets/fixtures/videos`
 
-License for fixture media:
+License and attribution for fixture media:
 
-- `tests/TestApplication/public/media/fixtures/automotive/LICENSE.md`
+- `assets/fixtures/LICENSE.md`
 
 ## Testing
 
-### Unit tests
+### PHPUnit (unit + functional)
 
 ```bash
-vendor/bin/phpunit
+vendor/bin/phpunit --testsuite=unit
+vendor/bin/phpunit --testsuite=functional   # needs the test database
+```
+
+### Static analysis & coding standard
+
+```bash
+vendor/bin/phpstan analyse -c phpstan.neon
+vendor/bin/ecs check
 ```
 
 ### Behat
@@ -288,4 +366,5 @@ For package maintainers:
 
 - Extension guide: `docs/EXTENDING.md`
 - Contribution guide: `docs/CONTRIBUTING.md`
-- Symfony Flex recipe scaffold: `docs/FLEX_RECIPE.md` and `flex/recipes/vanssa/sylius-slider-plugin/1.0`
+- Changelog: `CHANGELOG.md`
+- Symfony Flex recipe scaffold: `docs/FLEX_RECIPE.md` and `flex/recipes/vanssa/sylius-slider-plugin/2.2`
