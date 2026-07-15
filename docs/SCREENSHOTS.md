@@ -27,7 +27,9 @@ Path: `/admin/sliders/1/edit` (fixture slider: `homepage-main`)
 ![Admin slider edit](./screenshots/admin-slider-edit-homepage-main.png)
 
 The edit page includes the channel/language preview panel with a
-desktop/tablet/mobile resolution switcher.
+desktop/tablet/mobile resolution switcher:
+
+![Admin slider preview panel](./screenshots/admin-slider-preview-panel.png)
 
 ## Frontend: Slider usage
 
