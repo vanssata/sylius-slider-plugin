@@ -1,5 +1,7 @@
 {% set responsive_form = responsive_form|default(null) %}
 {% set responsive_id = responsive_id|default('slide-responsive') %}
+{# Skip the desktop title/description rows when they are already rendered elsewhere on the page. #}
+{% set skip_desktop_texts = skip_desktop_texts|default(false) %}
 
 {% if responsive_form is not null %}
     <div data-controller="vanssa-responsive-copy">
@@ -38,9 +40,13 @@
                     </div>
                 {% endif %}
                 <div class="row mb-3">
-                    <div class="col-12 col-md-6">{{ form_row(bp.title, { attr: {'data-preview-field': 'title'} }) }}</div>
+                    {% if not (skip_desktop_texts and breakpoint == 'desktop') %}
+                        <div class="col-12 col-md-6">{{ form_row(bp.title, { attr: {'data-preview-field': 'title'} }) }}</div>
+                    {% endif %}
                     <div class="col-12 col-md-6">{{ form_row(bp.headlineElement, { attr: {'data-preview-field': 'headlineElement'} }) }}</div>
-                    <div class="col-12">{{ form_row(bp.description, { attr: {'data-preview-field': 'description'} }) }}</div>
+                    {% if not (skip_desktop_texts and breakpoint == 'desktop') %}
+                        <div class="col-12">{{ form_row(bp.description, { attr: {'data-preview-field': 'description'} }) }}</div>
+                    {% endif %}
                     <div class="col-12 col-md-4">{{ form_row(bp.headlineFontSize, { attr: {'data-preview-field': 'headlineFontSize'} }) }}</div>
                     <div class="col-12 col-md-4">{{ form_row(bp.descriptionFontSize, { attr: {'data-preview-field': 'descriptionFontSize'} }) }}</div>
                     <div class="col-12 col-md-4">{{ form_row(bp.buttonFontSize, { attr: {'data-preview-field': 'buttonFontSize'} }) }}</div>

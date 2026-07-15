@@ -16,10 +16,8 @@
                 <img class="vanssa-slide-preview__media" src="{{ preview_cover }}" alt="">
             {% endif %}
             <div class="vanssa-slide-preview__content is-pos-x-start is-pos-y-bottom" {{ stimulus_target('vanssa-slide-preview', 'previewBox') }}>
-                <div class="vanssa-slide-preview__heading" {{ stimulus_target('vanssa-slide-preview', 'previewHeading') }}>Sample H3</div>
-                <p class="vanssa-slide-preview__description" {{ stimulus_target('vanssa-slide-preview', 'previewDescription') }}>
-                    This preview reflects content alignment, colors, blur and spacing settings.
-                </p>
+                <div class="vanssa-slide-preview__heading d-none" {{ stimulus_target('vanssa-slide-preview', 'previewHeading') }}></div>
+                <p class="vanssa-slide-preview__description d-none" {{ stimulus_target('vanssa-slide-preview', 'previewDescription') }}></p>
             </div>
         </div>
     </div>

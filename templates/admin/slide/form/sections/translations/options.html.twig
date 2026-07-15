@@ -1,48 +1,71 @@
 {% set form = hookable_metadata.context.form %}
+{% set translation = form.vars.data %}
+{% set slide = translation is not null ? translation.translatable : null %}
 
-<div class="col-12"><hr></div>
-<div class="col-12" {{ stimulus_controller('vanssa-slide-preview') }}>
-    <div class="accordion" id="slide-translation-options-accordion">
-        <div class="accordion-item">
-            <h3 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#slide-translation-options-responsive">
-                    <i class="bi bi-laptop me-1"></i> Responsive
-                </button>
-            </h3>
-            <div id="slide-translation-options-responsive" class="accordion-collapse collapse show" data-bs-parent="#slide-translation-options-accordion">
-                <div class="accordion-body">
-                    {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_responsive_settings.html.twig' with {
-                        responsive_form: form.settings.responsive,
-                        responsive_id: form.vars.id ~ '-responsive'
-                    } %}
+<div class="col-12" data-controller="slider-settings vanssa-slide-preview">
+    {# Translated texts — always applied for this locale, no override needed. #}
+    <div class="row">
+        <div class="col-12">{{ form_row(form.name) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.settings.responsive.desktop.title, { label: 'Title', attr: {'data-preview-field': 'title'} }) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.settings.responsive.desktop.description, { label: 'Content', attr: {'data-preview-field': 'description'} }) }}</div>
+    </div>
 
-                    <div class="row mt-3">
-                        <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with {
-                            slide: form.vars.data is not null ? form.vars.data.translatable : null
-                        } %}</div>
-                    </div>
-                </div>
-            </div>
+    <hr>
+
+    {# Button / link override #}
+    <div class="row">
+        <div class="col-12">{{ form_row(form.addButton) }}</div>
+    </div>
+    <div class="row" data-slider-settings-button-only>
+        <div class="col-12 col-md-6">{{ form_row(form.buttonLabel) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.url) }}</div>
+    </div>
+
+    <hr>
+
+    {# Media override #}
+    <div class="row">
+        <div class="col-12">{{ form_row(form.overrideMedia) }}</div>
+    </div>
+    <div class="row" data-slider-settings-media-override-only>
+        <div class="col-12 col-md-4">
+            {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                field: form.slideCoverFile,
+                image_path: translation ? translation.slideCover : null,
+                preview_id: form.vars.id ~ '-desktop-preview'
+            } %}
         </div>
-        <div class="accordion-item">
-            <h3 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#slide-translation-options-linking">
-                    {{ 'sylius.ui.link'|trans }}
-                </button>
-            </h3>
-            <div id="slide-translation-options-linking" class="accordion-collapse collapse" data-bs-parent="#slide-translation-options-accordion">
-                <div class="accordion-body row">
-                    <div class="col-12 col-md-6">{{ form_row(form.buttonLabel) }}</div>
-                    <div class="col-12 col-md-6">{{ form_row(form.url) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.type) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonAppearance) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonSize) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonPosition) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.overlay) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.openExternal) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.showProductFocusImage) }}</div>
-                </div>
-            </div>
+        <div class="col-12 col-md-4">
+            {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                field: form.slideCoverMobileFile,
+                image_path: translation ? translation.slideCoverMobile : null,
+                preview_id: form.vars.id ~ '-mobile-preview'
+            } %}
+        </div>
+        <div class="col-12 col-md-4">
+            {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                field: form.slideCoverTabletFile,
+                image_path: translation ? translation.slideCoverTablet : null,
+                preview_id: form.vars.id ~ '-tablet-preview'
+            } %}
+        </div>
+    </div>
+
+    <hr>
+
+    {# Display settings override (layout, heading tag, colors, effects) #}
+    <div class="row">
+        <div class="col-12">{{ form_row(form.overrideSettings) }}</div>
+    </div>
+    <div data-slider-settings-settings-override-only>
+        {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_responsive_settings.html.twig' with {
+            responsive_form: form.settings.responsive,
+            responsive_id: form.vars.id ~ '-responsive',
+            skip_desktop_texts: true
+        } %}
+
+        <div class="row mt-3">
+            <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with { slide: slide } %}</div>
         </div>
     </div>
 </div>

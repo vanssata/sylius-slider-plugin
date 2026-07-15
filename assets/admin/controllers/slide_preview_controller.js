@@ -68,13 +68,15 @@ export default class extends Controller {
         if (this.hasPreviewHeadingTarget) {
             this.previewHeadingTarget.style.color = headingColor || '';
             this.previewHeadingTarget.style.fontSize = headlineFontSize || '';
-            this.previewHeadingTarget.textContent = title || `Sample ${headingElement.toUpperCase()}`;
+            this.previewHeadingTarget.textContent = title;
+            this.previewHeadingTarget.classList.toggle('d-none', title === '');
         }
 
         if (this.hasPreviewDescriptionTarget) {
             this.previewDescriptionTarget.style.color = descriptionColor || '';
             this.previewDescriptionTarget.style.fontSize = descriptionFontSize || '';
-            this.previewDescriptionTarget.textContent = descriptionText || 'This preview reflects content alignment, colors, blur and spacing settings.';
+            this.previewDescriptionTarget.textContent = descriptionText;
+            this.previewDescriptionTarget.classList.toggle('d-none', descriptionText === '');
         }
     }
 

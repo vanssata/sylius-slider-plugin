@@ -9,6 +9,7 @@ use Sylius\Bundle\ResourceBundle\Form\Type\ResourceTranslationsType;
 use Sylius\Component\Core\Model\Channel;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -22,6 +23,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vanssa\SyliusSliderPlugin\Entity\Slide;
 use Vanssa\SyliusSliderPlugin\Entity\Slider;
+use Vanssa\SyliusSliderPlugin\Form\Type\Settings\SlideSettingsType;
 use Vanssa\SyliusSliderPlugin\Form\Type\Translation\SlideTranslationType;
 use Vanssa\SyliusSliderPlugin\Service\UploadedMediaStorage;
 
@@ -71,6 +73,33 @@ final class SlideType extends AbstractType
                     'No' => false,
                 ],
             ])
+            ->add('settings', SlideSettingsType::class, [
+                'required' => false,
+                'property_path' => 'slideSettings',
+            ])
+            ->add('addButton', CheckboxType::class, [
+                'required' => false,
+                'mapped' => false,
+                'label' => 'Add button/link',
+                'help' => 'Show a button or link on this slide.',
+                'attr' => [
+                    'data-slider-settings-target' => 'addButton',
+                    'data-action' => 'slider-settings#refresh',
+                ],
+            ])
+            ->add('buttonLabel', TextType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length(['max' => 255]),
+                ],
+            ])
+            ->add('url', TextType::class, [
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length(['max' => 1024]),
+                    new Assert\Url(),
+                ],
+            ])
             ->add('translations', ResourceTranslationsType::class, [
                 'entry_type' => SlideTranslationType::class,
                 'label' => false,
@@ -85,6 +114,10 @@ final class SlideType extends AbstractType
             }
 
             $this->addCodeField($event->getForm(), null !== $slide->getId());
+
+            $event->getForm()->get('addButton')->setData(
+                null !== $slide->getButtonLabel() || null !== $slide->getUrl(),
+            );
 
             $codes = $slide->getChannelCodes();
             if ([] === $codes) {
@@ -117,6 +150,11 @@ final class SlideType extends AbstractType
 
             if ('' === trim($slide->getName())) {
                 $slide->setName($slide->getCode());
+            }
+
+            if (true !== $form->get('addButton')->getData()) {
+                $slide->setButtonLabel(null);
+                $slide->setUrl(null);
             }
 
             /** @var UploadedFile|null $cover */

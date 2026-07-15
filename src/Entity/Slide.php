@@ -184,7 +184,11 @@ class Slide implements ResourceInterface, TranslatableInterface
 
     public function getLocalizedButtonLabel(string $locale, ?string $fallbackLocale = null): ?string
     {
-        return $this->getTranslation($locale, $fallbackLocale)?->getButtonLabel() ?: $this->buttonLabel;
+        return $this->resolveLocalizedValue(
+            $locale,
+            $fallbackLocale,
+            static fn (SlideTranslation $translation): ?string => $translation->isButtonOverrideEnabled() ? $translation->getButtonLabel() : null,
+        ) ?? $this->buttonLabel;
     }
 
     public function getUrl(): ?string
@@ -199,7 +203,11 @@ class Slide implements ResourceInterface, TranslatableInterface
 
     public function getLocalizedUrl(string $locale, ?string $fallbackLocale = null): ?string
     {
-        return $this->getTranslation($locale, $fallbackLocale)?->getUrl() ?: $this->url;
+        return $this->resolveLocalizedValue(
+            $locale,
+            $fallbackLocale,
+            static fn (SlideTranslation $translation): ?string => $translation->isButtonOverrideEnabled() ? $translation->getUrl() : null,
+        ) ?? $this->url;
     }
 
     public function getProductCode(): ?string
@@ -224,7 +232,11 @@ class Slide implements ResourceInterface, TranslatableInterface
 
     public function getLocalizedSlideCover(string $locale, ?string $fallbackLocale = null): ?string
     {
-        return $this->slideCover;
+        return $this->resolveLocalizedValue(
+            $locale,
+            $fallbackLocale,
+            static fn (SlideTranslation $translation): ?string => $translation->isMediaOverrideEnabled() ? $translation->getSlideCover() : null,
+        ) ?? $this->slideCover;
     }
 
     public function getSlideCoverMobile(): ?string
@@ -239,7 +251,11 @@ class Slide implements ResourceInterface, TranslatableInterface
 
     public function getLocalizedSlideCoverMobile(string $locale, ?string $fallbackLocale = null): ?string
     {
-        return $this->slideCoverMobile;
+        return $this->resolveLocalizedValue(
+            $locale,
+            $fallbackLocale,
+            static fn (SlideTranslation $translation): ?string => $translation->isMediaOverrideEnabled() ? $translation->getSlideCoverMobile() : null,
+        ) ?? $this->slideCoverMobile;
     }
 
     public function getSlideCoverTablet(): ?string
@@ -254,7 +270,11 @@ class Slide implements ResourceInterface, TranslatableInterface
 
     public function getLocalizedSlideCoverTablet(string $locale, ?string $fallbackLocale = null): ?string
     {
-        return $this->slideCoverTablet;
+        return $this->resolveLocalizedValue(
+            $locale,
+            $fallbackLocale,
+            static fn (SlideTranslation $translation): ?string => $translation->isMediaOverrideEnabled() ? $translation->getSlideCoverTablet() : null,
+        ) ?? $this->slideCoverTablet;
     }
 
     public function getSlideCoverVideo(): ?string
@@ -531,6 +551,35 @@ class Slide implements ResourceInterface, TranslatableInterface
     }
 
     /**
+     * Returns the first non-empty value produced by $resolver for the
+     * current locale translation, then the fallback locale translation.
+     *
+     * @param callable(SlideTranslation): ?string $resolver
+     */
+    private function resolveLocalizedValue(string $locale, ?string $fallbackLocale, callable $resolver): ?string
+    {
+        $translation = $this->findTranslation($locale);
+        if (null !== $translation) {
+            $value = $resolver($translation);
+            if (null !== $value && '' !== $value) {
+                return $value;
+            }
+        }
+
+        if (null !== $fallbackLocale && $fallbackLocale !== $locale) {
+            $translation = $this->findTranslation($fallbackLocale);
+            if (null !== $translation) {
+                $value = $resolver($translation);
+                if (null !== $value && '' !== $value) {
+                    return $value;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @param array<string, mixed> $baseSettings
      * @param array<string, mixed> $localizedSettings
      *
@@ -582,9 +631,56 @@ class Slide implements ResourceInterface, TranslatableInterface
             return null;
         }
 
-        $settings = $contentSettings ? $translation->getContentSettings() : $translation->getSlideSettings();
+        if ($contentSettings) {
+            $settings = $translation->getContentSettings();
 
-        return [] === $settings ? null : $settings;
+            return [] === $settings ? null : $settings;
+        }
+
+        $settings = $translation->getSlideSettings();
+        if ([] === $settings) {
+            return null;
+        }
+
+        if ($translation->isSettingsOverrideEnabled()) {
+            return $settings;
+        }
+
+        // Without the settings override, only the translated texts
+        // (title/description per breakpoint) apply on top of the base slide.
+        return self::extractTextOverrides($settings);
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function extractTextOverrides(array $settings): ?array
+    {
+        $responsive = $settings['responsive'] ?? null;
+        if (!is_array($responsive)) {
+            return null;
+        }
+
+        $texts = ['responsive' => []];
+        foreach (['desktop', 'tablet', 'mobile'] as $breakpoint) {
+            $breakpointSettings = $responsive[$breakpoint] ?? null;
+            if (!is_array($breakpointSettings)) {
+                continue;
+            }
+
+            $breakpointTexts = array_filter(
+                array_intersect_key($breakpointSettings, ['title' => true, 'description' => true]),
+                static fn (mixed $value): bool => is_string($value) && '' !== $value,
+            );
+
+            if ([] !== $breakpointTexts) {
+                $texts['responsive'][$breakpoint] = $breakpointTexts;
+            }
+        }
+
+        return [] === $texts['responsive'] ? null : $texts;
     }
 
     /**

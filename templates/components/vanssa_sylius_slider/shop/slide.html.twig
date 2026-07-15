@@ -1,6 +1,6 @@
 {% set slideSettings = this.slide.localizedSlideSettings(this.localeCode, this.fallbackLocaleCode) %}
 {% set slideUrl = this.slide.localizedUrl(this.localeCode, this.fallbackLocaleCode) %}
-{% set buttonLabel = this.slide.localizedButtonLabel(this.localeCode, this.fallbackLocaleCode) ?: 'Learn more' %}
+{% set buttonLabel = this.slide.localizedButtonLabel(this.localeCode, this.fallbackLocaleCode) %}
 {% set linking = slideSettings.linking|default({}) %}
 {% set buttonAppearance = linking.buttonAppearance|default('primary') %}
 {% set buttonSize = linking.buttonSize|default('md') %}
@@ -190,7 +190,7 @@
                 </div>
             {% endif %}
 
-            {% if slideUrl and buttonPosition in contentButtonPositions %}
+            {% if slideUrl and buttonLabel and buttonPosition in contentButtonPositions %}
                 <div class="vanssa-slide__button-content vanssa-slide__button-content--{{ buttonPosition|replace({'content_': ''}) }}">
                     <a class="vanssa-slide__button vanssa-slide__button--{{ buttonAppearance }} vanssa-slide__button--{{ buttonSize }}" href="{{ slideUrl }}"{% if openExternal %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ buttonLabel }}</a>
                 </div>
@@ -198,7 +198,7 @@
         </div>
     </div>
 
-    {% if slideUrl and normalizedSliderButtonPosition is not null %}
+    {% if slideUrl and buttonLabel and normalizedSliderButtonPosition is not null %}
         <div class="vanssa-slide__button-slot vanssa-slide__button-slot--{{ normalizedSliderButtonPosition|replace({'_': '-'}) }}">
             <a class="vanssa-slide__button vanssa-slide__button--{{ buttonAppearance }} vanssa-slide__button--{{ buttonSize }}" href="{{ slideUrl }}"{% if openExternal %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ buttonLabel }}</a>
         </div>

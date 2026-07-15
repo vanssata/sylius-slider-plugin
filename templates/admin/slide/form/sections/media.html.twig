@@ -3,15 +3,17 @@
 
 <div class="card mb-3">
     <div class="card-header">
-        <h2 class="card-title">{{ 'sylius.ui.media'|trans }}</h2>
+        <h2 class="card-title">{{ 'sylius.ui.media'|trans }} &amp; {{ 'sylius.ui.settings'|trans }}</h2>
     </div>
-    <div class="card-body">
+    <div class="card-body" {{ stimulus_controller('vanssa-slide-preview') }}>
         <ul class="nav nav-tabs" role="tablist">
-            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#slide-media-desktop" type="button" role="tab">Desktop</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-mobile" type="button" role="tab">Mobile</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-tablet" type="button" role="tab">Tablet</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-video" type="button" role="tab">Video</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-presentation" type="button" role="tab">Presentation</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#slide-media-desktop" type="button" role="tab"><i class="bi bi-display me-1"></i> Desktop</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-mobile" type="button" role="tab"><i class="bi bi-phone me-1"></i> Mobile</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-tablet" type="button" role="tab"><i class="bi bi-tablet me-1"></i> Tablet</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-video" type="button" role="tab"><i class="bi bi-camera-video me-1"></i> Video</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-presentation" type="button" role="tab"><i class="bi bi-easel me-1"></i> Presentation</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-content" type="button" role="tab"><i class="bi bi-card-text me-1"></i> Content &amp; Layout</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-button" type="button" role="tab"><i class="bi bi-link-45deg me-1"></i> Button / Link</button></li>
         </ul>
 
         <div class="tab-content pt-4">
@@ -41,6 +43,32 @@
             </div>
             <div class="tab-pane fade" id="slide-media-presentation" role="tabpanel">
                 {{ form_row(form.presentationMediaFile) }}
+            </div>
+            <div class="tab-pane fade" id="slide-media-content" role="tabpanel">
+                {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_responsive_settings.html.twig' with {
+                    responsive_form: form.settings.responsive,
+                    responsive_id: 'slide-base-responsive-settings'
+                } %}
+
+                <div class="row mt-3">
+                    <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with { slide: form.vars.data } %}</div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="slide-media-button" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">{{ form_row(form.addButton) }}</div>
+                </div>
+                <div class="row" data-slider-settings-button-only>
+                    <div class="col-12 col-md-6">{{ form_row(form.buttonLabel) }}</div>
+                    <div class="col-12 col-md-6">{{ form_row(form.url) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.type) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonAppearance) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonSize) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonPosition) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.overlay) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.openExternal) }}</div>
+                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.showProductFocusImage) }}</div>
+                </div>
             </div>
         </div>
     </div>

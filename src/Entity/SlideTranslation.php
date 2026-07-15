@@ -201,6 +201,69 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
     }
 
     /**
+     * @param array<string, bool> $overrides
+     */
+    public function setOverrides(array $overrides): void
+    {
+        $this->slideSettings['overrides'] = [
+            'button' => (bool) ($overrides['button'] ?? false),
+            'media' => (bool) ($overrides['media'] ?? false),
+            'settings' => (bool) ($overrides['settings'] ?? false),
+        ];
+    }
+
+    /**
+     * Legacy translations (saved before override flags existed) keep their
+     * previous behavior: an override counts as enabled when it has data.
+     */
+    public function isButtonOverrideEnabled(): bool
+    {
+        $flag = $this->overrideFlag('button');
+        if (null !== $flag) {
+            return $flag;
+        }
+
+        return null !== $this->buttonLabel || null !== $this->url;
+    }
+
+    public function isMediaOverrideEnabled(): bool
+    {
+        $flag = $this->overrideFlag('media');
+        if (null !== $flag) {
+            return $flag;
+        }
+
+        return null !== $this->slideCover || null !== $this->slideCoverMobile || null !== $this->slideCoverTablet;
+    }
+
+    public function isSettingsOverrideEnabled(): bool
+    {
+        $flag = $this->overrideFlag('settings');
+        if (null !== $flag) {
+            return $flag;
+        }
+
+        foreach (['linking', 'responsive'] as $key) {
+            $section = $this->slideSettings[$key] ?? null;
+            if (is_array($section) && [] !== array_filter($section, static fn (mixed $value): bool => is_array($value) ? [] !== $value : null !== $value)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function overrideFlag(string $name): ?bool
+    {
+        $overrides = $this->slideSettings['overrides'] ?? null;
+        if (!is_array($overrides) || !array_key_exists($name, $overrides)) {
+            return null;
+        }
+
+        return (bool) $overrides[$name];
+    }
+
+    /**
      * @param array<string, mixed> $slideSettings
      *
      * @return array<string, mixed>
@@ -211,6 +274,14 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
 
         if (isset($slideSettings['linking']) && is_array($slideSettings['linking'])) {
             $normalized['linking'] = $slideSettings['linking'];
+        }
+
+        if (isset($slideSettings['overrides']) && is_array($slideSettings['overrides'])) {
+            $normalized['overrides'] = [
+                'button' => (bool) ($slideSettings['overrides']['button'] ?? false),
+                'media' => (bool) ($slideSettings['overrides']['media'] ?? false),
+                'settings' => (bool) ($slideSettings['overrides']['settings'] ?? false),
+            ];
         }
 
         $responsive = [];
