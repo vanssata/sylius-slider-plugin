@@ -11,12 +11,12 @@ use Vanssa\SyliusSliderPlugin\Entity\Slider;
 /**
  * @implements FactoryInterface<Slide>
  */
-final class SlideFactory implements FactoryInterface
+final readonly class SlideFactory implements FactoryInterface
 {
     /**
      * @param class-string<Slide> $className
      */
-    public function __construct(private readonly string $className)
+    public function __construct(private string $className)
     {
     }
 

@@ -79,7 +79,7 @@ final class ColorPickerType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $pickerOptions = $options['picker_options'];
-        $pickerOptions['defaultRepresentation'] = $pickerOptions['defaultRepresentation'] ?? $options['picker_default_representation'];
+        $pickerOptions['defaultRepresentation'] ??= $options['picker_default_representation'];
         $pickerOptions['onlyPredefinedSwatches'] = $options['picker_predefined_only'];
         $pickerOptions['allowedSwatches'] = $options['picker_swatches'];
 

@@ -16,17 +16,17 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * shop channel context is available. The preview controller stores the
  * requested channel code as a request attribute.
  */
-final class PreviewChannelContext implements ChannelContextInterface
+final readonly class PreviewChannelContext implements ChannelContextInterface
 {
-    public const REQUEST_ATTRIBUTE = '_vanssa_slider_preview_channel';
+    public const string REQUEST_ATTRIBUTE = '_vanssa_slider_preview_channel';
 
     /**
      * @param ChannelRepositoryInterface<ChannelInterface> $channelRepository
      */
     public function __construct(
-        private readonly RequestStack $requestStack,
+        private RequestStack $requestStack,
         #[Autowire(service: 'sylius.repository.channel')]
-        private readonly ChannelRepositoryInterface $channelRepository,
+        private ChannelRepositoryInterface $channelRepository,
     ) {
     }
 

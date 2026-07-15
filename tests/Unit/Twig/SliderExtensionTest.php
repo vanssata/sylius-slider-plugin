@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Vanssa\SyliusSliderPlugin\Unit\Twig;
 
+use Twig\TwigFilter;
 use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
 use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 use Vanssa\SyliusSliderPlugin\Twig\SliderExtension;
@@ -41,7 +42,7 @@ final class SliderExtensionTest extends TestCase
     public function testItUsesRichEditorFilterWhenAvailable(): void
     {
         $twig = new Environment(new ArrayLoader());
-        $twig->addFilter(new \Twig\TwigFilter('monsieurbiz_richeditor_render_field', static fn (string $v): string => '<div class="rich">' . $v . '</div>', ['is_safe' => ['html']]));
+        $twig->addFilter(new TwigFilter('monsieurbiz_richeditor_render_field', static fn (string $v): string => '<div class="rich">' . $v . '</div>', ['is_safe' => ['html']]));
 
         $extension = new SliderExtension($this->sliderRepository, $this->slideRepository, $this->router, $twig);
 

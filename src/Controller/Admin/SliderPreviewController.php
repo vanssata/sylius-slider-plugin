@@ -15,19 +15,19 @@ use Vanssa\SyliusSliderPlugin\Context\Admin\PreviewChannelContext;
 use Vanssa\SyliusSliderPlugin\Entity\Slider;
 use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 
-final class SliderPreviewController
+final readonly class SliderPreviewController
 {
     /**
      * @param ChannelRepositoryInterface<ChannelInterface> $channelRepository
      * @param array<int, string> $shopEntrypoints
      */
     public function __construct(
-        private readonly SliderRepository $sliderRepository,
+        private SliderRepository $sliderRepository,
         #[Autowire(service: 'sylius.repository.channel')]
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly Environment $twig,
+        private ChannelRepositoryInterface $channelRepository,
+        private Environment $twig,
         #[Autowire(param: 'vanssa_sylius_slider.preview.shop_entrypoints')]
-        private readonly array $shopEntrypoints,
+        private array $shopEntrypoints,
     ) {
     }
 

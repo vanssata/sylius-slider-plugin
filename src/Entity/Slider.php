@@ -19,7 +19,7 @@ use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
     uniqueConstraints: [new ORM\UniqueConstraint(name: 'uniq_844454b177153098', columns: ['code'])],
 )]
 #[UniqueEntity(fields: ['code'], message: 'This slider code is already in use.')]
-class Slider implements ResourceInterface, TranslatableInterface
+class Slider implements ResourceInterface, TranslatableInterface, \Stringable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

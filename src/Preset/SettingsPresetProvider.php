@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Preset;
 
-final class SettingsPresetProvider
+final readonly class SettingsPresetProvider
 {
     /**
      * @param array<string, mixed> $sliderPresets
      */
     public function __construct(
-        private readonly array $sliderPresets,
+        private array $sliderPresets,
     ) {
     }
 

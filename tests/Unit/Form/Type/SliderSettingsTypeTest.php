@@ -138,8 +138,6 @@ final class SliderSettingsTypeTest extends TypeTestCase
     }
 
     /**
-     * @param mixed $input
-     *
      * @return array{strength: ?string}
      */
     private static function normalizeParallax(mixed $input): array
