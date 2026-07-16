@@ -57,22 +57,27 @@ final class SlideResponsiveBreakpointSettingsType extends AbstractType
             'rgba(255, 255, 255, 1)',
         ]);
 
+        if (true === $options['include_texts']) {
+            $builder
+                ->add('title', TextType::class, [
+                    'required' => false,
+                    'help' => 'Responsive title override for this breakpoint.',
+                    'constraints' => [new Assert\Length(['max' => 255])],
+                ])
+                ->add('description', TextareaType::class, [
+                    'required' => false,
+                    'help' => 'Responsive description override for this breakpoint.',
+                    'constraints' => [new Assert\Length(['max' => 65535])],
+                ])
+            ;
+        }
+
         $builder
             ->add('headlineElement', ChoiceType::class, [
                 'choices' => self::headlineChoices($headlineElementValues),
                 'required' => false,
                 'help' => 'Responsive headline tag override.',
                 'constraints' => [new Assert\Choice(['choices' => $headlineElementValues])],
-            ])
-            ->add('title', TextType::class, [
-                'required' => false,
-                'help' => 'Responsive title override for this breakpoint.',
-                'constraints' => [new Assert\Length(['max' => 255])],
-            ])
-            ->add('description', TextareaType::class, [
-                'required' => false,
-                'help' => 'Responsive description override for this breakpoint.',
-                'constraints' => [new Assert\Length(['max' => 65535])],
             ])
             ->add('contentHorizontalPosition', ChoiceType::class, [
                 'choices' => self::contentHorizontalChoices($horizontalValues),
@@ -231,7 +236,10 @@ final class SlideResponsiveBreakpointSettingsType extends AbstractType
             'data_class' => null,
             'empty_data' => static fn (): array => [],
             'allow_extra_fields' => true,
+            'include_texts' => true,
         ]);
+
+        $resolver->setAllowedTypes('include_texts', 'bool');
     }
 
     /**

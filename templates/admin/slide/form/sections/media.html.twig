@@ -19,11 +19,6 @@
                     </button>
                 </li>
             {% endfor %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-button" type="button" role="tab">
-                    <i class="bi bi-link-45deg me-1"></i> Button / Link
-                </button>
-            </li>
         </ul>
 
         <div class="tab-content pt-4">
@@ -66,29 +61,13 @@
                         <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-sliders me-1"></i> Layout settings</h4></div>
                         <div class="card-body">
                             {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_breakpoint_settings.html.twig' with {
-                                bp: attribute(form.settings.responsive, breakpoint.key)
+                                bp: attribute(form.settings.responsive, breakpoint.key),
+                                button_form: breakpoint.key == 'desktop' ? form : null
                             } %}
                         </div>
                     </div>
                 </div>
             {% endfor %}
-
-            <div class="tab-pane fade" id="slide-media-button" role="tabpanel">
-                <div class="row">
-                    <div class="col-12">{{ form_row(form.addButton) }}</div>
-                </div>
-                <div class="row" data-slider-settings-button-only>
-                    <div class="col-12 col-md-6">{{ form_row(form.buttonLabel) }}</div>
-                    <div class="col-12 col-md-6">{{ form_row(form.url) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.type) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonAppearance) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonSize) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.buttonPosition) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.overlay) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.openExternal) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(form.settings.linking.showProductFocusImage) }}</div>
-                </div>
-            </div>
         </div>
 
         <div class="row mt-3">

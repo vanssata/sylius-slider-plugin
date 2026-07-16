@@ -26,6 +26,7 @@ final class SlideSettingsType extends AbstractType
             ->add('responsive', SlideResponsiveSettingsType::class, [
                 'required' => false,
                 'help' => 'Device-specific overrides for slide settings.',
+                'include_texts' => $options['include_texts'],
             ])
         ;
     }
@@ -55,6 +56,9 @@ final class SlideSettingsType extends AbstractType
                 ],
             ],
             'allow_extra_fields' => true,
+            'include_texts' => true,
         ]);
+
+        $resolver->setAllowedTypes('include_texts', 'bool');
     }
 }

@@ -91,7 +91,9 @@ final class SlideTranslationType extends AbstractType
             ])
         ;
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
+        // Unmapped children must be populated in POST_SET_DATA — the data
+        // mapper resets them to their configured data right after PRE_SET_DATA.
+        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event): void {
             $translation = $event->getData();
             if (!$translation instanceof SlideTranslation) {
                 return;

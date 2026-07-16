@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Form\Type;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Persistence\ManagerRegistry;
+use Sylius\Bundle\ChannelBundle\Form\Type\ChannelChoiceType;
 use Sylius\Bundle\ResourceBundle\Form\Type\ResourceTranslationsType;
 use Sylius\Component\Core\Model\Channel;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -48,15 +50,13 @@ final class SlideType extends AbstractType
                 'autocomplete' => true,
                 'by_reference' => false,
             ])
-            ->add('channels', EntityType::class, [
-                'class' => Channel::class,
-                'choice_label' => 'name',
+            ->add('channels', ChannelChoiceType::class, [
                 'required' => false,
                 'multiple' => true,
+                'expanded' => true,
                 'mapped' => false,
                 'label' => 'Channels',
                 'help' => 'Leave empty to display this slide on every channel.',
-                'autocomplete' => true,
             ])
             ->add('slideCoverFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('slideCoverMobileFile', FileType::class, ['required' => false, 'mapped' => false])
@@ -77,6 +77,9 @@ final class SlideType extends AbstractType
             ->add('settings', SlideSettingsType::class, [
                 'required' => false,
                 'property_path' => 'slideSettings',
+                // Texts are translated per locale; the base form holds only
+                // display configuration.
+                'include_texts' => false,
             ])
             ->add('addButton', CheckboxType::class, [
                 'required' => false,
@@ -115,6 +118,15 @@ final class SlideType extends AbstractType
             }
 
             $this->addCodeField($event->getForm(), null !== $slide->getId());
+        });
+
+        // Unmapped children must be populated in POST_SET_DATA — the data
+        // mapper resets them to their configured data right after PRE_SET_DATA.
+        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event): void {
+            $slide = $event->getData();
+            if (!$slide instanceof Slide) {
+                return;
+            }
 
             $event->getForm()->get('addButton')->setData(
                 null !== $slide->getButtonLabel() || null !== $slide->getUrl(),
@@ -127,7 +139,7 @@ final class SlideType extends AbstractType
 
             $repository = $this->managerRegistry->getRepository(Channel::class);
             $channels = $repository->findBy(['code' => $codes]);
-            $event->getForm()->get('channels')->setData($channels);
+            $event->getForm()->get('channels')->setData(new ArrayCollection($channels));
         });
 
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event): void {

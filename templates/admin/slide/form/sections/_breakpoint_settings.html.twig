@@ -1,60 +1,128 @@
-{# Renders the layout settings of one responsive breakpoint form (`bp`). #}
+{# Renders the layout settings of one responsive breakpoint form (`bp`) as an accordion.
+   - skip_texts: hide the title/description rows (also skipped when the form has no text fields)
+   - button_form: when provided, renders the slide-level button/link fields as a group before "Layout" #}
 {% set skip_texts = skip_texts|default(false) %}
+{% set button_form = button_form|default(null) %}
+{% set has_texts = bp.title is defined and not skip_texts %}
+{% set accordion_id = bp.vars.id ~ '-groups' %}
 
-<div class="row mb-3">
-    {% if not skip_texts %}
-        <div class="col-12 col-md-6">{{ form_row(bp.title, { attr: {'data-preview-field': 'title'} }) }}</div>
+<div class="accordion" id="{{ accordion_id }}">
+    <div class="accordion-item">
+        <h4 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-texts">
+                <i class="bi bi-fonts me-1"></i> Texts &amp; Typography
+            </button>
+        </h4>
+        <div id="{{ accordion_id }}-texts" class="accordion-collapse collapse show" data-bs-parent="#{{ accordion_id }}">
+            <div class="accordion-body row">
+                {% if has_texts %}
+                    <div class="col-12 col-md-6">{{ form_row(bp.title, { attr: {'data-preview-field': 'title'} }) }}</div>
+                {% endif %}
+                <div class="col-12 col-md-6">{{ form_row(bp.headlineElement, { attr: {'data-preview-field': 'headlineElement'} }) }}</div>
+                {% if has_texts %}
+                    <div class="col-12">{{ form_row(bp.description, { attr: {'data-preview-field': 'description'} }) }}</div>
+                {% endif %}
+                <div class="col-12 col-md-4">{{ form_row(bp.headlineFontSize, { attr: {'data-preview-field': 'headlineFontSize'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.descriptionFontSize, { attr: {'data-preview-field': 'descriptionFontSize'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.buttonFontSize, { attr: {'data-preview-field': 'buttonFontSize'} }) }}</div>
+            </div>
+        </div>
+    </div>
+
+    {% if button_form is not null %}
+        <div class="accordion-item">
+            <h4 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-button">
+                    <i class="bi bi-link-45deg me-1"></i> Button / Link
+                </button>
+            </h4>
+            <div id="{{ accordion_id }}-button" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+                <div class="accordion-body">
+                    <div class="row">
+                        <div class="col-12">{{ form_row(button_form.addButton) }}</div>
+                    </div>
+                    <div class="row" data-slider-settings-button-only>
+                        <div class="col-12 col-md-6">{{ form_row(button_form.buttonLabel) }}</div>
+                        <div class="col-12 col-md-6">{{ form_row(button_form.url) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(button_form.settings.linking.type) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(button_form.settings.linking.buttonAppearance) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(button_form.settings.linking.buttonSize) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(button_form.settings.linking.buttonPosition) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(button_form.settings.linking.overlay) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(button_form.settings.linking.openExternal) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(button_form.settings.linking.showProductFocusImage) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     {% endif %}
-    <div class="col-12 col-md-6">{{ form_row(bp.headlineElement, { attr: {'data-preview-field': 'headlineElement'} }) }}</div>
-    {% if not skip_texts %}
-        <div class="col-12">{{ form_row(bp.description, { attr: {'data-preview-field': 'description'} }) }}</div>
-    {% endif %}
-    <div class="col-12 col-md-4">{{ form_row(bp.headlineFontSize, { attr: {'data-preview-field': 'headlineFontSize'} }) }}</div>
-    <div class="col-12 col-md-4">{{ form_row(bp.descriptionFontSize, { attr: {'data-preview-field': 'descriptionFontSize'} }) }}</div>
-    <div class="col-12 col-md-4">{{ form_row(bp.buttonFontSize, { attr: {'data-preview-field': 'buttonFontSize'} }) }}</div>
-</div>
 
-<div class="card mb-3">
-    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-layout-text-window-reverse me-1"></i> Layout</h4></div>
-    <div class="card-body row">
-        <div class="col-12 col-md-4">{{ form_row(bp.contentHorizontalPosition, { attr: {'data-preview-field': 'contentHorizontalPosition'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.contentVerticalPosition, { attr: {'data-preview-field': 'contentVerticalPosition'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.contentTextAlign, { attr: {'data-preview-field': 'contentTextAlign'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.contentPadding, { attr: {'data-preview-field': 'contentPadding'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.contentMargin, { attr: {'data-preview-field': 'contentMargin'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.borderRadius, { attr: {'data-preview-field': 'borderRadius'} }) }}</div>
-        <div class="col-12">{{ form_row(bp.customCssClass) }}</div>
+    <div class="accordion-item">
+        <h4 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-layout">
+                <i class="bi bi-layout-text-window-reverse me-1"></i> Layout
+            </button>
+        </h4>
+        <div id="{{ accordion_id }}-layout" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+            <div class="accordion-body row">
+                <div class="col-12 col-md-4">{{ form_row(bp.contentHorizontalPosition, { attr: {'data-preview-field': 'contentHorizontalPosition'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.contentVerticalPosition, { attr: {'data-preview-field': 'contentVerticalPosition'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.contentTextAlign, { attr: {'data-preview-field': 'contentTextAlign'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.contentPadding, { attr: {'data-preview-field': 'contentPadding'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.contentMargin, { attr: {'data-preview-field': 'contentMargin'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.borderRadius, { attr: {'data-preview-field': 'borderRadius'} }) }}</div>
+                <div class="col-12">{{ form_row(bp.customCssClass) }}</div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="card mb-3">
-    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-palette me-1"></i> Colors & Surface</h4></div>
-    <div class="card-body row">
-        <div class="col-12 col-md-4">{{ form_row(bp.textColor, { attr: {'data-preview-field': 'textColor'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.headlineColor, { attr: {'data-preview-field': 'headlineColor'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.descriptionColor, { attr: {'data-preview-field': 'descriptionColor'} }) }}</div>
-        <div class="col-12 col-md-6">{{ form_row(bp.backgroundColor, { attr: {'data-preview-field': 'backgroundColor'} }) }}</div>
-        <div class="col-12 col-md-6">{{ form_row(bp.mediaOverlayColor, { attr: {'data-preview-field': 'mediaOverlayColor'} }) }}</div>
+    <div class="accordion-item">
+        <h4 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-colors">
+                <i class="bi bi-palette me-1"></i> Colors &amp; Surface
+            </button>
+        </h4>
+        <div id="{{ accordion_id }}-colors" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+            <div class="accordion-body row">
+                <div class="col-12 col-md-4">{{ form_row(bp.textColor, { attr: {'data-preview-field': 'textColor'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.headlineColor, { attr: {'data-preview-field': 'headlineColor'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.descriptionColor, { attr: {'data-preview-field': 'descriptionColor'} }) }}</div>
+                <div class="col-12 col-md-6">{{ form_row(bp.backgroundColor, { attr: {'data-preview-field': 'backgroundColor'} }) }}</div>
+                <div class="col-12 col-md-6">{{ form_row(bp.mediaOverlayColor, { attr: {'data-preview-field': 'mediaOverlayColor'} }) }}</div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="card mb-3">
-    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-stars me-1"></i> Effects</h4></div>
-    <div class="card-body row">
-        <div class="col-12 col-md-4">{{ form_row(bp.contentAnimation, { attr: {'data-preview-field': 'contentAnimation'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.animationDuration, { attr: {'data-preview-field': 'animationDuration'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.animationDelay, { attr: {'data-preview-field': 'animationDelay'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.backgroundBlurPreset, { attr: {'data-preview-field': 'backgroundBlurPreset'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.enableTextBlur, { attr: {'data-preview-field': 'enableTextBlur'} }) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.contentBlurStrength, { attr: {'data-preview-field': 'contentBlurStrength'} }) }}</div>
+    <div class="accordion-item">
+        <h4 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-effects">
+                <i class="bi bi-stars me-1"></i> Effects
+            </button>
+        </h4>
+        <div id="{{ accordion_id }}-effects" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+            <div class="accordion-body row">
+                <div class="col-12 col-md-4">{{ form_row(bp.contentAnimation, { attr: {'data-preview-field': 'contentAnimation'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.animationDuration, { attr: {'data-preview-field': 'animationDuration'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.animationDelay, { attr: {'data-preview-field': 'animationDelay'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.backgroundBlurPreset, { attr: {'data-preview-field': 'backgroundBlurPreset'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.enableTextBlur, { attr: {'data-preview-field': 'enableTextBlur'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.contentBlurStrength, { attr: {'data-preview-field': 'contentBlurStrength'} }) }}</div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="card mb-0">
-    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-eye-slash me-1"></i> Visibility</h4></div>
-    <div class="card-body row">
-        <div class="col-12 col-md-4">{{ form_row(bp.hideTitle) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.hideDescription) }}</div>
-        <div class="col-12 col-md-4">{{ form_row(bp.hideButton) }}</div>
+    <div class="accordion-item">
+        <h4 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-visibility">
+                <i class="bi bi-eye-slash me-1"></i> Visibility
+            </button>
+        </h4>
+        <div id="{{ accordion_id }}-visibility" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+            <div class="accordion-body row">
+                <div class="col-12 col-md-4">{{ form_row(bp.hideTitle) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.hideDescription) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.hideButton) }}</div>
+            </div>
+        </div>
     </div>
 </div>
