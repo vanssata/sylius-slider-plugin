@@ -160,7 +160,9 @@
         {% set breakpointClasses = media.breakpoints|map(bp => 'vanssa-slide__media--on-' ~ bp)|join(' ') %}
         {% set allBreakpoints = media.breakpoints|length == 3 %}
         {% if media.type == 'video' %}
-            <video class="vanssa-slide__media {{ allBreakpoints ? '' : breakpointClasses }}" {% if this.sliderSettings.autoplay.enabled|default(this.sliderSettings.autoplay.active|default(false)) %}autoplay{% endif %} muted loop playsinline{% if this.lazyLoad %} preload="none"{% endif %}>
+            {# Playback is driven by the vanssa-slide-video controller: the
+               video runs only while its slide is visible in the viewport. #}
+            <video class="vanssa-slide__media {{ allBreakpoints ? '' : breakpointClasses }}" muted loop playsinline{% if this.lazyLoad %} preload="none"{% endif %} {{ stimulus_controller('vanssa-slide-video') }}>
                 <source src="{{ media.src }}">
             </video>
         {% else %}

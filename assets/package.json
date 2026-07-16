@@ -46,6 +46,12 @@
                 "name": "vanssa-slider-preview-frame",
                 "fetch": "eager",
                 "enabled": true
+            },
+            "slide-video": {
+                "main": "shop/controllers/slide_video_controller.js",
+                "name": "vanssa-slide-video",
+                "fetch": "eager",
+                "enabled": true
             }
         }
     },

@@ -18,6 +18,8 @@ export default class extends Controller {
         this.pointerUpBound = null;
         this.pointerCancelBound = null;
         this.swipeStart = null;
+        this.inView = false;
+        this.viewportObserver = null;
 
         if (this.totalSlides <= 0) {
             return;
@@ -28,7 +30,7 @@ export default class extends Controller {
         this.setupKeyboard();
         this.setupSwipe();
         this.applyCurrentSlide(0);
-        this.startAutoplay();
+        this.setupViewportObserver();
         this.initParallax();
 
         if (this.autoplayPauseOnHover()) {
@@ -48,9 +50,36 @@ export default class extends Controller {
             this.element.removeEventListener('mouseleave', this.startAutoplayBound);
         }
 
+        if (this.viewportObserver) {
+            this.viewportObserver.disconnect();
+            this.viewportObserver = null;
+        }
+
         this.teardownKeyboard();
         this.teardownSwipe();
         this.teardownParallax();
+    }
+
+    // Autoplay and content animations only run while the slider is actually
+    // visible; the is-in-view class is what triggers the content animations.
+    setupViewportObserver() {
+        this.viewportObserver = new IntersectionObserver((entries) => {
+            const isIntersecting = entries.some((entry) => entry.isIntersecting);
+            if (isIntersecting === this.inView) {
+                return;
+            }
+
+            this.inView = isIntersecting;
+            this.element.classList.toggle('is-in-view', isIntersecting);
+
+            if (isIntersecting) {
+                this.startAutoplay();
+            } else {
+                this.stopAutoplay();
+            }
+        }, { threshold: 0.2 });
+
+        this.viewportObserver.observe(this.element);
     }
 
     previous() {
@@ -237,7 +266,7 @@ export default class extends Controller {
     }
 
     startAutoplay() {
-        if (!this.autoplayEnabled() || this.totalSlides <= 1) {
+        if (!this.inView || !this.autoplayEnabled() || this.totalSlides <= 1) {
             return;
         }
 

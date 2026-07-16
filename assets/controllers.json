@@ -31,6 +31,10 @@
             "slider-preview-frame": {
                 "enabled": true,
                 "fetch": "eager"
+            },
+            "slide-video": {
+                "enabled": true,
+                "fetch": "eager"
             }
         }
     },

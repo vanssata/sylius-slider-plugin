@@ -342,7 +342,39 @@
             animation-delay: var(--vanssa-slide-animation-delay, 0ms);
         }
     }
+}
 
+// Inside a slider, content animations wait until the slider scrolls into
+// view (is-in-view, set by the vanssa-slider controller) and replay each
+// time a slide becomes active. Standalone slides (banner page) keep the
+// default animate-on-load behavior above.
+.vanssa-slider {
+    .vanssa-slide__content-box.is-anim-fade-up,
+    .vanssa-slide__content-box.is-anim-fade-right,
+    .vanssa-slide__content-box.is-anim-zoom-in {
+        animation: none;
+        opacity: 0;
+    }
+
+    &.is-in-view .vanssa-slide.is-active {
+        .vanssa-slide__content-box.is-anim-fade-up {
+            animation: vanssa-fade-up var(--vanssa-slide-animation-duration, 500ms) ease both;
+            animation-delay: var(--vanssa-slide-animation-delay, 0ms);
+        }
+
+        .vanssa-slide__content-box.is-anim-fade-right {
+            animation: vanssa-fade-right var(--vanssa-slide-animation-duration, 500ms) ease both;
+            animation-delay: var(--vanssa-slide-animation-delay, 0ms);
+        }
+
+        .vanssa-slide__content-box.is-anim-zoom-in {
+            animation: vanssa-zoom-in var(--vanssa-slide-animation-duration, 500ms) ease both;
+            animation-delay: var(--vanssa-slide-animation-delay, 0ms);
+        }
+    }
+}
+
+.vanssa-slide {
     &__headline {
         margin: 0 0 0.5rem;
         color: var(--vanssa-slide-headline-color, inherit);
