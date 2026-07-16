@@ -1,9 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['previewBox', 'previewHeading', 'previewDescription'];
+    static targets = ['previewBox', 'previewHeading', 'previewDescription', 'localeSelect', 'sizeButton', 'frame', 'media'];
 
     connect() {
+        this.breakpoint = 'desktop';
         this.refresh = this.refresh.bind(this);
         this.onShownTab = this.onShownTab.bind(this);
         this.scheduleRefresh = this.scheduleRefresh.bind(this);
@@ -31,14 +32,50 @@ export default class extends Controller {
         }
     }
 
+    // Resolution switcher (like the slider preview): resizes the preview
+    // frame, swaps the breakpoint media and re-reads that breakpoint's fields.
+    switchSize(event) {
+        this.breakpoint = event.params.breakpoint ?? 'desktop';
+
+        if (this.hasFrameTarget) {
+            this.frameTarget.style.maxWidth = event.params.width ?? '100%';
+        }
+
+        this.sizeButtonTargets.forEach((button) => {
+            button.classList.toggle('active', button === event.currentTarget);
+        });
+
+        this.mediaTargets.forEach((media) => {
+            media.classList.toggle('d-none', media.dataset.breakpoint !== this.breakpoint);
+        });
+
+        this.refresh();
+    }
+
+    previewLocale() {
+        if (!this.hasLocaleSelectTarget) {
+            return null;
+        }
+
+        const selected = this.localeSelectTarget.value;
+        if (selected !== '') {
+            return selected;
+        }
+
+        return this.hasFrameTarget ? (this.frameTarget.dataset.defaultLocale || null) : null;
+    }
+
+    defaultLocale() {
+        return this.hasFrameTarget ? (this.frameTarget.dataset.defaultLocale || null) : null;
+    }
+
     refresh() {
         if (!this.hasPreviewBoxTarget) {
             return;
         }
 
-        const title = this.getValue('title', '');
-        const descriptionText = this.getValue('description', '');
-        const headingElement = this.getValue('headlineElement', 'h3');
+        const title = this.getTextValue('title');
+        const descriptionText = this.getTextValue('description');
         const horizontal = this.normalizeHorizontal(this.getValue('contentHorizontalPosition', 'start'));
         const vertical = this.normalizeVertical(this.getValue('contentVerticalPosition', 'bottom'));
         const textAlign = this.getValue('contentTextAlign', 'left');
@@ -91,6 +128,45 @@ export default class extends Controller {
         return value === '' || value === null || value === undefined ? fallback : value;
     }
 
+    // Texts come from the translations of the previewed language; the default
+    // (fallback) language fills in when the chosen one has no text yet.
+    getTextValue(field) {
+        const locale = this.previewLocale();
+        if (locale === null) {
+            return this.getValue(field, '');
+        }
+
+        const localized = this.findTranslationField(field, locale);
+        if (localized && localized.value !== '') {
+            return localized.value;
+        }
+
+        const fallbackLocale = this.defaultLocale();
+        if (fallbackLocale && fallbackLocale !== locale) {
+            const fallback = this.findTranslationField(field, fallbackLocale);
+            if (fallback && fallback.value !== '') {
+                return fallback.value;
+            }
+        }
+
+        return '';
+    }
+
+    findTranslationField(field, locale) {
+        const candidates = [...document.querySelectorAll(`[name*="[translations][${locale}]"][data-preview-field="${field}"]`)];
+        if (candidates.length === 0) {
+            return null;
+        }
+
+        // Prefer the current breakpoint's override, then the desktop text.
+        const breakpointField = candidates.find((el) => el.name.includes(`[responsive][${this.breakpoint}]`) && el.value !== '');
+        if (breakpointField) {
+            return breakpointField;
+        }
+
+        return candidates.find((el) => el.name.includes('[responsive][desktop]')) ?? candidates[0];
+    }
+
     getCheckboxValue(field) {
         const element = this.findField(field);
 
@@ -98,6 +174,20 @@ export default class extends Controller {
     }
 
     findField(field) {
+        // With the resolution switcher: read the chosen breakpoint's field,
+        // falling back to the desktop value like the storefront does.
+        if (this.hasSizeButtonTarget) {
+            const scoped = this.element.querySelector(`[name*="[responsive][${this.breakpoint}]"][data-preview-field="${field}"]`);
+            if (scoped && scoped.value !== '' && !(scoped.type === 'checkbox' && !scoped.checked)) {
+                return scoped;
+            }
+
+            const desktop = this.element.querySelector(`[name*="[responsive][desktop]"][data-preview-field="${field}"]`);
+            if (desktop) {
+                return desktop;
+            }
+        }
+
         const activePane = this.element.querySelector('.tab-pane.active, .tab-pane.show');
         if (activePane) {
             const activeElement = activePane.querySelector(`[data-preview-field="${field}"]`);

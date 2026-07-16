@@ -1,8 +1,14 @@
 {% set form = hookable_metadata.context.form %}
 {% set translation = form.vars.data %}
 {% set slide = translation is not null ? translation.translatable : null %}
+{% set tabs_id = form.vars.id ~ '-media' %}
+{% set translation_breakpoints = [
+    { key: 'desktop', icon: 'bi-display', image_field: form.slideCoverFile, image_path: translation ? translation.slideCover : null, video_field: form.slideCoverVideoFile, video_path: translation ? translation.slideCoverVideo : null },
+    { key: 'mobile', icon: 'bi-phone', image_field: form.slideCoverMobileFile, image_path: translation ? translation.slideCoverMobile : null, video_field: form.slideCoverVideoMobileFile, video_path: translation ? translation.slideCoverVideoMobile : null },
+    { key: 'tablet', icon: 'bi-tablet', image_field: form.slideCoverTabletFile, image_path: translation ? translation.slideCoverTablet : null, video_field: form.slideCoverVideoTabletFile, video_path: translation ? translation.slideCoverVideoTablet : null },
+] %}
 
-<div class="col-12" data-controller="slider-settings vanssa-slide-preview">
+<div class="col-12" data-controller="slider-settings vanssa-slide-preview vanssa-responsive-copy">
     {# Translated texts — always applied for this locale, no override needed. #}
     <div class="row">
         <div class="col-12">{{ form_row(form.name) }}</div>
@@ -23,51 +29,73 @@
 
     <hr>
 
-    {# Media override #}
+    {# Media & display settings overrides, organized per breakpoint like the
+       main "Media & Settings" card. #}
     <div class="row">
-        <div class="col-12">{{ form_row(form.overrideMedia) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.overrideMedia) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.overrideSettings) }}</div>
     </div>
-    <div data-slider-settings-media-override-only>
-        {% set translation_media = [
-            { key: 'desktop', image_field: form.slideCoverFile, image_path: translation ? translation.slideCover : null, video_field: form.slideCoverVideoFile, video_path: translation ? translation.slideCoverVideo : null },
-            { key: 'mobile', image_field: form.slideCoverMobileFile, image_path: translation ? translation.slideCoverMobile : null, video_field: form.slideCoverVideoMobileFile, video_path: translation ? translation.slideCoverVideoMobile : null },
-            { key: 'tablet', image_field: form.slideCoverTabletFile, image_path: translation ? translation.slideCoverTablet : null, video_field: form.slideCoverVideoTabletFile, video_path: translation ? translation.slideCoverVideoTablet : null },
-        ] %}
-        {% for media in translation_media %}
-            <div class="row align-items-end">
-                <div class="col-12"><h4 class="h6 mt-2">{{ media.key|capitalize }}</h4></div>
-                <div class="col-12 col-md-6">
-                    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
-                        field: media.image_field,
-                        image_path: media.image_path,
-                        preview_id: form.vars.id ~ '-' ~ media.key ~ '-preview'
-                    } %}
+
+    <ul class="nav nav-tabs" role="tablist">
+        {% for breakpoint in translation_breakpoints %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link{% if loop.first %} active{% endif %}" data-bs-toggle="tab" data-bs-target="#{{ tabs_id }}-{{ breakpoint.key }}" type="button" role="tab">
+                    <i class="bi {{ breakpoint.icon }} me-1"></i> {{ breakpoint.key|capitalize }}
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="tab-content pt-4">
+        {% for breakpoint in translation_breakpoints %}
+            <div class="tab-pane fade{% if loop.first %} show active{% endif %}" id="{{ tabs_id }}-{{ breakpoint.key }}" role="tabpanel">
+                {% if breakpoint.key != 'desktop' %}
+                    <div class="alert alert-info d-flex justify-content-between align-items-center py-2">
+                        <span>Media and layout settings left empty fall back to the desktop version.</span>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            data-action="vanssa-responsive-copy#copyFromDesktop"
+                            data-vanssa-responsive-copy-breakpoint-param="{{ breakpoint.key }}"
+                        >
+                            <i class="bi bi-copy me-1"></i> Copy settings from desktop
+                        </button>
+                    </div>
+                {% endif %}
+
+                <div class="card mb-3 d-none" data-slider-settings-media-override-only>
+                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-image me-1"></i> {{ 'sylius.ui.media'|trans }}</h4></div>
+                    <div class="card-body row">
+                        <div class="col-12 col-md-6">
+                            {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                                field: breakpoint.image_field,
+                                image_path: breakpoint.image_path,
+                                preview_id: form.vars.id ~ '-' ~ breakpoint.key ~ '-preview'
+                            } %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {{ form_row(breakpoint.video_field, { label: 'Video', help: 'Optional video for the ' ~ breakpoint.key ~ ' version of this locale.' }) }}
+                            {% if breakpoint.video_path %}
+                                <div class="text-secondary small mt-1"><i class="bi bi-camera-video me-1"></i>{{ breakpoint.video_path }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <div class="col-12 col-md-6">
-                    {{ form_row(media.video_field, { label: 'Video', help: 'Optional video for the ' ~ media.key ~ ' version of this locale.' }) }}
-                    {% if media.video_path %}
-                        <div class="text-secondary small mt-1"><i class="bi bi-camera-video me-1"></i>{{ media.video_path }}</div>
-                    {% endif %}
+
+                <div class="card mb-0 d-none" data-slider-settings-settings-override-only>
+                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-sliders me-1"></i> Layout settings</h4></div>
+                    <div class="card-body">
+                        {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_breakpoint_settings.html.twig' with {
+                            bp: attribute(form.settings.responsive, breakpoint.key),
+                            skip_texts: breakpoint.key == 'desktop'
+                        } %}
+                    </div>
                 </div>
             </div>
         {% endfor %}
     </div>
 
-    <hr>
-
-    {# Display settings override (layout, heading tag, colors, effects) #}
-    <div class="row">
-        <div class="col-12">{{ form_row(form.overrideSettings) }}</div>
-    </div>
-    <div data-slider-settings-settings-override-only>
-        {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_responsive_settings.html.twig' with {
-            responsive_form: form.settings.responsive,
-            responsive_id: form.vars.id ~ '-responsive',
-            skip_desktop_texts: true
-        } %}
-
-        <div class="row mt-3">
-            <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with { slide: slide } %}</div>
-        </div>
+    <div class="row mt-3">
+        <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with { slide: slide } %}</div>
     </div>
 </div>

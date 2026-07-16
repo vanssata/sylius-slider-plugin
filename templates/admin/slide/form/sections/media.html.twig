@@ -70,8 +70,13 @@
             {% endfor %}
         </div>
 
+        {% set preview_locales = form.translations.children|keys %}
         <div class="row mt-3">
-            <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with { slide: form.vars.data } %}</div>
+            <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with {
+                slide: form.vars.data,
+                locales: preview_locales,
+                default_locale: app.request.locale in preview_locales ? app.request.locale : preview_locales|first
+            } %}</div>
         </div>
     </div>
 </div>
