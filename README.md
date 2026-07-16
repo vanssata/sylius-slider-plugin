@@ -3,11 +3,19 @@
 A Sylius plugin for building and managing rich storefront sliders with:
 
 - Slider and Slide admin management
-- Translatable slide content and settings
-- Image and video slide support
-- Symfony UX-based storefront rendering
+- Per-breakpoint media and layout settings (Desktop / Mobile / Tablet) with
+  image **and video** per breakpoint — empty breakpoints fall back to desktop
+- Translatable slide content with explicit per-locale overrides for texts,
+  media and display settings
+- Live admin previews: per-slide (language + resolution switcher) and
+  per-slider (channel theme, language and resolution)
+- Viewport-aware storefront: content animations start and videos play only
+  while the slider is visible
+- Symfony UX-based storefront rendering (Stimulus + Twig Components)
 - Twig Hooks integration for Sylius Admin/Shop
 - Optional integrations with Sylius CMS Plugin and Sylius Rich Editor Plugin
+
+![Storefront slider](docs/screenshots/frontend-slider-homepage-main.png)
 
 ## System Requirements
 
@@ -207,7 +215,10 @@ and media/display settings per locale via explicit checkboxes.
 The slider edit page includes a live preview panel: pick a **channel** and a
 **language** first, then the slider renders in an iframe using the storefront
 styles of that channel (its theme assets), with a desktop / tablet / mobile
-resolution switcher.
+resolution switcher. "Open in new tab" shows the preview standalone with an
+"Edit slider" shortcut back to the form.
+
+![Admin slider preview panel](docs/screenshots/admin-slider-preview-panel.png)
 
 The preview page includes your storefront Webpack Encore entrypoints. If your
 project uses different build/entry names, configure them (format
@@ -274,6 +285,8 @@ After installation, in admin you can manage:
 - `Sliders`: `/admin/sliders`
 - `Slides`: `/admin/slides`
 
+![Admin sliders list](docs/screenshots/admin-sliders-index.png)
+
 Typical flow:
 
 1. Create slides (media, translated text, styling/options).
@@ -281,7 +294,47 @@ Typical flow:
 3. Assign/reorder slides in slider edit page.
 4. Render slider in storefront by code.
 
+### Slide editing
+
+The "Media & Settings" card groups everything per breakpoint: each of the
+Desktop / Mobile / Tablet tabs carries its own cover image, optional video
+and layout settings accordion (texts & typography, button/link, layout,
+colors, effects, visibility). Mobile/Tablet values left empty fall back to
+the desktop version.
+
+![Slide media and settings per breakpoint](docs/screenshots/admin-slide-media-settings.png)
+
+The live preview below the form previews the slide with the selected
+language (falling back to the default language) and a desktop / tablet /
+mobile resolution switcher:
+
+![Slide live preview](docs/screenshots/admin-slide-live-preview.png)
+
+### Slide translations
+
+Each locale follows the same structure — Desktop / Mobile / Tablet tabs with
+Texts (always applied for the locale), plus media and display settings that
+are only overridden after enabling the corresponding checkbox:
+
+![Slide translations with per-locale overrides](docs/screenshots/admin-slide-translations.png)
+
+### Slider editing
+
+Slider settings are grouped into collapsible sections (layout & spacing,
+behavior, arrows & navigation, pagination, autoplay); dependent options hide
+while their parent toggle is off.
+
+![Slider edit page](docs/screenshots/admin-slider-edit-homepage-main.png)
+
 ## Storefront Usage
+
+Content animations start when the slider scrolls into view and replay on
+slide changes; slide videos play only while their slide is visible. Each
+breakpoint renders its own media (video wins over image, desktop fallback).
+
+| Desktop | Mobile |
+| --- | --- |
+| ![Storefront desktop](docs/screenshots/frontend-slider-homepage-main.png) | ![Storefront mobile](docs/screenshots/frontend-slider-homepage-main-mobile.png) |
 
 ### Route-based rendering
 

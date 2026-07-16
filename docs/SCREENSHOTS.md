@@ -20,9 +20,15 @@ Path: `/admin/sliders`
 
 ![Admin sliders list](./screenshots/admin-sliders-index.png)
 
+## Admin: Slides list
+
+Path: `/admin/slides`
+
+![Admin slides list](./screenshots/admin-slides-index.png)
+
 ## Admin: Slider edit (settings accordion + preview panel)
 
-Path: `/admin/sliders/1/edit` (fixture slider: `homepage-main`)
+Path: `/admin/sliders/{id}/edit` (fixture slider: `homepage-main`)
 
 ![Admin slider edit](./screenshots/admin-slider-edit-homepage-main.png)
 
@@ -30,6 +36,25 @@ The edit page includes the channel/language preview panel with a
 desktop/tablet/mobile resolution switcher:
 
 ![Admin slider preview panel](./screenshots/admin-slider-preview-panel.png)
+
+## Admin: Slide edit (per-breakpoint media & settings)
+
+Path: `/admin/slides/{id}/edit` — the Media & Settings card groups image,
+video and layout settings per Desktop/Mobile/Tablet breakpoint:
+
+![Slide media and settings](./screenshots/admin-slide-media-settings.png)
+
+The live preview supports language selection (with default-language
+fallback) and a resolution switcher:
+
+![Slide live preview](./screenshots/admin-slide-live-preview.png)
+
+## Admin: Slide translations
+
+Per locale: Desktop/Mobile/Tablet tabs with Texts (always applied) and
+checkbox-gated media/display-settings overrides:
+
+![Slide translations](./screenshots/admin-slide-translations.png)
 
 ## Frontend: Slider usage
 
