@@ -9,11 +9,8 @@
 ] %}
 
 <div class="col-12" data-controller="slider-settings vanssa-slide-preview vanssa-responsive-copy">
-    {# Translated texts — always applied for this locale, no override needed. #}
     <div class="row">
         <div class="col-12">{{ form_row(form.name) }}</div>
-        <div class="col-12 col-md-6">{{ form_row(form.settings.responsive.desktop.title, { label: 'Title', attr: {'data-preview-field': 'title'} }) }}</div>
-        <div class="col-12 col-md-6">{{ form_row(form.settings.responsive.desktop.description, { label: 'Content', attr: {'data-preview-field': 'description'} }) }}</div>
     </div>
 
     <hr>
@@ -51,7 +48,7 @@
             <div class="tab-pane fade{% if loop.first %} show active{% endif %}" id="{{ tabs_id }}-{{ breakpoint.key }}" role="tabpanel">
                 {% if breakpoint.key != 'desktop' %}
                     <div class="alert alert-info d-flex justify-content-between align-items-center py-2">
-                        <span>Media and layout settings left empty fall back to the desktop version.</span>
+                        <span>Texts, media and layout settings left empty fall back to the desktop version.</span>
                         <button
                             type="button"
                             class="btn btn-sm btn-outline-secondary"
@@ -62,6 +59,16 @@
                         </button>
                     </div>
                 {% endif %}
+
+                {# Translated texts — always applied for this locale, no override needed. #}
+                {% set bp_form = attribute(form.settings.responsive, breakpoint.key) %}
+                <div class="card mb-3">
+                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-fonts me-1"></i> Texts</h4></div>
+                    <div class="card-body row">
+                        <div class="col-12 col-md-6">{{ form_row(bp_form.title, { label: 'Title', attr: {'data-preview-field': 'title'} }) }}</div>
+                        <div class="col-12 col-md-6">{{ form_row(bp_form.description, { label: 'Content', attr: {'data-preview-field': 'description'} }) }}</div>
+                    </div>
+                </div>
 
                 <div class="card mb-3 d-none" data-slider-settings-media-override-only>
                     <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-image me-1"></i> {{ 'sylius.ui.media'|trans }}</h4></div>
@@ -86,8 +93,8 @@
                     <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-sliders me-1"></i> Layout settings</h4></div>
                     <div class="card-body">
                         {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_breakpoint_settings.html.twig' with {
-                            bp: attribute(form.settings.responsive, breakpoint.key),
-                            skip_texts: breakpoint.key == 'desktop'
+                            bp: bp_form,
+                            skip_texts: true
                         } %}
                     </div>
                 </div>
