@@ -5,6 +5,56 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.9] - 2026-07-16
+
+### Added
+- Per-breakpoint slide media and layout settings: the "Media & Settings"
+  card groups each of Desktop/Mobile/Tablet into its own tab with cover
+  image, optional **video per breakpoint** (new `slide_cover_video_mobile`
+  and `slide_cover_video_tablet` columns) and a layout settings accordion
+  (texts & typography, button/link, layout, colors, effects, visibility);
+  Mobile/Tablet values left empty fall back to the desktop version.
+- Base slide display settings now live on the main Slide entity and are
+  edited on the main form; translations override texts (always applied),
+  media and display settings per locale via explicit checkboxes, organized
+  in the same Desktop/Mobile/Tablet structure (translations gained their
+  own per-breakpoint video columns).
+- "Add button/link" checkbox on the base form and per locale; unchecking
+  clears the values and the storefront renders no button without a label.
+- Slide live preview: real cover image/video backdrop per breakpoint, a
+  language selector with default-language fallback, and a desktop/tablet/
+  mobile resolution switcher like the slider preview.
+- Slider preview panel: "Open in new tab" link; the standalone preview page
+  shows an "Edit slider" bar when opened outside the iframe.
+- Demo fixtures: Big Buck Bunny video slide (CC BY 3.0, Blender Foundation)
+  on the service-ops slider.
+- Migration `Version20260716045546` (new nullable video columns only).
+
+### Changed
+- Channel selection on slider and slide forms uses Sylius product-style
+  checkboxes (`ChannelChoiceType`, multiple + expanded) instead of
+  autocomplete selects.
+- Storefront media markup renders one element per distinct breakpoint media
+  toggled by CSS classes (replaces the single-video/`<picture>` markup).
+- README restructured with a feature overview and embedded documentation
+  screenshots; `docs/SCREENSHOTS.md` extended to nine captures.
+
+### Fixed
+- Content animations now start only when the slider scrolls into view and
+  replay when a slide becomes active; autoplay pauses while the slider is
+  off-screen.
+- Slide videos play only while visible (viewport + active slide + active
+  breakpoint variant) via the new `vanssa-slide-video` controller.
+- Unmapped form fields (channels, add-button and override checkboxes) were
+  reset by the data mapper after `PRE_SET_DATA`, so saved selections never
+  showed on edit; they are now populated in `POST_SET_DATA`.
+- Translation cover images were ignored by the storefront; localized media
+  getters now honor the per-locale media override.
+- Web debug toolbar no longer appears inside the slider preview iframe in
+  dev environments.
+- Slide "Media & Settings" card header showed the raw `sylius.ui.settings`
+  translation key.
+
 ## [2.2.8] - 2026-07-15
 
 ### Added
@@ -94,6 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   image/video slides, Symfony UX storefront rendering, Twig Hooks
   integration, demo fixtures, Behat and PHPUnit test setup.
 
+[2.2.9]: https://github.com/vanssa/sylius-slider-plugin/compare/2.2.8...2.2.9
 [2.2.8]: https://github.com/vanssa/sylius-slider-plugin/compare/2.2.7...2.2.8
 [2.2.7]: https://github.com/vanssa/sylius-slider-plugin/compare/2.2.6...2.2.7
 [2.2.6]: https://github.com/vanssa/sylius-slider-plugin/compare/2.2.5...2.2.6
