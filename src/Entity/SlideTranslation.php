@@ -48,6 +48,15 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
     #[ORM\Column(name: 'slide_cover_tablet', type: 'string', length: 1024, nullable: true)]
     private ?string $slideCoverTablet = null;
 
+    #[ORM\Column(name: 'slide_cover_video', type: 'string', length: 1024, nullable: true)]
+    private ?string $slideCoverVideo = null;
+
+    #[ORM\Column(name: 'slide_cover_video_mobile', type: 'string', length: 1024, nullable: true)]
+    private ?string $slideCoverVideoMobile = null;
+
+    #[ORM\Column(name: 'slide_cover_video_tablet', type: 'string', length: 1024, nullable: true)]
+    private ?string $slideCoverVideoTablet = null;
+
     /** @var array<string, mixed> */
     #[ORM\Column(name: 'content_settings', type: 'json')]
     private array $contentSettings = [];
@@ -168,6 +177,36 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
         $this->slideCoverTablet = $slideCoverTablet;
     }
 
+    public function getSlideCoverVideo(): ?string
+    {
+        return $this->slideCoverVideo;
+    }
+
+    public function setSlideCoverVideo(?string $slideCoverVideo): void
+    {
+        $this->slideCoverVideo = $slideCoverVideo;
+    }
+
+    public function getSlideCoverVideoMobile(): ?string
+    {
+        return $this->slideCoverVideoMobile;
+    }
+
+    public function setSlideCoverVideoMobile(?string $slideCoverVideoMobile): void
+    {
+        $this->slideCoverVideoMobile = $slideCoverVideoMobile;
+    }
+
+    public function getSlideCoverVideoTablet(): ?string
+    {
+        return $this->slideCoverVideoTablet;
+    }
+
+    public function setSlideCoverVideoTablet(?string $slideCoverVideoTablet): void
+    {
+        $this->slideCoverVideoTablet = $slideCoverVideoTablet;
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -233,7 +272,12 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
             return $flag;
         }
 
-        return null !== $this->slideCover || null !== $this->slideCoverMobile || null !== $this->slideCoverTablet;
+        return null !== $this->slideCover ||
+            null !== $this->slideCoverMobile ||
+            null !== $this->slideCoverTablet ||
+            null !== $this->slideCoverVideo ||
+            null !== $this->slideCoverVideoMobile ||
+            null !== $this->slideCoverVideoTablet;
     }
 
     public function isSettingsOverrideEnabled(): bool

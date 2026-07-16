@@ -1,59 +1,78 @@
 {% set form = hookable_metadata.context.form %}
 {% set slide = hookable_metadata.context.resource %}
+{% set breakpoints = [
+    { key: 'desktop', icon: 'bi-display', image_field: form.slideCoverFile, image_path: slide.slideCover, video_field: form.slideCoverVideoFile, video_path: slide.slideCoverVideo },
+    { key: 'mobile', icon: 'bi-phone', image_field: form.slideCoverMobileFile, image_path: slide.slideCoverMobile, video_field: form.slideCoverVideoMobileFile, video_path: slide.slideCoverVideoMobile },
+    { key: 'tablet', icon: 'bi-tablet', image_field: form.slideCoverTabletFile, image_path: slide.slideCoverTablet, video_field: form.slideCoverVideoTabletFile, video_path: slide.slideCoverVideoTablet },
+] %}
 
 <div class="card mb-3">
     <div class="card-header">
         <h2 class="card-title">{{ 'sylius.ui.media'|trans }} &amp; {{ 'sylius.ui.settings'|trans }}</h2>
     </div>
-    <div class="card-body" {{ stimulus_controller('vanssa-slide-preview') }}>
+    <div class="card-body" data-controller="vanssa-responsive-copy vanssa-slide-preview">
         <ul class="nav nav-tabs" role="tablist">
-            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#slide-media-desktop" type="button" role="tab"><i class="bi bi-display me-1"></i> Desktop</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-mobile" type="button" role="tab"><i class="bi bi-phone me-1"></i> Mobile</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-tablet" type="button" role="tab"><i class="bi bi-tablet me-1"></i> Tablet</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-video" type="button" role="tab"><i class="bi bi-camera-video me-1"></i> Video</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-presentation" type="button" role="tab"><i class="bi bi-easel me-1"></i> Presentation</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-content" type="button" role="tab"><i class="bi bi-card-text me-1"></i> Content &amp; Layout</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-button" type="button" role="tab"><i class="bi bi-link-45deg me-1"></i> Button / Link</button></li>
+            {% for breakpoint in breakpoints %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if loop.first %} active{% endif %}" data-bs-toggle="tab" data-bs-target="#slide-media-{{ breakpoint.key }}" type="button" role="tab">
+                        <i class="bi {{ breakpoint.icon }} me-1"></i> {{ breakpoint.key|capitalize }}
+                    </button>
+                </li>
+            {% endfor %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#slide-media-button" type="button" role="tab">
+                    <i class="bi bi-link-45deg me-1"></i> Button / Link
+                </button>
+            </li>
         </ul>
 
         <div class="tab-content pt-4">
-            <div class="tab-pane fade show active" id="slide-media-desktop" role="tabpanel">
-                {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
-                    field: form.slideCoverFile,
-                    image_path: slide.slideCover,
-                    preview_id: form.vars.id ~ '-desktop-preview'
-                } %}
-            </div>
-            <div class="tab-pane fade" id="slide-media-mobile" role="tabpanel">
-                {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
-                    field: form.slideCoverMobileFile,
-                    image_path: slide.slideCoverMobile,
-                    preview_id: form.vars.id ~ '-mobile-preview'
-                } %}
-            </div>
-            <div class="tab-pane fade" id="slide-media-tablet" role="tabpanel">
-                {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
-                    field: form.slideCoverTabletFile,
-                    image_path: slide.slideCoverTablet,
-                    preview_id: form.vars.id ~ '-tablet-preview'
-                } %}
-            </div>
-            <div class="tab-pane fade" id="slide-media-video" role="tabpanel">
-                {{ form_row(form.slideCoverVideoFile) }}
-            </div>
-            <div class="tab-pane fade" id="slide-media-presentation" role="tabpanel">
-                {{ form_row(form.presentationMediaFile) }}
-            </div>
-            <div class="tab-pane fade" id="slide-media-content" role="tabpanel">
-                {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_responsive_settings.html.twig' with {
-                    responsive_form: form.settings.responsive,
-                    responsive_id: 'slide-base-responsive-settings'
-                } %}
+            {% for breakpoint in breakpoints %}
+                <div class="tab-pane fade{% if loop.first %} show active{% endif %}" id="slide-media-{{ breakpoint.key }}" role="tabpanel">
+                    {% if breakpoint.key != 'desktop' %}
+                        <div class="alert alert-info d-flex justify-content-between align-items-center py-2">
+                            <span>Media and layout settings left empty fall back to the desktop version.</span>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                data-action="vanssa-responsive-copy#copyFromDesktop"
+                                data-vanssa-responsive-copy-breakpoint-param="{{ breakpoint.key }}"
+                            >
+                                <i class="bi bi-copy me-1"></i> Copy settings from desktop
+                            </button>
+                        </div>
+                    {% endif %}
 
-                <div class="row mt-3">
-                    <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with { slide: form.vars.data } %}</div>
+                    <div class="card mb-3">
+                        <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-image me-1"></i> {{ 'sylius.ui.media'|trans }}</h4></div>
+                        <div class="card-body row">
+                            <div class="col-12 col-md-6">
+                                {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                                    field: breakpoint.image_field,
+                                    image_path: breakpoint.image_path,
+                                    preview_id: form.vars.id ~ '-' ~ breakpoint.key ~ '-preview'
+                                } %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                {{ form_row(breakpoint.video_field, { label: 'Video', help: 'Optional video for the ' ~ breakpoint.key ~ ' version; it replaces the image when set.' }) }}
+                                {% if breakpoint.video_path %}
+                                    <div class="text-secondary small mt-1"><i class="bi bi-camera-video me-1"></i>{{ breakpoint.video_path }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-0">
+                        <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-sliders me-1"></i> Layout settings</h4></div>
+                        <div class="card-body">
+                            {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_breakpoint_settings.html.twig' with {
+                                bp: attribute(form.settings.responsive, breakpoint.key)
+                            } %}
+                        </div>
+                    </div>
                 </div>
-            </div>
+            {% endfor %}
+
             <div class="tab-pane fade" id="slide-media-button" role="tabpanel">
                 <div class="row">
                     <div class="col-12">{{ form_row(form.addButton) }}</div>
@@ -70,6 +89,10 @@
                     <div class="col-12 col-md-4">{{ form_row(form.settings.linking.showProductFocusImage) }}</div>
                 </div>
             </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with { slide: form.vars.data } %}</div>
         </div>
     </div>
 </div>

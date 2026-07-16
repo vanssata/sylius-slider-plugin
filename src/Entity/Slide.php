@@ -60,6 +60,12 @@ class Slide implements ResourceInterface, TranslatableInterface
     #[ORM\Column(name: 'slide_cover_video', type: 'string', length: 1024, nullable: true)]
     private ?string $slideCoverVideo = null;
 
+    #[ORM\Column(name: 'slide_cover_video_mobile', type: 'string', length: 1024, nullable: true)]
+    private ?string $slideCoverVideoMobile = null;
+
+    #[ORM\Column(name: 'slide_cover_video_tablet', type: 'string', length: 1024, nullable: true)]
+    private ?string $slideCoverVideoTablet = null;
+
     #[ORM\Column(name: 'presentation_media', type: 'string', length: 1024, nullable: true)]
     private ?string $presentationMedia = null;
 
@@ -285,6 +291,114 @@ class Slide implements ResourceInterface, TranslatableInterface
     public function setSlideCoverVideo(?string $slideCoverVideo): void
     {
         $this->slideCoverVideo = $slideCoverVideo;
+    }
+
+    public function getSlideCoverVideoMobile(): ?string
+    {
+        return $this->slideCoverVideoMobile;
+    }
+
+    public function setSlideCoverVideoMobile(?string $slideCoverVideoMobile): void
+    {
+        $this->slideCoverVideoMobile = $slideCoverVideoMobile;
+    }
+
+    public function getSlideCoverVideoTablet(): ?string
+    {
+        return $this->slideCoverVideoTablet;
+    }
+
+    public function setSlideCoverVideoTablet(?string $slideCoverVideoTablet): void
+    {
+        $this->slideCoverVideoTablet = $slideCoverVideoTablet;
+    }
+
+    public function getLocalizedSlideCoverVideo(string $locale, ?string $fallbackLocale = null): ?string
+    {
+        return $this->resolveLocalizedValue(
+            $locale,
+            $fallbackLocale,
+            static fn (SlideTranslation $translation): ?string => $translation->isMediaOverrideEnabled() ? $translation->getSlideCoverVideo() : null,
+        ) ?? $this->slideCoverVideo;
+    }
+
+    public function getLocalizedSlideCoverVideoMobile(string $locale, ?string $fallbackLocale = null): ?string
+    {
+        return $this->resolveLocalizedValue(
+            $locale,
+            $fallbackLocale,
+            static fn (SlideTranslation $translation): ?string => $translation->isMediaOverrideEnabled() ? $translation->getSlideCoverVideoMobile() : null,
+        ) ?? $this->slideCoverVideoMobile;
+    }
+
+    public function getLocalizedSlideCoverVideoTablet(string $locale, ?string $fallbackLocale = null): ?string
+    {
+        return $this->resolveLocalizedValue(
+            $locale,
+            $fallbackLocale,
+            static fn (SlideTranslation $translation): ?string => $translation->isMediaOverrideEnabled() ? $translation->getSlideCoverVideoTablet() : null,
+        ) ?? $this->slideCoverVideoTablet;
+    }
+
+    /**
+     * Resolves the effective media for a breakpoint: the breakpoint's own
+     * video wins, then its image; anything missing falls back to desktop.
+     * Returns null when the slide has no media at all.
+     *
+     * @return array{type: 'video'|'image', src: string}|null
+     */
+    public function getLocalizedMediaForBreakpoint(string $breakpoint, string $locale, ?string $fallbackLocale = null): ?array
+    {
+        $video = match ($breakpoint) {
+            'mobile' => $this->getLocalizedSlideCoverVideoMobile($locale, $fallbackLocale),
+            'tablet' => $this->getLocalizedSlideCoverVideoTablet($locale, $fallbackLocale),
+            default => null,
+        } ?? $this->getLocalizedSlideCoverVideo($locale, $fallbackLocale);
+
+        if (null !== $video && '' !== $video) {
+            return ['type' => 'video', 'src' => $video];
+        }
+
+        $image = match ($breakpoint) {
+            'mobile' => $this->getLocalizedSlideCoverMobile($locale, $fallbackLocale),
+            'tablet' => $this->getLocalizedSlideCoverTablet($locale, $fallbackLocale),
+            default => null,
+        } ?? $this->getLocalizedSlideCover($locale, $fallbackLocale)
+            ?? $this->getLocalizedSlideCoverTablet($locale, $fallbackLocale)
+            ?? $this->getLocalizedSlideCoverMobile($locale, $fallbackLocale);
+
+        if (null !== $image && '' !== $image) {
+            return ['type' => 'image', 'src' => $image];
+        }
+
+        return null;
+    }
+
+    /**
+     * Groups identical breakpoint media so the template renders each
+     * distinct video/image only once, tagged with its breakpoints.
+     *
+     * @return array<int, array{type: 'video'|'image', src: string, breakpoints: array<int, string>}>
+     */
+    public function getLocalizedMediaGroups(string $locale, ?string $fallbackLocale = null): array
+    {
+        $groups = [];
+
+        foreach (['desktop', 'tablet', 'mobile'] as $breakpoint) {
+            $media = $this->getLocalizedMediaForBreakpoint($breakpoint, $locale, $fallbackLocale);
+            if (null === $media) {
+                continue;
+            }
+
+            $key = $media['type'] . '|' . $media['src'];
+            if (!isset($groups[$key])) {
+                $groups[$key] = ['type' => $media['type'], 'src' => $media['src'], 'breakpoints' => []];
+            }
+
+            $groups[$key]['breakpoints'][] = $breakpoint;
+        }
+
+        return array_values($groups);
     }
 
     public function getPresentationMedia(): ?string

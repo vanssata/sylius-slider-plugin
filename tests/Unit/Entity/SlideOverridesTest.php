@@ -122,6 +122,67 @@ final class SlideOverridesTest extends TestCase
         self::assertTrue($translation->isButtonOverrideEnabled());
     }
 
+    public function testDesktopVideoAppliesToAllBreakpointsWhenOthersAreEmpty(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideCoverVideo('/media/desktop.mp4');
+
+        $groups = $slide->getLocalizedMediaGroups('en_US');
+
+        self::assertCount(1, $groups);
+        self::assertSame('video', $groups[0]['type']);
+        self::assertSame('/media/desktop.mp4', $groups[0]['src']);
+        self::assertSame(['desktop', 'tablet', 'mobile'], $groups[0]['breakpoints']);
+    }
+
+    public function testMobileVideoOverridesDesktopVideoOnMobileOnly(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideCoverVideo('/media/desktop.mp4');
+        $slide->setSlideCoverVideoMobile('/media/mobile.mp4');
+
+        $groups = $slide->getLocalizedMediaGroups('en_US');
+
+        self::assertCount(2, $groups);
+        self::assertSame(['desktop', 'tablet'], $groups[0]['breakpoints']);
+        self::assertSame('/media/desktop.mp4', $groups[0]['src']);
+        self::assertSame(['mobile'], $groups[1]['breakpoints']);
+        self::assertSame('/media/mobile.mp4', $groups[1]['src']);
+    }
+
+    public function testBreakpointWithoutAnyVideoFallsBackToItsImageThenDesktopImage(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideCoverMobile('/media/mobile.jpg');
+
+        $groups = $slide->getLocalizedMediaGroups('en_US');
+
+        self::assertCount(2, $groups);
+        self::assertSame('image', $groups[0]['type']);
+        self::assertSame('/media/base-cover.jpg', $groups[0]['src']);
+        self::assertSame(['desktop', 'tablet'], $groups[0]['breakpoints']);
+        self::assertSame('/media/mobile.jpg', $groups[1]['src']);
+        self::assertSame(['mobile'], $groups[1]['breakpoints']);
+    }
+
+    public function testTranslationVideoAppliesOnlyWithMediaOverride(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideCoverVideo('/media/base.mp4');
+
+        $translation = $this->addTranslation($slide, 'de_DE');
+        $translation->setSlideCoverVideo('/media/de.mp4');
+        $translation->setOverrides(['media' => false]);
+
+        self::assertSame('/media/base.mp4', $slide->getLocalizedSlideCoverVideo('de_DE'));
+
+        $translation->setOverrides(['media' => true]);
+
+        self::assertSame('/media/de.mp4', $slide->getLocalizedSlideCoverVideo('de_DE'));
+        self::assertSame('video', $slide->getLocalizedMediaGroups('de_DE')[0]['type']);
+        self::assertSame('/media/de.mp4', $slide->getLocalizedMediaGroups('de_DE')[0]['src']);
+    }
+
     private function createSlide(): Slide
     {
         $slide = new Slide();

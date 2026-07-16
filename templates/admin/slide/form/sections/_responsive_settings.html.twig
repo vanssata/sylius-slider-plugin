@@ -39,63 +39,10 @@
                         </button>
                     </div>
                 {% endif %}
-                <div class="row mb-3">
-                    {% if not (skip_desktop_texts and breakpoint == 'desktop') %}
-                        <div class="col-12 col-md-6">{{ form_row(bp.title, { attr: {'data-preview-field': 'title'} }) }}</div>
-                    {% endif %}
-                    <div class="col-12 col-md-6">{{ form_row(bp.headlineElement, { attr: {'data-preview-field': 'headlineElement'} }) }}</div>
-                    {% if not (skip_desktop_texts and breakpoint == 'desktop') %}
-                        <div class="col-12">{{ form_row(bp.description, { attr: {'data-preview-field': 'description'} }) }}</div>
-                    {% endif %}
-                    <div class="col-12 col-md-4">{{ form_row(bp.headlineFontSize, { attr: {'data-preview-field': 'headlineFontSize'} }) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(bp.descriptionFontSize, { attr: {'data-preview-field': 'descriptionFontSize'} }) }}</div>
-                    <div class="col-12 col-md-4">{{ form_row(bp.buttonFontSize, { attr: {'data-preview-field': 'buttonFontSize'} }) }}</div>
-                </div>
-
-                <div class="card mb-3">
-                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-layout-text-window-reverse me-1"></i> Layout</h4></div>
-                    <div class="card-body row">
-                        <div class="col-12 col-md-4">{{ form_row(bp.contentHorizontalPosition, { attr: {'data-preview-field': 'contentHorizontalPosition'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.contentVerticalPosition, { attr: {'data-preview-field': 'contentVerticalPosition'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.contentTextAlign, { attr: {'data-preview-field': 'contentTextAlign'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.contentPadding, { attr: {'data-preview-field': 'contentPadding'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.contentMargin, { attr: {'data-preview-field': 'contentMargin'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.borderRadius, { attr: {'data-preview-field': 'borderRadius'} }) }}</div>
-                        <div class="col-12">{{ form_row(bp.customCssClass) }}</div>
-                    </div>
-                </div>
-
-                <div class="card mb-3">
-                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-palette me-1"></i> Colors & Surface</h4></div>
-                    <div class="card-body row">
-                        <div class="col-12 col-md-4">{{ form_row(bp.textColor, { attr: {'data-preview-field': 'textColor'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.headlineColor, { attr: {'data-preview-field': 'headlineColor'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.descriptionColor, { attr: {'data-preview-field': 'descriptionColor'} }) }}</div>
-                        <div class="col-12 col-md-6">{{ form_row(bp.backgroundColor, { attr: {'data-preview-field': 'backgroundColor'} }) }}</div>
-                        <div class="col-12 col-md-6">{{ form_row(bp.mediaOverlayColor, { attr: {'data-preview-field': 'mediaOverlayColor'} }) }}</div>
-                    </div>
-                </div>
-
-                <div class="card mb-3">
-                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-stars me-1"></i> Effects</h4></div>
-                    <div class="card-body row">
-                        <div class="col-12 col-md-4">{{ form_row(bp.contentAnimation, { attr: {'data-preview-field': 'contentAnimation'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.animationDuration, { attr: {'data-preview-field': 'animationDuration'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.animationDelay, { attr: {'data-preview-field': 'animationDelay'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.backgroundBlurPreset, { attr: {'data-preview-field': 'backgroundBlurPreset'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.enableTextBlur, { attr: {'data-preview-field': 'enableTextBlur'} }) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.contentBlurStrength, { attr: {'data-preview-field': 'contentBlurStrength'} }) }}</div>
-                    </div>
-                </div>
-
-                <div class="card mb-0">
-                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-eye-slash me-1"></i> Visibility</h4></div>
-                    <div class="card-body row">
-                        <div class="col-12 col-md-4">{{ form_row(bp.hideTitle) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.hideDescription) }}</div>
-                        <div class="col-12 col-md-4">{{ form_row(bp.hideButton) }}</div>
-                    </div>
-                </div>
+                {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_breakpoint_settings.html.twig' with {
+                    bp: bp,
+                    skip_texts: skip_desktop_texts and breakpoint == 'desktop'
+                } %}
             </div>
         {% endfor %}
     </div>

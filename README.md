@@ -192,8 +192,15 @@ the defaults below.
 Additionally: effects (`slide/fade/zoom/lift/flip`), speed, rewind, autoplay,
 parallax, arrow icon/size/colors/shadow and pagination shape/size/colors/shadow.
 Content blur ("blur on content") is configured **per slide and breakpoint**
-(Slide → Options → Effects: `backgroundBlurPreset`, `enableTextBlur`,
+(Slide → Media & Settings → Effects: `backgroundBlurPreset`, `enableTextBlur`,
 `contentBlurStrength`).
+
+Slide media and layout settings are organized **per breakpoint** (Desktop /
+Mobile / Tablet tabs): each version has its own image, optional video (the
+video replaces the image when set) and layout settings including the heading
+tag. Anything left empty on Mobile/Tablet falls back to the Desktop version,
+so nothing needs to be duplicated. Translations can override texts directly
+and media/display settings per locale via explicit checkboxes.
 
 ## Admin Slider Preview
 

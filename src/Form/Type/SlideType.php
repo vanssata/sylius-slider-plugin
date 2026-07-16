@@ -62,7 +62,8 @@ final class SlideType extends AbstractType
             ->add('slideCoverMobileFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('slideCoverTabletFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('slideCoverVideoFile', FileType::class, ['required' => false, 'mapped' => false])
-            ->add('presentationMediaFile', FileType::class, ['required' => false, 'mapped' => false])
+            ->add('slideCoverVideoMobileFile', FileType::class, ['required' => false, 'mapped' => false])
+            ->add('slideCoverVideoTabletFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('position', IntegerType::class)
             ->add('enabled', ChoiceType::class, [
                 'required' => false,
@@ -181,10 +182,16 @@ final class SlideType extends AbstractType
                 $slide->setSlideCoverVideo($this->uploadedMediaStorage->store($video, 'slider/base-cover-video'));
             }
 
-            /** @var UploadedFile|null $presentation */
-            $presentation = $form->get('presentationMediaFile')->getData();
-            if ($presentation instanceof UploadedFile) {
-                $slide->setPresentationMedia($this->uploadedMediaStorage->store($presentation, 'slider/presentation-media'));
+            /** @var UploadedFile|null $videoMobile */
+            $videoMobile = $form->get('slideCoverVideoMobileFile')->getData();
+            if ($videoMobile instanceof UploadedFile) {
+                $slide->setSlideCoverVideoMobile($this->uploadedMediaStorage->store($videoMobile, 'slider/base-cover-video'));
+            }
+
+            /** @var UploadedFile|null $videoTablet */
+            $videoTablet = $form->get('slideCoverVideoTabletFile')->getData();
+            if ($videoTablet instanceof UploadedFile) {
+                $slide->setSlideCoverVideoTablet($this->uploadedMediaStorage->store($videoTablet, 'slider/base-cover-video'));
             }
         });
     }

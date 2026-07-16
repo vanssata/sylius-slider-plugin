@@ -258,6 +258,34 @@
         display: block;
     }
 
+    // Breakpoint-specific media: each element is shown only in the viewport
+    // range(s) it was resolved for (media without these classes covers all).
+    &__media--on-desktop,
+    &__media--on-tablet,
+    &__media--on-mobile {
+        display: none;
+        position: absolute;
+        inset: 0;
+    }
+
+    @media (max-width: 767px) {
+        &__media--on-mobile {
+            display: block;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 1024px) {
+        &__media--on-tablet {
+            display: block;
+        }
+    }
+
+    @media (min-width: 1025px) {
+        &__media--on-desktop {
+            display: block;
+        }
+    }
+
     .vanssa-slider--parallax &__media {
         transform: translate3d(var(--vanssa-slide-parallax-x, 0px), var(--vanssa-slide-parallax-y, 0px), 0) scale(1.06);
         transition: transform 240ms ease-out;

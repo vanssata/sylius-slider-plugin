@@ -72,6 +72,9 @@ final class SlideTranslationType extends AbstractType
             ->add('slideCoverFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('slideCoverMobileFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('slideCoverTabletFile', FileType::class, ['required' => false, 'mapped' => false])
+            ->add('slideCoverVideoFile', FileType::class, ['required' => false, 'mapped' => false])
+            ->add('slideCoverVideoMobileFile', FileType::class, ['required' => false, 'mapped' => false])
+            ->add('slideCoverVideoTabletFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('overrideSettings', CheckboxType::class, [
                 'required' => false,
                 'mapped' => false,
@@ -120,6 +123,9 @@ final class SlideTranslationType extends AbstractType
                 'slideCoverFile' => 'setSlideCover',
                 'slideCoverMobileFile' => 'setSlideCoverMobile',
                 'slideCoverTabletFile' => 'setSlideCoverTablet',
+                'slideCoverVideoFile' => 'setSlideCoverVideo',
+                'slideCoverVideoMobileFile' => 'setSlideCoverVideoMobile',
+                'slideCoverVideoTabletFile' => 'setSlideCoverVideoTablet',
             ] as $field => $setter) {
                 $file = $form->get($field)->getData();
                 if ($file instanceof UploadedFile) {
