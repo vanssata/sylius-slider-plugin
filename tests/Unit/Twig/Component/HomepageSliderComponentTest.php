@@ -17,9 +17,13 @@ use Vanssa\SyliusSliderPlugin\Twig\Component\Shop\HomepageSliderComponent;
 final class HomepageSliderComponentTest extends TestCase
 {
     private SliderRepository&MockObject $sliderRepository;
+
     private LocaleContextInterface&MockObject $localeContext;
+
     private ChannelContextInterface&MockObject $channelContext;
+
     private ChannelInterface&MockObject $channel;
+
     private LocaleInterface&MockObject $locale;
 
     protected function setUp(): void

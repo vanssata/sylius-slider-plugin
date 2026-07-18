@@ -59,7 +59,7 @@ vanssa_sylius_slider:
                 values: [left, center, right]
                 default: center
             content_animation:
-                values: [fade-up, fade-right, zoom-in, none]
+                values: [fade-up, fade-down, fade-left, fade-right, zoom-in, slide-up, flip-in, blur-in, bounce-in, none]
                 default: fade-up
             animation_duration:
                 values: [250, 400, 500, 700, 1000]
@@ -141,6 +141,7 @@ sylius_resource:
             classes:
                 model: Vanssa\SyliusSliderPlugin\Entity\Slider
                 repository: Vanssa\SyliusSliderPlugin\Repository\SliderRepository
+                factory: Vanssa\SyliusSliderPlugin\Factory\SliderFactory
                 form: Vanssa\SyliusSliderPlugin\Form\Type\SliderType
         vanssa_sylius_slider.slide:
             driver: doctrine/orm
@@ -149,3 +150,9 @@ sylius_resource:
                 repository: Vanssa\SyliusSliderPlugin\Repository\SlideRepository
                 factory: Vanssa\SyliusSliderPlugin\Factory\SlideFactory
                 form: Vanssa\SyliusSliderPlugin\Form\Type\SlideType
+        vanssa_sylius_slider.style_preset:
+            driver: doctrine/orm
+            classes:
+                model: Vanssa\SyliusSliderPlugin\Entity\StylePreset
+                repository: Vanssa\SyliusSliderPlugin\Repository\StylePresetRepository
+                form: Vanssa\SyliusSliderPlugin\Form\Type\StylePresetType

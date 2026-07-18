@@ -2,6 +2,13 @@
 {% set slideUrl = this.slide.localizedUrl(this.localeCode, this.fallbackLocaleCode) %}
 {% set buttonLabel = this.slide.localizedButtonLabel(this.localeCode, this.fallbackLocaleCode) %}
 {% set linking = slideSettings.linking|default({}) %}
+{# Slide parallax overrides the slider's: empty = inherit, '0' = force off. #}
+{% set slideParallaxStrength = slideSettings.parallax.strength|default('')|trim %}
+{% set sliderParallaxStrength = this.sliderSettings.parallax.strength|default('')|trim %}
+{% set effectiveParallaxStrength = slideParallaxStrength is not empty
+    ? (slideParallaxStrength == '0' ? '' : slideParallaxStrength)
+    : sliderParallaxStrength
+%}
 {% set buttonAppearance = linking.buttonAppearance|default('primary') %}
 {% set buttonSize = linking.buttonSize|default('md') %}
 {% set buttonPositionRaw = linking.buttonPosition|default('content_left') %}
@@ -98,8 +105,25 @@
     '--vanssa-slide-content-shift-x: ' ~ desktopShiftX,
     '--vanssa-slide-content-shift-y: ' ~ desktopShiftY,
     '--vanssa-slide-text-align: ' ~ desktopTextAlign,
-    '--vanssa-slide-bg-blur: ' ~ desktopBgBlur
+    '--vanssa-slide-bg-blur: ' ~ desktopBgBlur,
+    '--vanssa-slide-animation-name: ' ~ animation,
+    '--vanssa-slide-text-blur: ' ~ (desktopResolved.enableTextBlur|default(false) ? 1 : 0)
 ]) %}
+{# Edge-to-edge mode: full width, no overlay gutter, and the position shift
+   suppressed (a -10% translate would push a full-bleed strip off-canvas).
+   Emitted AFTER the shift vars — the last declaration wins. #}
+{% if desktopResolved.contentWidth|default('boxed') == 'full' %}
+    {% set styleVars = styleVars|merge([
+        '--vanssa-slide-content-max-width: 100%',
+        '--vanssa-slide-content-width: 100%',
+        '--vanssa-slide-content-gutter: 0px',
+        '--vanssa-slide-content-shift-x: 0px',
+        '--vanssa-slide-content-shift-y: 0px'
+    ]) %}
+{% endif %}
+{% if desktopResolved.contentMaxHeight|default('none') != 'none' %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-content-max-height: ' ~ desktopResolved.contentMaxHeight]) %}
+{% endif %}
 
 {% set tabletVars = [] %}
 {% set mobileVars = [] %}
@@ -137,6 +161,18 @@
     {% if settings.headlineFontSize|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-headline-size: ' ~ settings.headlineFontSize]) %}{% endif %}
     {% if settings.descriptionFontSize|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-description-size: ' ~ settings.descriptionFontSize]) %}{% endif %}
     {% if settings.buttonFontSize|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-button-size: ' ~ settings.buttonFontSize]) %}{% endif %}
+    {% if settings.contentAnimation|default('') is not empty %}{% set vars = vars|merge(['--vanssa-slide-animation-name: ' ~ settings.contentAnimation]) %}{% endif %}
+    {% if settings.enableTextBlur is defined %}{% set vars = vars|merge(['--vanssa-slide-text-blur: ' ~ (settings.enableTextBlur ? 1 : 0)]) %}{% endif %}
+    {% if settings.contentWidth|default('') is not empty %}
+        {% if settings.contentWidth == 'full' %}
+            {% set vars = vars|merge(['--vanssa-slide-content-max-width: 100%', '--vanssa-slide-content-width: 100%', '--vanssa-slide-content-gutter: 0px', '--vanssa-slide-content-shift-x: 0px', '--vanssa-slide-content-shift-y: 0px']) %}
+        {% else %}
+            {% set vars = vars|merge(['--vanssa-slide-content-max-width: min(54ch, 100%)', '--vanssa-slide-content-width: auto', '--vanssa-slide-content-gutter: 1.5rem']) %}
+        {% endif %}
+    {% endif %}
+    {% if settings.contentMaxHeight|default('') is not empty %}
+        {% set vars = vars|merge(['--vanssa-slide-content-max-height: ' ~ (settings.contentMaxHeight == 'none' ? 'none' : settings.contentMaxHeight)]) %}
+    {% endif %}
     {% if target == 'tablet' %}{% set tabletVars = vars %}{% else %}{% set mobileVars = vars %}{% endif %}
 {% endfor %}
 
@@ -151,7 +187,18 @@
 {% if mobileResolved.hideDescription|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-description-mobile']) %}{% endif %}
 {% if mobileResolved.hideButton|default(false) %}{% set visibilityClasses = visibilityClasses|merge(['is-hide-button-mobile']) %}{% endif %}
 
-<article class="vanssa-slide {{ this.index == 0 ? 'is-active' : '' }} {{ desktopResolved.customCssClass|default('') }} {{ visibilityClasses|join(' ') }}" data-slide-code="{{ this.slide.code }}" {{ stimulus_target('vanssa-slider', 'slide') }}>
+{% set videoPlayback = slideSettings.video.playback|default('autoplay') %}
+{% set sliderAutoplayEnabled = this.sliderSettings.autoplay.enabled|default(this.sliderSettings.autoplay.active|default(false)) %}
+<article class="vanssa-slide {{ this.index == 0 ? 'is-active' : '' }} {{ effectiveParallaxStrength is not empty ? 'vanssa-slide--parallax' : '' }} {{ desktopResolved.customCssClass|default('') }} {{ visibilityClasses|join(' ') }}"
+    data-slide-code="{{ this.slide.code }}"
+    data-vanssa-video-playback="{{ videoPlayback }}"
+    {% if slideParallaxStrength is not empty %}data-vanssa-parallax-strength="{{ slideParallaxStrength }}"{% endif %}
+    data-vanssa-headline-element="{{ headlineTag }}"
+    data-vanssa-animation="{{ animation }}"
+    data-vanssa-button-position="{{ buttonPosition }}"
+    data-vanssa-button-appearance="{{ buttonAppearance }}"
+    data-vanssa-button-size="{{ buttonSize }}"
+    {{ stimulus_target('vanssa-slider', 'slide') }}>
     {# Each breakpoint resolves its own media (video wins over image,
        missing mobile/tablet media falls back to desktop); identical media
        renders once and is shown per breakpoint via CSS classes. #}
@@ -160,15 +207,43 @@
         {% set breakpointClasses = media.breakpoints|map(bp => 'vanssa-slide__media--on-' ~ bp)|join(' ') %}
         {% set allBreakpoints = media.breakpoints|length == 3 %}
         {% if media.type == 'video' %}
-            {# Playback is driven by the vanssa-slide-video controller: the
-               video runs only while its slide is visible in the viewport. #}
-            <video class="vanssa-slide__media {{ allBreakpoints ? '' : breakpointClasses }}" muted loop playsinline{% if this.lazyLoad %} preload="none"{% endif %} {{ stimulus_controller('vanssa-slide-video') }}>
-                <source src="{{ media.src }}">
-            </video>
+            {# Playback is driven by the vanssa-slide-video controller (only
+               while visible + active; click mode waits for the play button).
+               External provider URLs render an embedded player instead; the
+               embed starts paused (autoplay=0) — the controller commands it.
+               `loop` is dropped when the slider autoplays: the video must
+               fire `ended` so the slider can advance after it finishes. #}
+            {% set embed_url = vanssa_video_embed_url(media.src, false) %}
+            {% if embed_url %}
+                <iframe
+                    class="vanssa-slide__media vanssa-slide__media--embed {{ allBreakpoints ? '' : breakpointClasses }}"
+                    src="{{ embed_url }}"
+                    title="{{ coverTitle }}"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    {% if this.lazyLoad %}loading="lazy"{% endif %}
+                    {{ stimulus_controller('vanssa-slide-video', { playback: videoPlayback }) }}
+                ></iframe>
+            {% else %}
+                <video class="vanssa-slide__media {{ allBreakpoints ? '' : breakpointClasses }}" muted{% if not sliderAutoplayEnabled %} loop{% endif %} playsinline{% if this.lazyLoad %} preload="none"{% endif %} {{ stimulus_controller('vanssa-slide-video', { playback: videoPlayback }) }}>
+                    <source src="{{ media.src }}">
+                </video>
+            {% endif %}
         {% else %}
             <img class="vanssa-slide__media {{ allBreakpoints ? '' : breakpointClasses }}" src="{{ media.src }}" alt="{{ coverAlt }}" title="{{ coverTitle }}"{% if this.lazyLoad %} loading="lazy" fetchpriority="low"{% endif %}>
         {% endif %}
     {% endfor %}
+
+    {% if videoPlayback == 'click' and mediaGroups|filter(media => media.type == 'video')|length > 0 %}
+        {# Click-to-play overlay: every media variant's vanssa-slide-video
+           controller listens on this button; the visible one starts. Hidden
+           via .is-video-started once playback begins. #}
+        <button type="button" class="vanssa-slide__video-play" aria-label="Play video">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
+                <path d="M8 5.14v13.72c0 .8.87 1.3 1.56.88l10.54-6.86a1.05 1.05 0 0 0 0-1.76L9.56 4.26A1.04 1.04 0 0 0 8 5.14z"/>
+            </svg>
+        </button>
+    {% endif %}
 
     {% if mediaOverlayColor or this.sliderSettings.overlay|default(false) %}
         <div class="vanssa-slide__overlay" {% if mediaOverlayColor %}style="background: {{ mediaOverlayColor }};"{% endif %}></div>

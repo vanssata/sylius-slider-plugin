@@ -177,7 +177,7 @@ final class Configuration implements ConfigurationInterface
                                 ->arrayNode('content_animation')
                                     ->addDefaultsIfNotSet()
                                     ->children()
-                                        ->arrayNode('values')->scalarPrototype()->end()->defaultValue(['fade-up', 'fade-right', 'zoom-in', 'none'])->end()
+                                        ->arrayNode('values')->scalarPrototype()->end()->defaultValue(['fade-up', 'fade-down', 'fade-left', 'fade-right', 'zoom-in', 'slide-up', 'flip-in', 'blur-in', 'bounce-in', 'none'])->end()
                                         ->scalarNode('default')->defaultValue('fade-up')->end()
                                     ->end()
                                 ->end()
@@ -221,6 +221,20 @@ final class Configuration implements ConfigurationInterface
                                     ->children()
                                         ->arrayNode('values')->scalarPrototype()->end()->defaultValue(['0', '0.5rem', '1rem', '1.5rem', '2rem'])->end()
                                         ->scalarNode('default')->defaultValue('0')->end()
+                                    ->end()
+                                ->end()
+                                ->arrayNode('content_width')
+                                    ->addDefaultsIfNotSet()
+                                    ->children()
+                                        ->arrayNode('values')->scalarPrototype()->end()->defaultValue(['boxed', 'full'])->end()
+                                        ->scalarNode('default')->defaultValue('boxed')->end()
+                                    ->end()
+                                ->end()
+                                ->arrayNode('content_max_height')
+                                    ->addDefaultsIfNotSet()
+                                    ->children()
+                                        ->arrayNode('values')->scalarPrototype()->end()->defaultValue(['none', '20%', '30%', '40%', '50%', '100%'])->end()
+                                        ->scalarNode('default')->defaultValue('none')->end()
                                     ->end()
                                 ->end()
                                 ->arrayNode('border_radius')
@@ -330,9 +344,367 @@ final class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('style_presets')
+                    ->info('One-click style bundles offered in the admin preview panels; each settings key is a dot path relative to the form root (e.g. "settings.responsive.desktop.textColor"). Project config merges into / overrides these.')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->arrayNode('slide')
+                            ->useAttributeAsKey('name')
+                            ->defaultValue(self::defaultSlideStylePresets())
+                            ->arrayPrototype()
+                                ->children()
+                                    ->scalarNode('label')->isRequired()->cannotBeEmpty()->end()
+                                    ->variableNode('settings')->defaultValue([])->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                        ->arrayNode('slider')
+                            ->useAttributeAsKey('name')
+                            ->defaultValue(self::defaultSliderStylePresets())
+                            ->arrayPrototype()
+                                ->children()
+                                    ->scalarNode('label')->isRequired()->cannotBeEmpty()->end()
+                                    ->variableNode('settings')->defaultValue([])->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
             ->end()
         ;
 
         return $treeBuilder;
+    }
+
+    /**
+     * @return array<string, array{label: string, settings: array<string, scalar>}>
+     */
+    private static function defaultSlideStylePresets(): array
+    {
+        return [
+            'hero_dark' => [
+                'label' => 'Hero Dark',
+                'settings' => [
+                    'settings.responsive.desktop.contentHorizontalPosition' => 'start',
+                    'settings.responsive.desktop.contentVerticalPosition' => 'center',
+                    'settings.responsive.desktop.contentTextAlign' => 'left',
+                    'settings.responsive.desktop.contentPadding' => '2rem',
+                    'settings.responsive.desktop.borderRadius' => 16,
+                    'settings.responsive.desktop.headlineFontSize' => '2.5rem',
+                    'settings.responsive.desktop.descriptionFontSize' => '1.2rem',
+                    'settings.responsive.desktop.textColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.headlineColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.descriptionColor' => 'rgba(230, 230, 230, 1)',
+                    'settings.responsive.desktop.backgroundColor' => 'rgba(15, 23, 42, 0.75)',
+                    'settings.responsive.desktop.mediaOverlayColor' => 'rgba(0, 0, 0, 0)',
+                    'settings.responsive.desktop.contentAnimation' => 'fade-up',
+                    'settings.responsive.desktop.animationDuration' => 700,
+                    'settings.responsive.desktop.animationDelay' => 100,
+                    'settings.responsive.desktop.backgroundBlurPreset' => 'soft',
+                    'settings.responsive.desktop.enableTextBlur' => false,
+                ],
+            ],
+            'clean_light' => [
+                'label' => 'Clean Light',
+                'settings' => [
+                    'settings.responsive.desktop.contentHorizontalPosition' => 'left_3_12',
+                    'settings.responsive.desktop.contentVerticalPosition' => 'bottom',
+                    'settings.responsive.desktop.contentTextAlign' => 'left',
+                    'settings.responsive.desktop.contentPadding' => '1.5rem',
+                    'settings.responsive.desktop.borderRadius' => 10,
+                    'settings.responsive.desktop.headlineFontSize' => '2rem',
+                    'settings.responsive.desktop.descriptionFontSize' => '1rem',
+                    'settings.responsive.desktop.textColor' => 'rgba(0, 0, 0, 1)',
+                    'settings.responsive.desktop.headlineColor' => 'rgba(0, 0, 0, 1)',
+                    'settings.responsive.desktop.descriptionColor' => 'rgba(0, 0, 0, 1)',
+                    'settings.responsive.desktop.backgroundColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.mediaOverlayColor' => 'rgba(0, 0, 0, 0)',
+                    'settings.responsive.desktop.contentAnimation' => 'fade-right',
+                    'settings.responsive.desktop.animationDuration' => 500,
+                    'settings.responsive.desktop.animationDelay' => 0,
+                    'settings.responsive.desktop.backgroundBlurPreset' => 'none',
+                    'settings.responsive.desktop.enableTextBlur' => false,
+                ],
+            ],
+            'minimal' => [
+                'label' => 'Minimal',
+                'settings' => [
+                    'settings.responsive.desktop.contentHorizontalPosition' => 'start',
+                    'settings.responsive.desktop.contentVerticalPosition' => 'bottom',
+                    'settings.responsive.desktop.contentTextAlign' => 'left',
+                    'settings.responsive.desktop.contentPadding' => '1rem',
+                    'settings.responsive.desktop.borderRadius' => 0,
+                    'settings.responsive.desktop.headlineFontSize' => '1.5rem',
+                    'settings.responsive.desktop.descriptionFontSize' => '1rem',
+                    'settings.responsive.desktop.textColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.headlineColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.descriptionColor' => 'rgba(255, 255, 255, 0.92)',
+                    'settings.responsive.desktop.backgroundColor' => 'rgba(0, 0, 0, 0)',
+                    'settings.responsive.desktop.mediaOverlayColor' => 'rgba(15, 23, 42, 0.75)',
+                    'settings.responsive.desktop.contentAnimation' => 'none',
+                    'settings.responsive.desktop.backgroundBlurPreset' => 'none',
+                    'settings.responsive.desktop.enableTextBlur' => false,
+                ],
+            ],
+            'bold_center' => [
+                'label' => 'Bold Center',
+                'settings' => [
+                    'settings.responsive.desktop.contentHorizontalPosition' => 'center',
+                    'settings.responsive.desktop.contentVerticalPosition' => 'center',
+                    'settings.responsive.desktop.contentTextAlign' => 'center',
+                    'settings.responsive.desktop.contentPadding' => '2rem',
+                    'settings.responsive.desktop.borderRadius' => 24,
+                    'settings.responsive.desktop.headlineFontSize' => '3rem',
+                    'settings.responsive.desktop.descriptionFontSize' => '1.5rem',
+                    'settings.responsive.desktop.textColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.headlineColor' => 'rgba(250, 204, 21, 1)',
+                    'settings.responsive.desktop.descriptionColor' => 'rgba(255, 255, 255, 0.92)',
+                    'settings.responsive.desktop.backgroundColor' => 'rgba(17, 24, 39, 0.9)',
+                    'settings.responsive.desktop.mediaOverlayColor' => 'rgba(0, 0, 0, 0)',
+                    'settings.responsive.desktop.contentAnimation' => 'zoom-in',
+                    'settings.responsive.desktop.animationDuration' => 700,
+                    'settings.responsive.desktop.animationDelay' => 0,
+                    'settings.responsive.desktop.backgroundBlurPreset' => 'medium',
+                    'settings.responsive.desktop.enableTextBlur' => true,
+                    'settings.responsive.desktop.contentBlurStrength' => 12,
+                    'settings.linking.buttonAppearance' => 'primary',
+                    'settings.linking.buttonSize' => 'lg',
+                    'settings.linking.buttonPosition' => 'content_center',
+                ],
+            ],
+            'split_left_light' => [
+                'label' => 'Split Left Light',
+                'settings' => [
+                    'settings.responsive.desktop.contentHorizontalPosition' => 'left_4_12',
+                    'settings.responsive.desktop.contentVerticalPosition' => 'center',
+                    'settings.responsive.desktop.contentTextAlign' => 'left',
+                    'settings.responsive.desktop.contentPadding' => '2rem',
+                    'settings.responsive.desktop.borderRadius' => 12,
+                    'settings.responsive.desktop.headlineFontSize' => '2.25rem',
+                    'settings.responsive.desktop.descriptionFontSize' => '1.1rem',
+                    'settings.responsive.desktop.textColor' => 'rgba(15, 23, 42, 1)',
+                    'settings.responsive.desktop.headlineColor' => 'rgba(15, 23, 42, 1)',
+                    'settings.responsive.desktop.descriptionColor' => 'rgba(51, 65, 85, 1)',
+                    'settings.responsive.desktop.backgroundColor' => 'rgba(255, 255, 255, 0.94)',
+                    'settings.responsive.desktop.mediaOverlayColor' => 'rgba(0, 0, 0, 0)',
+                    'settings.responsive.desktop.contentAnimation' => 'fade-right',
+                    'settings.responsive.desktop.animationDuration' => 600,
+                    'settings.responsive.desktop.animationDelay' => 0,
+                    'settings.responsive.desktop.backgroundBlurPreset' => 'none',
+                    'settings.responsive.desktop.enableTextBlur' => false,
+                ],
+            ],
+            'gradient_overlay' => [
+                'label' => 'Gradient Overlay',
+                'settings' => [
+                    'settings.responsive.desktop.contentHorizontalPosition' => 'start',
+                    'settings.responsive.desktop.contentVerticalPosition' => 'bottom',
+                    'settings.responsive.desktop.contentTextAlign' => 'left',
+                    'settings.responsive.desktop.contentPadding' => '1.25rem',
+                    'settings.responsive.desktop.borderRadius' => 0,
+                    'settings.responsive.desktop.headlineFontSize' => '2rem',
+                    'settings.responsive.desktop.descriptionFontSize' => '1rem',
+                    'settings.responsive.desktop.textColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.headlineColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.descriptionColor' => 'rgba(226, 232, 240, 1)',
+                    'settings.responsive.desktop.backgroundColor' => 'rgba(0, 0, 0, 0)',
+                    'settings.responsive.desktop.mediaOverlayColor' => 'rgba(2, 6, 23, 0.55)',
+                    'settings.responsive.desktop.contentAnimation' => 'fade-up',
+                    'settings.responsive.desktop.animationDuration' => 500,
+                    'settings.responsive.desktop.animationDelay' => 0,
+                    'settings.responsive.desktop.backgroundBlurPreset' => 'none',
+                    'settings.responsive.desktop.enableTextBlur' => false,
+                ],
+            ],
+            'glass_card' => [
+                'label' => 'Glass Card',
+                'settings' => [
+                    'settings.responsive.desktop.contentHorizontalPosition' => 'center',
+                    'settings.responsive.desktop.contentVerticalPosition' => 'center',
+                    'settings.responsive.desktop.contentTextAlign' => 'center',
+                    'settings.responsive.desktop.contentPadding' => '2rem',
+                    'settings.responsive.desktop.borderRadius' => 20,
+                    'settings.responsive.desktop.headlineFontSize' => '2.25rem',
+                    'settings.responsive.desktop.descriptionFontSize' => '1.1rem',
+                    'settings.responsive.desktop.textColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.headlineColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.descriptionColor' => 'rgba(241, 245, 249, 0.95)',
+                    'settings.responsive.desktop.backgroundColor' => 'rgba(255, 255, 255, 0.18)',
+                    'settings.responsive.desktop.mediaOverlayColor' => 'rgba(0, 0, 0, 0)',
+                    'settings.responsive.desktop.contentAnimation' => 'zoom-in',
+                    'settings.responsive.desktop.animationDuration' => 600,
+                    'settings.responsive.desktop.animationDelay' => 100,
+                    'settings.responsive.desktop.backgroundBlurPreset' => 'none',
+                    'settings.responsive.desktop.enableTextBlur' => true,
+                    'settings.responsive.desktop.contentBlurStrength' => 16,
+                ],
+            ],
+            'bottom_banner' => [
+                'label' => 'Bottom Banner',
+                'settings' => [
+                    'settings.responsive.desktop.contentWidth' => 'full',
+                    'settings.responsive.desktop.contentMaxHeight' => '30%',
+                    'settings.responsive.desktop.contentHorizontalPosition' => 'center',
+                    'settings.responsive.desktop.contentVerticalPosition' => 'bottom',
+                    'settings.responsive.desktop.contentTextAlign' => 'center',
+                    'settings.responsive.desktop.contentPadding' => '1rem',
+                    'settings.responsive.desktop.borderRadius' => 0,
+                    'settings.responsive.desktop.headlineFontSize' => '1.75rem',
+                    'settings.responsive.desktop.descriptionFontSize' => '1rem',
+                    'settings.responsive.desktop.textColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.headlineColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.descriptionColor' => 'rgba(226, 232, 240, 1)',
+                    'settings.responsive.desktop.backgroundColor' => 'rgba(2, 6, 23, 0.78)',
+                    'settings.responsive.desktop.mediaOverlayColor' => 'rgba(0, 0, 0, 0)',
+                    'settings.responsive.desktop.contentAnimation' => 'fade-up',
+                    'settings.responsive.desktop.animationDuration' => 500,
+                    'settings.responsive.desktop.animationDelay' => 0,
+                    'settings.responsive.desktop.backgroundBlurPreset' => 'none',
+                    'settings.responsive.desktop.enableTextBlur' => false,
+                ],
+            ],
+            'promo_badge_right' => [
+                'label' => 'Promo Badge Right',
+                'settings' => [
+                    'settings.responsive.desktop.contentHorizontalPosition' => 'right_3_12',
+                    'settings.responsive.desktop.contentVerticalPosition' => 'top_1_5',
+                    'settings.responsive.desktop.contentTextAlign' => 'right',
+                    'settings.responsive.desktop.contentPadding' => '1.5rem',
+                    'settings.responsive.desktop.borderRadius' => 16,
+                    'settings.responsive.desktop.headlineFontSize' => '1.75rem',
+                    'settings.responsive.desktop.descriptionFontSize' => '1rem',
+                    'settings.responsive.desktop.textColor' => 'rgba(255, 255, 255, 1)',
+                    'settings.responsive.desktop.headlineColor' => 'rgba(250, 204, 21, 1)',
+                    'settings.responsive.desktop.descriptionColor' => 'rgba(255, 255, 255, 0.92)',
+                    'settings.responsive.desktop.backgroundColor' => 'rgba(15, 23, 42, 0.85)',
+                    'settings.responsive.desktop.mediaOverlayColor' => 'rgba(0, 0, 0, 0)',
+                    'settings.responsive.desktop.contentAnimation' => 'zoom-in',
+                    'settings.responsive.desktop.animationDuration' => 500,
+                    'settings.responsive.desktop.animationDelay' => 150,
+                    'settings.responsive.desktop.backgroundBlurPreset' => 'none',
+                    'settings.responsive.desktop.enableTextBlur' => false,
+                    'settings.linking.buttonAppearance' => 'primary',
+                    'settings.linking.buttonSize' => 'sm',
+                    'settings.linking.buttonPosition' => 'content_right',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, array{label: string, settings: array<string, scalar>}>
+     */
+    private static function defaultSliderStylePresets(): array
+    {
+        return [
+            'classic_arrows' => [
+                'label' => 'Classic Arrows',
+                'settings' => [
+                    'settings.showNavigation' => true,
+                    'settings.showArrows' => true,
+                    'settings.arrowsPosition' => 'overlay',
+                    'settings.arrowsVerticalAlign' => 'center',
+                    'settings.navigationIcon' => 'chevron',
+                    'settings.navigationSize' => '3rem',
+                    'settings.navigationShadow' => 'soft',
+                    'settings.paginationStyle' => 'dots',
+                    'settings.paginationPosition' => 'bottom-inside',
+                    'settings.paginationShape' => 'circle',
+                    'settings.paginationSize' => '0.625rem',
+                    'settings.paginationShadow' => 'none',
+                    'settings.slideEffect' => 'slide',
+                    'settings.speed' => 500,
+                    'settings.rewind' => true,
+                    'settings.autoplay.enabled' => false,
+                    'settings.showProgressBar' => false,
+                ],
+            ],
+            'minimal_fade' => [
+                'label' => 'Minimal Fade',
+                'settings' => [
+                    'settings.slideEffect' => 'fade',
+                    'settings.speed' => 700,
+                    'settings.showNavigation' => true,
+                    'settings.showArrows' => false,
+                    'settings.paginationStyle' => 'lines',
+                    'settings.paginationPosition' => 'bottom-inside',
+                    'settings.paginationSize' => '0.5rem',
+                    'settings.paginationShadow' => 'none',
+                    'settings.rewind' => true,
+                    'settings.autoplay.enabled' => false,
+                    'settings.showProgressBar' => false,
+                ],
+            ],
+            'autoplay_showcase' => [
+                'label' => 'Autoplay Showcase',
+                'settings' => [
+                    'settings.autoplay.enabled' => true,
+                    'settings.autoplay.interval' => 5000,
+                    'settings.autoplay.pauseOnHover' => true,
+                    'settings.showProgressBar' => true,
+                    'settings.pauseOnHover' => true,
+                    'settings.slideEffect' => 'slide',
+                    'settings.speed' => 500,
+                    'settings.rewind' => true,
+                    'settings.showNavigation' => true,
+                    'settings.showArrows' => true,
+                    'settings.arrowsPosition' => 'overlay',
+                    'settings.paginationStyle' => 'dots',
+                    'settings.paginationPosition' => 'bottom-inside',
+                ],
+            ],
+            'fullscreen_hero' => [
+                'label' => 'Fullscreen Hero',
+                'settings' => [
+                    'settings.containerWidth' => 'full',
+                    'settings.slideEffect' => 'fade',
+                    'settings.speed' => 800,
+                    'settings.showNavigation' => true,
+                    'settings.showArrows' => false,
+                    'settings.paginationStyle' => 'lines',
+                    'settings.paginationPosition' => 'bottom-inside',
+                    'settings.autoplay.enabled' => true,
+                    'settings.autoplay.interval' => 6000,
+                    'settings.autoplay.pauseOnHover' => true,
+                    'settings.showProgressBar' => true,
+                    'settings.rewind' => true,
+                ],
+            ],
+            'compact_banner' => [
+                'label' => 'Compact Banner',
+                'settings' => [
+                    'settings.containerWidth' => 'content',
+                    'settings.maxHeight' => '320px',
+                    'settings.slideEffect' => 'slide',
+                    'settings.speed' => 400,
+                    'settings.showNavigation' => true,
+                    'settings.showArrows' => true,
+                    'settings.arrowsPosition' => 'outside',
+                    'settings.arrowsVerticalAlign' => 'center',
+                    'settings.navigationIcon' => 'angle',
+                    'settings.navigationSize' => '1.5rem',
+                    'settings.paginationStyle' => 'numbers',
+                    'settings.paginationPosition' => 'bottom-outside',
+                    'settings.autoplay.enabled' => false,
+                    'settings.showProgressBar' => false,
+                ],
+            ],
+            'parallax_showcase' => [
+                'label' => 'Parallax Showcase',
+                'settings' => [
+                    'settings.parallax.strength' => '2rem',
+                    'settings.slideEffect' => 'slide',
+                    'settings.speed' => 600,
+                    'settings.showNavigation' => true,
+                    'settings.showArrows' => true,
+                    'settings.arrowsPosition' => 'overlay',
+                    'settings.navigationShadow' => 'soft',
+                    'settings.paginationStyle' => 'dots',
+                    'settings.paginationPosition' => 'bottom-inside',
+                    'settings.rewind' => true,
+                    'settings.autoplay.enabled' => false,
+                ],
+            ],
+        ];
     }
 }

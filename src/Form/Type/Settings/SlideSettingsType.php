@@ -29,6 +29,19 @@ final class SlideSettingsType extends AbstractType
                 'include_texts' => $options['include_texts'],
             ])
         ;
+
+        if ($options['include_parallax']) {
+            $builder->add('parallax', ParallaxSettingsType::class, [
+                'required' => false,
+                'inherit' => true,
+            ]);
+        }
+
+        if ($options['include_video']) {
+            $builder->add('video', VideoSettingsType::class, [
+                'required' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -57,8 +70,12 @@ final class SlideSettingsType extends AbstractType
             ],
             'allow_extra_fields' => true,
             'include_texts' => true,
+            'include_parallax' => true,
+            'include_video' => true,
         ]);
 
         $resolver->setAllowedTypes('include_texts', 'bool');
+        $resolver->setAllowedTypes('include_parallax', 'bool');
+        $resolver->setAllowedTypes('include_video', 'bool');
     }
 }

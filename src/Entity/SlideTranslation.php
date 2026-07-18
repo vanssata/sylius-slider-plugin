@@ -18,6 +18,18 @@ use Webmozart\Assert\Assert;
 #[ORM\UniqueConstraint(name: 'uniq_slide_locale', columns: ['slide_id', 'locale_code'])]
 class SlideTranslation implements ResourceInterface, TranslationInterface
 {
+    /** @var list<string> */
+    private const LAYOUT_RESPONSIVE_FIELDS = ['contentHorizontalPosition', 'contentVerticalPosition', 'contentTextAlign', 'contentPadding', 'contentMargin', 'borderRadius', 'customCssClass'];
+
+    /** @var list<string> */
+    private const COLORS_RESPONSIVE_FIELDS = ['textColor', 'headlineColor', 'descriptionColor', 'backgroundColor', 'mediaOverlayColor'];
+
+    /** @var list<string> */
+    private const EFFECTS_RESPONSIVE_FIELDS = ['contentAnimation', 'animationDuration', 'animationDelay', 'backgroundBlurPreset', 'enableTextBlur', 'contentBlurStrength'];
+
+    /** @var list<string> */
+    private const VISIBILITY_RESPONSIVE_FIELDS = ['hideTitle', 'hideDescription', 'hideButton'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -248,6 +260,10 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
             'button' => (bool) ($overrides['button'] ?? false),
             'media' => (bool) ($overrides['media'] ?? false),
             'settings' => (bool) ($overrides['settings'] ?? false),
+            'layout' => (bool) ($overrides['layout'] ?? false),
+            'colors' => (bool) ($overrides['colors'] ?? false),
+            'effects' => (bool) ($overrides['effects'] ?? false),
+            'visibility' => (bool) ($overrides['visibility'] ?? false),
         ];
     }
 
@@ -262,7 +278,13 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
             return $flag;
         }
 
-        return null !== $this->buttonLabel || null !== $this->url;
+        if (null !== $this->buttonLabel || null !== $this->url) {
+            return true;
+        }
+
+        $linking = $this->slideSettings['linking'] ?? null;
+
+        return is_array($linking) && [] !== array_filter($linking, static fn (mixed $value): bool => is_array($value) ? [] !== $value : null !== $value);
     }
 
     public function isMediaOverrideEnabled(): bool
@@ -297,6 +319,75 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
         return false;
     }
 
+    public function isLayoutOverrideEnabled(): bool
+    {
+        return $this->granularOverrideFlag('layout', self::LAYOUT_RESPONSIVE_FIELDS);
+    }
+
+    public function isColorsOverrideEnabled(): bool
+    {
+        return $this->granularOverrideFlag('colors', self::COLORS_RESPONSIVE_FIELDS);
+    }
+
+    public function isEffectsOverrideEnabled(): bool
+    {
+        return $this->granularOverrideFlag('effects', self::EFFECTS_RESPONSIVE_FIELDS);
+    }
+
+    public function isVisibilityOverrideEnabled(): bool
+    {
+        return $this->granularOverrideFlag('visibility', self::VISIBILITY_RESPONSIVE_FIELDS);
+    }
+
+    /**
+     * Falls back to the legacy combined "settings" flag, then to plain data
+     * presence, for translations saved before display settings were split
+     * per accordion section.
+     *
+     * @param list<string> $fields
+     */
+    private function granularOverrideFlag(string $name, array $fields): bool
+    {
+        $flag = $this->overrideFlag($name);
+        if (null !== $flag) {
+            return $flag;
+        }
+
+        $legacy = $this->overrideFlag('settings');
+        if (null !== $legacy) {
+            return $legacy;
+        }
+
+        return $this->hasResponsiveFieldData($fields);
+    }
+
+    /**
+     * @param list<string> $fields
+     */
+    private function hasResponsiveFieldData(array $fields): bool
+    {
+        $responsive = $this->slideSettings['responsive'] ?? null;
+        if (!is_array($responsive)) {
+            return false;
+        }
+
+        foreach (['desktop', 'tablet', 'mobile'] as $breakpoint) {
+            $breakpointSettings = $responsive[$breakpoint] ?? null;
+            if (!is_array($breakpointSettings)) {
+                continue;
+            }
+
+            foreach ($fields as $field) {
+                $value = $breakpointSettings[$field] ?? null;
+                if (is_array($value) ? [] !== $value : null !== $value) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private function overrideFlag(string $name): ?bool
     {
         $overrides = $this->slideSettings['overrides'] ?? null;
@@ -325,6 +416,10 @@ class SlideTranslation implements ResourceInterface, TranslationInterface
                 'button' => (bool) ($slideSettings['overrides']['button'] ?? false),
                 'media' => (bool) ($slideSettings['overrides']['media'] ?? false),
                 'settings' => (bool) ($slideSettings['overrides']['settings'] ?? false),
+                'layout' => (bool) ($slideSettings['overrides']['layout'] ?? false),
+                'colors' => (bool) ($slideSettings['overrides']['colors'] ?? false),
+                'effects' => (bool) ($slideSettings['overrides']['effects'] ?? false),
+                'visibility' => (bool) ($slideSettings['overrides']['visibility'] ?? false),
             ];
         }
 

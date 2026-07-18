@@ -1,46 +1,124 @@
-{# Renders the layout settings of one responsive breakpoint form (`bp`) as an accordion.
-   - skip_texts: hide the title/description rows (also skipped when the form has no text fields)
-   - button_form: when provided, renders the slide-level button/link fields as a group before "Layout" #}
-{% set skip_texts = skip_texts|default(false) %}
+{# Renders one responsive breakpoint (`bp`) as a single accordion: Texts &
+   Typography, Media, optional Button/Link, Layout, Colors & Surface, Effects,
+   Visibility.
+   - media: optional {image_field, image_path, video_field, video_path, preview_id, video_help} — renders a Media item when given
+   - button_form: when provided, renders the slide-level button/link fields as an item (desktop breakpoint only)
+   - gated: when true, every item except Texts & Typography only shows/opens once its own "Overwrite" checkbox is checked
+   - text_first: when true, Texts & Typography is the first item and open by default (used in Translations); otherwise Media is first/open (base form)
+   - media_override_field / layout_override_field / colors_override_field / effects_override_field / visibility_override_field: the "Overwrite" checkbox FormView for each gated item (Button/Link reuses button_form.addButton) #}
+{% set media = media|default(null) %}
 {% set button_form = button_form|default(null) %}
-{% set has_texts = bp.title is defined and not skip_texts %}
+{% set gated = gated|default(false) %}
+{% set text_first = text_first|default(false) %}
+{# Not |default(null): a leaf FormView (e.g. a checkbox with no children) is Countable
+   with count 0, which Twig's `default` filter treats as empty and silently nulls out. #}
+{% set media_override_field = media_override_field is defined ? media_override_field : null %}
+{% set layout_override_field = layout_override_field is defined ? layout_override_field : null %}
+{% set colors_override_field = colors_override_field is defined ? colors_override_field : null %}
+{% set effects_override_field = effects_override_field is defined ? effects_override_field : null %}
+{% set visibility_override_field = visibility_override_field is defined ? visibility_override_field : null %}
+{% set has_texts = bp.title is defined %}
 {% set accordion_id = bp.vars.id ~ '-groups' %}
 
-<div class="accordion" id="{{ accordion_id }}">
+{% macro header(icon, title, target_id, open_by_default, override_field) %}
+    {% set enabled = override_field is null or override_field.vars.checked %}
+    <h4 class="accordion-header d-flex align-items-center">
+        <button
+            class="accordion-button{% if not open_by_default %} collapsed{% endif %} flex-grow-1"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#{{ target_id }}"
+            {% if not enabled %}disabled aria-disabled="true"{% endif %}
+        >
+            <svg class="me-1 accordion-chevron" width="12" height="12" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+            </svg>
+            {{ ux_icon(icon, {'class': 'icon me-1'}) }} {{ title }}
+        </button>
+        {% if override_field is not null %}
+            <div class="form-check mb-0 ms-3 me-2">
+                {{ form_widget(override_field, { label: 'Overwrite', attr: { class: 'form-check-input', title: override_field.vars.help } }) }}
+            </div>
+        {% endif %}
+    </h4>
+{% endmacro %}
+
+{% macro texts_item(accordion_id, bp, has_texts, open_by_default) %}
     <div class="accordion-item">
-        <h4 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-texts">
-                <i class="bi bi-fonts me-1"></i> Texts &amp; Typography
-            </button>
-        </h4>
-        <div id="{{ accordion_id }}-texts" class="accordion-collapse collapse show" data-bs-parent="#{{ accordion_id }}">
+        {{ _self.header('tabler:typography', 'Texts & Typography', accordion_id ~ '-texts', open_by_default, null) }}
+        <div id="{{ accordion_id }}-texts" class="accordion-collapse collapse{% if open_by_default %} show{% endif %}" data-bs-parent="#{{ accordion_id }}">
             <div class="accordion-body row">
                 {% if has_texts %}
                     <div class="col-12 col-md-6">{{ form_row(bp.title, { attr: {'data-preview-field': 'title'} }) }}</div>
-                {% endif %}
-                <div class="col-12 col-md-6">{{ form_row(bp.headlineElement, { attr: {'data-preview-field': 'headlineElement'} }) }}</div>
-                {% if has_texts %}
                     <div class="col-12">{{ form_row(bp.description, { attr: {'data-preview-field': 'description'} }) }}</div>
                 {% endif %}
+                <div class="col-12 col-md-4">{{ form_row(bp.headlineElement, { attr: {'data-preview-field': 'headlineElement'} }) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.headlineFontSize, { attr: {'data-preview-field': 'headlineFontSize'} }) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.descriptionFontSize, { attr: {'data-preview-field': 'descriptionFontSize'} }) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.buttonFontSize, { attr: {'data-preview-field': 'buttonFontSize'} }) }}</div>
             </div>
         </div>
     </div>
+{% endmacro %}
+
+{% macro media_item(accordion_id, media, gated, override_field, open_by_default) %}
+    <div class="accordion-item"{% if gated %} data-slider-settings-item-guard="media"{% endif %}>
+        {{ _self.header('tabler:photo', 'sylius.ui.media'|trans, accordion_id ~ '-media', open_by_default, override_field) }}
+        <div id="{{ accordion_id }}-media" class="accordion-collapse collapse{% if open_by_default %} show{% endif %}" data-bs-parent="#{{ accordion_id }}"{% if gated %} data-slider-settings-media-override-only{% endif %}>
+            <div class="accordion-body row">
+                <div class="col-12 col-md-6">
+                    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                        field: media.image_field,
+                        image_path: media.image_path,
+                        preview_id: media.preview_id
+                    } %}
+                </div>
+                <div class="col-12 col-md-6">
+                    {{ form_row(media.video_field, { label: 'Video (self-hosted upload)', help: media.video_help|default('Optional video for this breakpoint; it replaces the image when set.') }) }}
+                    {# Not |default(null): a leaf FormView is Countable(0) and
+                       Twig's default filter would silently null it out. #}
+                    {% if media.video_url_field is defined and media.video_url_field is not null %}
+                        {{ form_row(media.video_url_field) }}
+                    {% endif %}
+                    {% if media.video_path %}
+                        <div class="text-secondary small mt-1">{{ ux_icon('tabler:video', {'class': 'icon me-1'}) }}{{ media.video_path }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+<div class="accordion" id="{{ accordion_id }}">
+    {% if text_first %}
+        {{ _self.texts_item(accordion_id, bp, has_texts, true) }}
+        {% if media is not null %}{{ _self.media_item(accordion_id, media, gated, media_override_field, false) }}{% endif %}
+    {% else %}
+        {% if media is not null %}{{ _self.media_item(accordion_id, media, gated, media_override_field, true) }}{% endif %}
+        {{ _self.texts_item(accordion_id, bp, has_texts, media is null) }}
+    {% endif %}
 
     {% if button_form is not null %}
-        <div class="accordion-item">
-            <h4 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-button">
-                    <i class="bi bi-link-45deg me-1"></i> Button / Link
-                </button>
-            </h4>
+        <div class="accordion-item"{% if gated %} data-slider-settings-item-guard="button"{% endif %}>
+            {% if gated %}
+                {{ _self.header('tabler:link', 'Button / Link', accordion_id ~ '-button', false, button_form.addButton) }}
+            {% else %}
+                <h4 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-button">
+                        <svg class="me-1 accordion-chevron" width="12" height="12" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                        {{ ux_icon('tabler:link', {'class': 'icon me-1'}) }} Button / Link
+                    </button>
+                </h4>
+            {% endif %}
             <div id="{{ accordion_id }}-button" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
                 <div class="accordion-body">
-                    <div class="row">
-                        <div class="col-12">{{ form_row(button_form.addButton) }}</div>
-                    </div>
+                    {% if not gated %}
+                        <div class="row">
+                            <div class="col-12">{{ form_row(button_form.addButton) }}</div>
+                        </div>
+                    {% endif %}
                     <div class="row" data-slider-settings-button-only>
                         <div class="col-12 col-md-6">{{ form_row(button_form.buttonLabel) }}</div>
                         <div class="col-12 col-md-6">{{ form_row(button_form.url) }}</div>
@@ -57,13 +135,9 @@
         </div>
     {% endif %}
 
-    <div class="accordion-item">
-        <h4 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-layout">
-                <i class="bi bi-layout-text-window-reverse me-1"></i> Layout
-            </button>
-        </h4>
-        <div id="{{ accordion_id }}-layout" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+    <div class="accordion-item"{% if gated %} data-slider-settings-item-guard="layout"{% endif %}>
+        {{ _self.header('tabler:layout-2', 'Layout', accordion_id ~ '-layout', false, layout_override_field) }}
+        <div id="{{ accordion_id }}-layout" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}"{% if gated %} data-slider-settings-layout-override-only{% endif %}>
             <div class="accordion-body row">
                 <div class="col-12 col-md-4">{{ form_row(bp.contentHorizontalPosition, { attr: {'data-preview-field': 'contentHorizontalPosition'} }) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.contentVerticalPosition, { attr: {'data-preview-field': 'contentVerticalPosition'} }) }}</div>
@@ -71,18 +145,16 @@
                 <div class="col-12 col-md-4">{{ form_row(bp.contentPadding, { attr: {'data-preview-field': 'contentPadding'} }) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.contentMargin, { attr: {'data-preview-field': 'contentMargin'} }) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.borderRadius, { attr: {'data-preview-field': 'borderRadius'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.contentWidth, { attr: {'data-preview-field': 'contentWidth'} }) }}</div>
+                <div class="col-12 col-md-4">{{ form_row(bp.contentMaxHeight, { attr: {'data-preview-field': 'contentMaxHeight'} }) }}</div>
                 <div class="col-12">{{ form_row(bp.customCssClass) }}</div>
             </div>
         </div>
     </div>
 
-    <div class="accordion-item">
-        <h4 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-colors">
-                <i class="bi bi-palette me-1"></i> Colors &amp; Surface
-            </button>
-        </h4>
-        <div id="{{ accordion_id }}-colors" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+    <div class="accordion-item"{% if gated %} data-slider-settings-item-guard="colors"{% endif %}>
+        {{ _self.header('tabler:palette', 'Colors & Surface', accordion_id ~ '-colors', false, colors_override_field) }}
+        <div id="{{ accordion_id }}-colors" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}"{% if gated %} data-slider-settings-colors-override-only{% endif %}>
             <div class="accordion-body row">
                 <div class="col-12 col-md-4">{{ form_row(bp.textColor, { attr: {'data-preview-field': 'textColor'} }) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.headlineColor, { attr: {'data-preview-field': 'headlineColor'} }) }}</div>
@@ -93,17 +165,59 @@
         </div>
     </div>
 
-    <div class="accordion-item">
-        <h4 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-effects">
-                <i class="bi bi-stars me-1"></i> Effects
-            </button>
-        </h4>
-        <div id="{{ accordion_id }}-effects" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
-            <div class="accordion-body row">
-                <div class="col-12 col-md-4">{{ form_row(bp.contentAnimation, { attr: {'data-preview-field': 'contentAnimation'} }) }}</div>
-                <div class="col-12 col-md-4">{{ form_row(bp.animationDuration, { attr: {'data-preview-field': 'animationDuration'} }) }}</div>
-                <div class="col-12 col-md-4">{{ form_row(bp.animationDelay, { attr: {'data-preview-field': 'animationDelay'} }) }}</div>
+    {# Every animation type carries predefined settings (applied when the
+       type changes); the "customize" checkbox reveals only the settings the
+       tunables list allows for that type. #}
+    {% set animation_presets = {
+        'fade-up': { fields: { duration: 500, delay: 0 }, tunables: ['duration', 'delay'] },
+        'fade-down': { fields: { duration: 500, delay: 0 }, tunables: ['duration', 'delay'] },
+        'fade-left': { fields: { duration: 500, delay: 0 }, tunables: ['duration', 'delay'] },
+        'fade-right': { fields: { duration: 500, delay: 0 }, tunables: ['duration', 'delay'] },
+        'zoom-in': { fields: { duration: 700, delay: 0 }, tunables: ['duration', 'delay'] },
+        'slide-up': { fields: { duration: 700, delay: 0 }, tunables: ['duration', 'delay'] },
+        'flip-in': { fields: { duration: 700, delay: 100 }, tunables: ['duration', 'delay'] },
+        'blur-in': { fields: { duration: 1000, delay: 0 }, tunables: ['duration', 'delay'] },
+        'bounce-in': { fields: { duration: 1000, delay: 0 }, tunables: ['duration', 'delay'] },
+        'none': { fields: {}, tunables: [] },
+    } %}
+    <div class="accordion-item"{% if gated %} data-slider-settings-item-guard="effects"{% endif %}>
+        {{ _self.header('tabler:sparkles', 'Effects', accordion_id ~ '-effects', false, effects_override_field) }}
+        <div id="{{ accordion_id }}-effects" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}"{% if gated %} data-slider-settings-effects-override-only{% endif %}>
+            <div
+                class="accordion-body row"
+                data-controller="vanssa-animation-settings"
+                data-vanssa-animation-settings-presets-value="{{ animation_presets|json_encode|e('html_attr') }}"
+            >
+                <div class="col-12 col-md-4">{{ form_row(bp.contentAnimation, { attr: {
+                    'data-preview-field': 'contentAnimation',
+                    'data-vanssa-animation-settings-target': 'type',
+                    'data-action': 'vanssa-animation-settings#typeChanged',
+                } }) }}</div>
+                <div class="col-12 col-md-8 d-flex align-items-center" data-vanssa-animation-custom-wrap>
+                    <label class="form-check mb-0">
+                        <input
+                            type="checkbox"
+                            class="form-check-input"
+                            data-vanssa-animation-settings-target="custom"
+                            data-action="vanssa-animation-settings#customChanged"
+                        >
+                        <span class="form-check-label">Customize animation settings</span>
+                    </label>
+                </div>
+                <div class="col-12 d-none" data-vanssa-animation-settings-target="tunables">
+                    <div class="row">
+                        <div class="col-12 col-md-4" data-vanssa-animation-field-wrap>{{ form_row(bp.animationDuration, { attr: {
+                            'data-preview-field': 'animationDuration',
+                            'data-vanssa-animation-settings-target': 'field',
+                            'data-vanssa-animation-field': 'duration',
+                        } }) }}</div>
+                        <div class="col-12 col-md-4" data-vanssa-animation-field-wrap>{{ form_row(bp.animationDelay, { attr: {
+                            'data-preview-field': 'animationDelay',
+                            'data-vanssa-animation-settings-target': 'field',
+                            'data-vanssa-animation-field': 'delay',
+                        } }) }}</div>
+                    </div>
+                </div>
                 <div class="col-12 col-md-4">{{ form_row(bp.backgroundBlurPreset, { attr: {'data-preview-field': 'backgroundBlurPreset'} }) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.enableTextBlur, { attr: {'data-preview-field': 'enableTextBlur'} }) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.contentBlurStrength, { attr: {'data-preview-field': 'contentBlurStrength'} }) }}</div>
@@ -111,13 +225,9 @@
         </div>
     </div>
 
-    <div class="accordion-item">
-        <h4 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-visibility">
-                <i class="bi bi-eye-slash me-1"></i> Visibility
-            </button>
-        </h4>
-        <div id="{{ accordion_id }}-visibility" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+    <div class="accordion-item"{% if gated %} data-slider-settings-item-guard="visibility"{% endif %}>
+        {{ _self.header('tabler:eye-off', 'Visibility', accordion_id ~ '-visibility', false, visibility_override_field) }}
+        <div id="{{ accordion_id }}-visibility" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}"{% if gated %} data-slider-settings-visibility-override-only{% endif %}>
             <div class="accordion-body row">
                 <div class="col-12 col-md-4">{{ form_row(bp.hideTitle) }}</div>
                 <div class="col-12 col-md-4">{{ form_row(bp.hideDescription) }}</div>

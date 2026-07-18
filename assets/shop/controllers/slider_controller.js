@@ -25,6 +25,15 @@ export default class extends Controller {
             return;
         }
 
+        // Per-breakpoint structural settings: apply the map matching the
+        // viewport now and whenever it crosses a breakpoint boundary.
+        this.mediaTablet = window.matchMedia('(max-width: 1024px)');
+        this.mediaMobile = window.matchMedia('(max-width: 767px)');
+        this.breakpointChangeBound = () => this.applyStructuralSettings();
+        this.mediaTablet.addEventListener('change', this.breakpointChangeBound);
+        this.mediaMobile.addEventListener('change', this.breakpointChangeBound);
+
+        this.applyStructuralSettings(true);
         this.setupPagination();
         this.bindButtons();
         this.setupKeyboard();
@@ -55,9 +64,91 @@ export default class extends Controller {
             this.viewportObserver = null;
         }
 
+        if (this.breakpointChangeBound) {
+            this.mediaTablet?.removeEventListener('change', this.breakpointChangeBound);
+            this.mediaMobile?.removeEventListener('change', this.breakpointChangeBound);
+            this.breakpointChangeBound = null;
+        }
+
         this.teardownKeyboard();
         this.teardownSwipe();
         this.teardownParallax();
+    }
+
+    currentBreakpoint() {
+        if (this.mediaMobile?.matches) {
+            return 'mobile';
+        }
+        if (this.mediaTablet?.matches) {
+            return 'tablet';
+        }
+
+        return 'desktop';
+    }
+
+    // Effective structural settings for the current viewport (locale merged
+    // server-side; tablet cascades from desktop, mobile from tablet).
+    structural() {
+        const maps = this.optionsValue?.responsive;
+
+        return maps?.[this.currentBreakpoint()] ?? maps?.desktop ?? null;
+    }
+
+    applyStructuralSettings(initial = false) {
+        const settings = this.structural();
+        if (!settings) {
+            return;
+        }
+
+        const el = this.element;
+        const swapModifier = (prefix, value, allowed) => {
+            allowed.forEach((candidate) => el.classList.toggle(prefix + candidate, candidate === value));
+        };
+        swapModifier('vanssa-slider--container-', settings.containerWidth === 'full' ? 'full' : 'content', ['content', 'full']);
+        swapModifier('vanssa-slider--arrows-', settings.arrowsPosition, ['overlay', 'outside', 'bottom']);
+        swapModifier('vanssa-slider--arrows-align-', settings.arrowsVerticalAlign, ['center', 'top', 'bottom']);
+        swapModifier('vanssa-slider--pagination-', settings.paginationPosition, ['bottom-inside', 'bottom-outside', 'top', 'left', 'right']);
+
+        for (const [property, value] of Object.entries({
+            '--vanssa-slider-nav-size': settings.navigationSize,
+            '--vanssa-slider-nav-shadow': settings.navigationShadow,
+            '--vanssa-slider-nav-color': settings.navigationColor,
+            '--vanssa-slider-nav-bg': settings.navigationBackgroundColor,
+            '--vanssa-slider-pagination-size': settings.paginationSize,
+            '--vanssa-slider-pagination-shadow': settings.paginationShadow,
+            '--vanssa-slider-pagination-color': settings.paginationColor,
+            '--vanssa-slider-pagination-active': settings.paginationActiveColor,
+        })) {
+            if (value) {
+                el.style.setProperty(property, value);
+            }
+        }
+
+        const controls = el.querySelector('.vanssa-slider__controls');
+        if (controls) {
+            controls.style.display = settings.showNavigation && settings.showArrows && this.totalSlides > 1 ? '' : 'none';
+        }
+        if (this.hasPaginationTarget) {
+            this.paginationTarget.style.display = settings.showNavigation && this.totalSlides > 1 ? '' : 'none';
+        }
+        const progress = el.querySelector('.vanssa-slider__progress');
+        if (progress) {
+            progress.style.display = settings.showProgressBar && this.totalSlides > 1 ? '' : 'none';
+        }
+
+        el.querySelectorAll('.vanssa-slider__action').forEach((button) => {
+            ['chevron', 'angle', 'square'].forEach((icon) => {
+                button.classList.toggle(`vanssa-slider__action-icon--${icon}`, icon === settings.navigationIcon);
+            });
+            const isPrev = button.classList.contains('vanssa-slider__action--prev');
+            button.textContent = settings.navigationIcon === 'square' ? '■' : (settings.navigationIcon === 'angle' ? (isPrev ? '❮' : '❯') : (isPrev ? '‹' : '›'));
+        });
+
+        if (!initial) {
+            // Pagination style/shape and slide effect may differ — rebuild.
+            this.setupPagination();
+            this.applyCurrentSlide(this.currentIndex);
+        }
     }
 
     // Autoplay and content animations only run while the slider is actually
@@ -117,7 +208,7 @@ export default class extends Controller {
         }
 
         this.paginationTarget.innerHTML = '';
-        const shape = this.optionsValue?.paginationShape ?? 'circle';
+        const shape = this.structural()?.paginationShape ?? this.optionsValue?.paginationShape ?? 'circle';
         const style = this.paginationStyle();
         this.slideTargets.forEach((_, index) => {
             const bullet = document.createElement('button');
@@ -137,7 +228,7 @@ export default class extends Controller {
     }
 
     paginationStyle() {
-        const style = this.optionsValue?.paginationStyle ?? 'dots';
+        const style = this.structural()?.paginationStyle ?? this.optionsValue?.paginationStyle ?? 'dots';
 
         return ['dots', 'lines', 'numbers'].includes(style) ? style : 'dots';
     }
@@ -239,7 +330,7 @@ export default class extends Controller {
 
     applyCurrentSlide(index) {
         this.currentIndex = index;
-        const effect = this.optionsValue?.effect ?? 'slide';
+        const effect = this.structural()?.slideEffect ?? this.optionsValue?.effect ?? 'slide';
         const supportedEffects = ['slide', 'fade', 'zoom', 'lift', 'flip'];
         const resolvedEffect = supportedEffects.includes(effect) ? effect : 'slide';
 
@@ -272,7 +363,31 @@ export default class extends Controller {
 
         this.stopAutoplay();
 
-        this.timer = window.setInterval(() => {
+        // Video-gated advance: when the active slide shows an auto-playing
+        // video, its `ended` event drives the advance instead of the fixed
+        // interval — the interval only remains as a fallback in case the
+        // video never starts (load failure, blocked autoplay). Click-mode
+        // videos never gate rotation (an unstarted video must not stall it).
+        if (this.activeAutoplayMedia()) {
+            this.mediaEndedBound = (event) => {
+                if (this.ownsActiveSlideEvent(event)) {
+                    this.goTo(this.currentIndex + 1);
+                }
+            };
+            this.mediaPlayingBound = (event) => {
+                if (!this.ownsActiveSlideEvent(event)) {
+                    return;
+                }
+
+                window.clearTimeout(this.timer);
+                this.timer = null;
+                this.renderProgress(event.detail?.remainingMs ?? null);
+            };
+            this.element.addEventListener('vanssa-slide-video:ended', this.mediaEndedBound);
+            this.element.addEventListener('vanssa-slide-video:playing', this.mediaPlayingBound);
+        }
+
+        this.timer = window.setTimeout(() => {
             this.goTo(this.currentIndex + 1);
         }, this.autoplayInterval());
 
@@ -280,26 +395,55 @@ export default class extends Controller {
     }
 
     stopAutoplay() {
+        if (this.mediaEndedBound) {
+            this.element.removeEventListener('vanssa-slide-video:ended', this.mediaEndedBound);
+            this.mediaEndedBound = null;
+        }
+
+        if (this.mediaPlayingBound) {
+            this.element.removeEventListener('vanssa-slide-video:playing', this.mediaPlayingBound);
+            this.mediaPlayingBound = null;
+        }
+
         if (this.timer === null) {
             return;
         }
 
-        window.clearInterval(this.timer);
+        window.clearTimeout(this.timer);
         this.timer = null;
         this.resetProgress();
     }
 
-    renderProgress() {
-        if (!this.hasProgressBarTarget || this.optionsValue?.showProgressBar !== true) {
+    // Visible auto-playing video/embed of the active slide, if any — the
+    // media whose end should advance the slider.
+    activeAutoplayMedia() {
+        const slide = this.slideTargets[this.currentIndex] ?? null;
+        if (!slide || slide.dataset.vanssaVideoPlayback === 'click') {
+            return null;
+        }
+
+        return [...slide.querySelectorAll('video.vanssa-slide__media, iframe.vanssa-slide__media--embed')]
+            .find((media) => window.getComputedStyle(media).display !== 'none') ?? null;
+    }
+
+    ownsActiveSlideEvent(event) {
+        const slide = event.target instanceof Element ? event.target.closest('.vanssa-slide') : null;
+
+        return slide !== null && slide === (this.slideTargets[this.currentIndex] ?? null);
+    }
+
+    renderProgress(durationMs = null) {
+        if (!this.hasProgressBarTarget || (this.structural()?.showProgressBar ?? this.optionsValue?.showProgressBar) !== true) {
             return;
         }
 
+        const duration = Number.isFinite(durationMs) && durationMs > 0 ? durationMs : this.autoplayInterval();
         const bar = this.progressBarTarget;
         bar.style.transition = 'none';
         bar.style.width = '0%';
         // Force a reflow so the width reset applies before the animation starts.
         void bar.offsetWidth;
-        bar.style.transition = `width ${this.autoplayInterval()}ms linear`;
+        bar.style.transition = `width ${duration}ms linear`;
         bar.style.width = '100%';
     }
 
@@ -380,8 +524,16 @@ export default class extends Controller {
             return;
         }
 
+        const activeSlide = this.slideTargets[this.currentIndex] ?? null;
         const activeMedia = this.activeSlideMedia();
-        if (!activeMedia) {
+        if (!activeSlide || !activeMedia) {
+            return;
+        }
+
+        const strength = this.parallaxStrengthFor(activeSlide);
+        if (strength <= 0) {
+            this.resetParallax();
+
             return;
         }
 
@@ -392,7 +544,6 @@ export default class extends Controller {
 
         const relativeX = (event.clientX - rect.left) / rect.width;
         const relativeY = (event.clientY - rect.top) / rect.height;
-        const strength = this.parallaxStrength();
         const shiftX = (0.5 - relativeX) * 2 * strength;
         const shiftY = (0.5 - relativeY) * 2 * strength;
 
@@ -422,7 +573,8 @@ export default class extends Controller {
     }
 
     parallaxEnabled() {
-        if (this.parallaxStrength() <= 0) {
+        const anySlideStrength = this.slideTargets.some((slide) => this.parallaxStrengthFor(slide) > 0);
+        if (this.parallaxStrength() <= 0 && !anySlideStrength) {
             return false;
         }
 
@@ -445,6 +597,28 @@ export default class extends Controller {
         }
 
         return Math.max(0, Math.min(200, parsed));
+    }
+
+    // Effective strength for one slide: its own data attribute wins over the
+    // slider-level option; '0' explicitly disables parallax for that slide.
+    parallaxStrengthFor(slideElement) {
+        const raw = (slideElement?.dataset?.vanssaParallaxStrength ?? '').trim();
+        if (raw === '') {
+            return this.parallaxStrength();
+        }
+
+        const parsed = raw === '0' ? 0 : this.parseLengthToPx(raw);
+        if (!Number.isFinite(parsed)) {
+            return this.parallaxStrength();
+        }
+
+        return Math.max(0, Math.min(200, parsed));
+    }
+
+    // Read any --vanssa-* custom property from the slider root, so themes and
+    // integrations can reach every admin-configured value from JS.
+    cssVar(name) {
+        return window.getComputedStyle(this.element).getPropertyValue(name).trim();
     }
 
     parseLengthToPx(value) {

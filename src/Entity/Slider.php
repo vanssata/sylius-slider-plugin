@@ -130,7 +130,60 @@ class Slider implements ResourceInterface, TranslatableInterface, \Stringable
      */
     public function getLocalizedSettings(string $locale, ?string $fallbackLocale = null): array
     {
-        return $this->settings;
+        $settings = $this->settings;
+
+        $translation = $this->getTranslation($locale, $fallbackLocale);
+        if (!$translation instanceof SliderTranslation) {
+            return $settings;
+        }
+
+        $overrides = $translation->getSettings();
+
+        // Locale base overrides apply to the top-level (desktop) settings;
+        // locale responsive overrides overlay the breakpoint variants.
+        $base = $overrides['base'] ?? null;
+        if (is_array($base)) {
+            $settings = self::overlaySettings($settings, $base);
+        }
+
+        $localeResponsive = $overrides['responsive'] ?? null;
+        if (is_array($localeResponsive)) {
+            $responsive = is_array($settings['responsive'] ?? null) ? $settings['responsive'] : [];
+            foreach (['tablet', 'mobile'] as $breakpoint) {
+                $breakpointOverride = $localeResponsive[$breakpoint] ?? null;
+                if (!is_array($breakpointOverride)) {
+                    continue;
+                }
+
+                $current = is_array($responsive[$breakpoint] ?? null) ? $responsive[$breakpoint] : [];
+                $responsive[$breakpoint] = self::overlaySettings($current, $breakpointOverride);
+            }
+            $settings['responsive'] = $responsive;
+        }
+
+        return $settings;
+    }
+
+    /**
+     * Overlays override values, skipping empty ones ('' / null) so partial
+     * locale overrides inherit everything they do not set.
+     *
+     * @param array<string, mixed> $settings
+     * @param array<string, mixed> $overrides
+     *
+     * @return array<string, mixed>
+     */
+    private static function overlaySettings(array $settings, array $overrides): array
+    {
+        foreach ($overrides as $key => $value) {
+            if (null === $value || '' === $value || [] === $value) {
+                continue;
+            }
+
+            $settings[$key] = $value;
+        }
+
+        return $settings;
     }
 
     public function isAvailableForChannel(string $channelCode, string $locale, ?string $fallbackLocale = null): bool

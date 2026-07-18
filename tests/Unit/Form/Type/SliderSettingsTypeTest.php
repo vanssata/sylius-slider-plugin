@@ -27,6 +27,7 @@ final class SliderSettingsTypeTest extends TypeTestCase
                 new AutoplaySettingsType($presetProvider),
                 new ParallaxSettingsType($presetProvider),
                 new ColorPickerType($presetProvider),
+                new \Vanssa\SyliusSliderPlugin\Form\Type\Settings\SliderResponsiveBreakpointSettingsType($presetProvider),
             ], []),
             new ValidatorExtension(Validation::createValidator()),
         ];

@@ -10,6 +10,26 @@ $radius-sm: 0.45rem;
 $radius-md: 0.5rem;
 $radius-lg: 0.75rem;
 
+// Build-time theme defaults for every admin-configurable slider/slide value.
+// Each is the fallback of the matching --vanssa-* CSS custom property, so
+// integrators can retheme by overriding these before importing plugin SCSS.
+$vanssa-slider-speed: 400ms !default;
+$vanssa-slider-nav-size: 1.5rem !default;
+$vanssa-slider-nav-color: $color-amber-400 !default;
+$vanssa-slider-nav-bg: rgb(17 24 39 / 85%) !default;
+$vanssa-slider-pagination-size: 0.625rem !default;
+$vanssa-slider-pagination-color: rgb(250 204 21 / 45%) !default;
+$vanssa-slider-pagination-active: rgb(250 204 21) !default;
+$vanssa-slide-text-color: $color-white !default;
+$vanssa-slide-content-padding: 1.25rem !default;
+$vanssa-slide-content-blur: 12px !default;
+$vanssa-slide-animation-duration: 500ms !default;
+$vanssa-slide-animation-delay: 0ms !default;
+
+// Content animation types — keyframes vanssa-<name> and classes
+// is-anim-<name> are generated from this list in shop/styles/slider.scss.
+$vanssa-content-animations: (fade-up, fade-down, fade-left, fade-right, zoom-in, slide-up, flip-in, blur-in, bounce-in) !default;
+
 $bp-tablet: 1024px;
 $bp-mobile: 767px;
 $bp-mobile-wide: 768px;

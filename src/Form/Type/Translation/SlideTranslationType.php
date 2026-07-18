@@ -9,37 +9,40 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vanssa\SyliusSliderPlugin\Entity\Slide;
 use Vanssa\SyliusSliderPlugin\Entity\SlideTranslation;
 use Vanssa\SyliusSliderPlugin\Form\Type\Settings\SlideSettingsType;
 use Vanssa\SyliusSliderPlugin\Service\UploadedMediaStorage;
+use Vanssa\SyliusSliderPlugin\Video\VideoProviderRegistry;
 
 final class SlideTranslationType extends AbstractType
 {
+    /** @var array<string, array{url: string, getter: string, setter: string}> file field => external-URL wiring per video slot */
+    private const VIDEO_SLOTS = [
+        'slideCoverVideoFile' => ['url' => 'slideCoverVideoUrl', 'getter' => 'getSlideCoverVideo', 'setter' => 'setSlideCoverVideo'],
+        'slideCoverVideoMobileFile' => ['url' => 'slideCoverVideoMobileUrl', 'getter' => 'getSlideCoverVideoMobile', 'setter' => 'setSlideCoverVideoMobile'],
+        'slideCoverVideoTabletFile' => ['url' => 'slideCoverVideoTabletUrl', 'getter' => 'getSlideCoverVideoTablet', 'setter' => 'setSlideCoverVideoTablet'],
+    ];
+
     public function __construct(
         private readonly UploadedMediaStorage $uploadedMediaStorage,
+        private readonly VideoProviderRegistry $videoProviderRegistry,
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name', TextType::class, [
-                'required' => false,
-                'label' => 'sylius.ui.name',
-                'help' => 'Translated slide title shown in this locale.',
-                'constraints' => [
-                    new Assert\Length(['max' => 255]),
-                ],
-            ])
             ->add('addButton', CheckboxType::class, [
                 'required' => false,
                 'mapped' => false,
-                'label' => 'Translate button/link',
+                'label' => 'Overwrite',
                 'help' => 'Override the button label and link for this locale.',
                 'attr' => [
                     'data-slider-settings-target' => 'addButton',
@@ -62,7 +65,7 @@ final class SlideTranslationType extends AbstractType
             ->add('overrideMedia', CheckboxType::class, [
                 'required' => false,
                 'mapped' => false,
-                'label' => 'Override media for this locale',
+                'label' => 'Overwrite',
                 'help' => 'Use locale-specific images instead of the main slide media.',
                 'attr' => [
                     'data-slider-settings-target' => 'overrideMedia',
@@ -75,19 +78,54 @@ final class SlideTranslationType extends AbstractType
             ->add('slideCoverVideoFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('slideCoverVideoMobileFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('slideCoverVideoTabletFile', FileType::class, ['required' => false, 'mapped' => false])
-            ->add('overrideSettings', CheckboxType::class, [
+            ->add('slideCoverVideoUrl', TextType::class, self::videoUrlFieldOptions())
+            ->add('slideCoverVideoMobileUrl', TextType::class, self::videoUrlFieldOptions())
+            ->add('slideCoverVideoTabletUrl', TextType::class, self::videoUrlFieldOptions())
+            ->add('overrideLayout', CheckboxType::class, [
                 'required' => false,
                 'mapped' => false,
-                'label' => 'Override display settings for this locale',
-                'help' => 'Override layout, heading tag, colors and effects for this locale.',
+                'label' => 'Overwrite',
+                'help' => 'Override the layout for this locale.',
                 'attr' => [
-                    'data-slider-settings-target' => 'overrideSettings',
+                    'data-slider-settings-target' => 'overrideLayout',
+                    'data-action' => 'slider-settings#refresh',
+                ],
+            ])
+            ->add('overrideColors', CheckboxType::class, [
+                'required' => false,
+                'mapped' => false,
+                'label' => 'Overwrite',
+                'help' => 'Override colors and surface for this locale.',
+                'attr' => [
+                    'data-slider-settings-target' => 'overrideColors',
+                    'data-action' => 'slider-settings#refresh',
+                ],
+            ])
+            ->add('overrideEffects', CheckboxType::class, [
+                'required' => false,
+                'mapped' => false,
+                'label' => 'Overwrite',
+                'help' => 'Override animation and blur effects for this locale.',
+                'attr' => [
+                    'data-slider-settings-target' => 'overrideEffects',
+                    'data-action' => 'slider-settings#refresh',
+                ],
+            ])
+            ->add('overrideVisibility', CheckboxType::class, [
+                'required' => false,
+                'mapped' => false,
+                'label' => 'Overwrite',
+                'help' => 'Override title/description/button visibility for this locale.',
+                'attr' => [
+                    'data-slider-settings-target' => 'overrideVisibility',
                     'data-action' => 'slider-settings#refresh',
                 ],
             ])
             ->add('settings', SlideSettingsType::class, [
                 'required' => false,
                 'property_path' => 'slideSettings',
+                'include_parallax' => false,
+                'include_video' => false,
             ])
         ;
 
@@ -102,7 +140,17 @@ final class SlideTranslationType extends AbstractType
             $form = $event->getForm();
             $form->get('addButton')->setData($translation->isButtonOverrideEnabled());
             $form->get('overrideMedia')->setData($translation->isMediaOverrideEnabled());
-            $form->get('overrideSettings')->setData($translation->isSettingsOverrideEnabled());
+            $form->get('overrideLayout')->setData($translation->isLayoutOverrideEnabled());
+            $form->get('overrideColors')->setData($translation->isColorsOverrideEnabled());
+            $form->get('overrideEffects')->setData($translation->isEffectsOverrideEnabled());
+            $form->get('overrideVisibility')->setData($translation->isVisibilityOverrideEnabled());
+
+            foreach (self::VIDEO_SLOTS as $slot) {
+                $stored = $translation->{$slot['getter']}();
+                if (is_string($stored) && $this->videoProviderRegistry->isExternal($stored)) {
+                    $form->get($slot['url'])->setData($stored);
+                }
+            }
         });
 
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event): void {
@@ -114,11 +162,40 @@ final class SlideTranslationType extends AbstractType
             $form = $event->getForm();
             $addButton = true === $form->get('addButton')->getData();
             $overrideMedia = true === $form->get('overrideMedia')->getData();
-            $overrideSettings = true === $form->get('overrideSettings')->getData();
+            $overrideLayout = true === $form->get('overrideLayout')->getData();
+            $overrideColors = true === $form->get('overrideColors')->getData();
+            $overrideEffects = true === $form->get('overrideEffects')->getData();
+            $overrideVisibility = true === $form->get('overrideVisibility')->getData();
 
             if (!$addButton) {
                 $translation->setButtonLabel(null);
                 $translation->setUrl(null);
+            }
+
+            // External video URLs win over file uploads for their slot; a
+            // cleared URL whose stored value was external removes the video.
+            $externalHandled = [];
+            foreach (self::VIDEO_SLOTS as $fileField => $slot) {
+                $urlValue = $form->get($slot['url'])->getData();
+                $url = is_string($urlValue) ? trim($urlValue) : '';
+                if ('' !== $url) {
+                    $normalized = $this->videoProviderRegistry->normalize($url);
+                    if (null === $normalized) {
+                        $form->get($slot['url'])->addError(new FormError('Unsupported video URL — only YouTube links are accepted.'));
+
+                        continue;
+                    }
+
+                    $translation->{$slot['setter']}($normalized);
+                    $externalHandled[$fileField] = true;
+
+                    continue;
+                }
+
+                $stored = $translation->{$slot['getter']}();
+                if (is_string($stored) && $this->videoProviderRegistry->isExternal($stored)) {
+                    $translation->{$slot['setter']}(null);
+                }
             }
 
             foreach ([
@@ -129,6 +206,10 @@ final class SlideTranslationType extends AbstractType
                 'slideCoverVideoMobileFile' => 'setSlideCoverVideoMobile',
                 'slideCoverVideoTabletFile' => 'setSlideCoverVideoTablet',
             ] as $field => $setter) {
+                if (isset($externalHandled[$field])) {
+                    continue;
+                }
+
                 $file = $form->get($field)->getData();
                 if ($file instanceof UploadedFile) {
                     $translation->{$setter}($this->uploadedMediaStorage->store($file, 'slider/translation-cover'));
@@ -138,9 +219,38 @@ final class SlideTranslationType extends AbstractType
             $translation->setOverrides([
                 'button' => $addButton,
                 'media' => $overrideMedia,
-                'settings' => $overrideSettings,
+                'layout' => $overrideLayout,
+                'colors' => $overrideColors,
+                'effects' => $overrideEffects,
+                'visibility' => $overrideVisibility,
             ]);
+
+            $responsive = $translation->getSlideSettings()['responsive'] ?? null;
+            $desktop = is_array($responsive) && is_array($responsive['desktop'] ?? null) ? $responsive['desktop'] : [];
+            $desktopTitle = $desktop['title'] ?? null;
+
+            // A brand-new translation (locale with no persisted row yet) is
+            // only attached to its slide by ResourceTranslationsType's SUBMIT
+            // listener, which fires AFTER this child's POST_SUBMIT — reach for
+            // the slide through the form tree in that case.
+            $slide = $translation->getSlide() ?? $form->getParent()?->getParent()?->getData();
+            $slideCode = $slide instanceof Slide ? $slide->getCode() : null;
+            $translation->setName(is_string($desktopTitle) && '' !== trim($desktopTitle) ? $desktopTitle : $slideCode);
         });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function videoUrlFieldOptions(): array
+    {
+        return [
+            'required' => false,
+            'mapped' => false,
+            'label' => 'External video URL',
+            'help' => 'Paste a YouTube link instead of uploading a file — it wins over the upload for this slot; clear it to remove the external video.',
+            'attr' => ['placeholder' => 'https://www.youtube.com/watch?v=…'],
+        ];
     }
 
     public function configureOptions(OptionsResolver $resolver): void

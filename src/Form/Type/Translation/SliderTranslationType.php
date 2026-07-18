@@ -9,6 +9,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Vanssa\SyliusSliderPlugin\Entity\SliderTranslation;
+use Vanssa\SyliusSliderPlugin\Form\Type\Settings\SliderSettingsOverrideType;
 
 final class SliderTranslationType extends AbstractType
 {
@@ -16,6 +17,9 @@ final class SliderTranslationType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, ['required' => false])
+            ->add('settings', SliderSettingsOverrideType::class, [
+                'required' => false,
+            ])
         ;
     }
 

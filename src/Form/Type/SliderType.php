@@ -118,6 +118,9 @@ final class SliderType extends AbstractType
         $form->add('code', TextType::class, [
             'label' => 'sylius.ui.code',
             'disabled' => $disabled,
+            // Empty submissions map '' (not null) so NotBlank renders a form
+            // error instead of a TypeError 500 in the strict-typed setter.
+            'empty_data' => '',
             'constraints' => [
                 new Assert\NotBlank(),
                 new Assert\Length(['max' => 64]),

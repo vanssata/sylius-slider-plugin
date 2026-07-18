@@ -1,143 +1,173 @@
 {% set form = hookable_metadata.context.form.settings %}
-{% set accordion_id = form.vars.id ~ '-accordion' %}
-
-<div class="col-12">
-    <div class="card mt-3 mb-0" data-controller="slider-settings">
-        <div class="card-header">
-            <h2 class="card-title">{{ 'sylius.ui.settings'|trans }}</h2>
+{# Items of the flat slider settings accordion (form/sections.html.twig owns
+   the container and the slider-settings controller). #}
+{% set accordion_id = 'vanssa-slider-sections' %}
+        <div class="accordion-item">
+            <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-layout">
+                    {{ ux_icon('tabler:box-margin', {'class': 'icon me-2'}) }} Layout &amp; Spacing
+                </button>
+            </h3>
+            <div id="{{ accordion_id }}-layout" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+                <div class="accordion-body">
+                    {# Toolbar-driven breakpoints: Desktop edits the base
+                       values; Tablet/Mobile edit overrides (empty inherits). #}
+                    <div data-vanssa-context-breakpoint="desktop">
+                        <div class="row">
+                            <div class="col-12 col-md-6">{{ form_row(form.containerWidth) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.maxHeight) }}</div>
+                        </div>
+                        <div class="hr-text hr-text-start mt-3 mb-2">{{ 'vanssa_sylius_slider.ui.margin'|trans }}</div>
+                        <div class="row">
+                            <div class="col-6 col-md-3">{{ form_row(form.marginTop) }}</div>
+                            <div class="col-6 col-md-3">{{ form_row(form.marginRight) }}</div>
+                            <div class="col-6 col-md-3">{{ form_row(form.marginBottom) }}</div>
+                            <div class="col-6 col-md-3">{{ form_row(form.marginLeft) }}</div>
+                        </div>
+                        <div class="hr-text hr-text-start mt-3 mb-2">{{ 'vanssa_sylius_slider.ui.padding'|trans }}</div>
+                        <div class="row">
+                            <div class="col-6 col-md-3">{{ form_row(form.paddingTop) }}</div>
+                            <div class="col-6 col-md-3">{{ form_row(form.paddingRight) }}</div>
+                            <div class="col-6 col-md-3">{{ form_row(form.paddingBottom) }}</div>
+                            <div class="col-6 col-md-3">{{ form_row(form.paddingLeft) }}</div>
+                        </div>
+                    </div>
+                    {% for breakpoint in ['tablet', 'mobile'] %}
+                        <div data-vanssa-context-breakpoint="{{ breakpoint }}" class="d-none">
+                            <div class="alert alert-info py-2">Values left on "Inherit" fall back to the desktop version.</div>
+                            {% include '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/_override_fields.html.twig' with {
+                                form: attribute(form.responsive, breakpoint), groups: ['layout'],
+                            } %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="accordion" id="{{ accordion_id }}">
-                <div class="accordion-item">
-                    <h3 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-layout">
-                            <i class="bi bi-layout-text-window-reverse me-2"></i> Layout &amp; Spacing
-                        </button>
-                    </h3>
-                    <div id="{{ accordion_id }}-layout" class="accordion-collapse collapse show" data-bs-parent="#{{ accordion_id }}">
-                        <div class="accordion-body">
-                            <div class="row">
-                                <div class="col-12 col-md-4">{{ form_row(form.containerWidth) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.maxHeight) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.justifySlideHeight) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.overlay) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.showTitle) }}</div>
-                            </div>
-                            <h4 class="mt-2 mb-2 text-secondary">Margin</h4>
-                            <div class="row">
-                                <div class="col-6 col-md-3">{{ form_row(form.marginTop) }}</div>
-                                <div class="col-6 col-md-3">{{ form_row(form.marginRight) }}</div>
-                                <div class="col-6 col-md-3">{{ form_row(form.marginBottom) }}</div>
-                                <div class="col-6 col-md-3">{{ form_row(form.marginLeft) }}</div>
-                            </div>
-                            <h4 class="mt-2 mb-2 text-secondary">Padding</h4>
-                            <div class="row">
-                                <div class="col-6 col-md-3">{{ form_row(form.paddingTop) }}</div>
-                                <div class="col-6 col-md-3">{{ form_row(form.paddingRight) }}</div>
-                                <div class="col-6 col-md-3">{{ form_row(form.paddingBottom) }}</div>
-                                <div class="col-6 col-md-3">{{ form_row(form.paddingLeft) }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="accordion-item">
-                    <h3 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-behavior">
-                            <i class="bi bi-sliders me-2"></i> Behavior &amp; Effects
-                        </button>
-                    </h3>
-                    <div id="{{ accordion_id }}-behavior" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
-                        <div class="accordion-body">
-                            <div class="row">
-                                <div class="col-12 col-md-4">{{ form_row(form.slideEffect) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.speed) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.parallax.strength) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.rewind) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.pauseOnHover) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.keyboardNavigation) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.touchSwipe) }}</div>
-                                <div class="col-12 col-md-4">{{ form_row(form.lazyLoadMedia) }}</div>
-                            </div>
+        <div class="accordion-item">
+            <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-behavior">
+                    {{ ux_icon('tabler:adjustments-horizontal', {'class': 'icon me-2'}) }} Behavior &amp; Effects
+                </button>
+            </h3>
+            <div id="{{ accordion_id }}-behavior" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+                <div class="accordion-body">
+                    {% for breakpoint in ['tablet', 'mobile'] %}
+                        <div data-vanssa-context-breakpoint="{{ breakpoint }}" class="d-none">
+                            <div class="alert alert-info py-2">Values left on "Inherit" fall back to the desktop version.</div>
+                            {% include '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/_override_fields.html.twig' with {
+                                form: attribute(form.responsive, breakpoint), groups: ['behavior'],
+                            } %}
                         </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h3 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-navigation">
-                            <i class="bi bi-arrow-left-right me-2"></i> Arrows &amp; Navigation
-                        </button>
-                    </h3>
-                    <div id="{{ accordion_id }}-navigation" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
-                        <div class="accordion-body">
-                            <div class="row">
-                                <div class="col-12 col-md-6">{{ form_row(form.showNavigation, { attr: {
-                                    'data-slider-settings-target': 'showNavigation',
-                                    'data-action': 'slider-settings#refresh',
-                                } }) }}</div>
-                                <div class="col-12 col-md-6" data-slider-settings-navigation-only>{{ form_row(form.showArrows, { attr: {
-                                    'data-slider-settings-target': 'showArrows',
-                                    'data-action': 'slider-settings#refresh',
-                                } }) }}</div>
-                            </div>
-                            <div class="row" data-slider-settings-arrows-only>
-                                <div class="col-12 col-md-6">{{ form_row(form.arrowsPosition) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.arrowsVerticalAlign) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.navigationIcon) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.navigationSize) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.navigationShadow) }}</div>
-                                <div class="col-12 col-md-6"></div>
-                                <div class="col-12 col-md-6">{{ form_row(form.navigationColor) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.navigationBackgroundColor) }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h3 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-pagination">
-                            <i class="bi bi-three-dots me-2"></i> Pagination
-                        </button>
-                    </h3>
-                    <div id="{{ accordion_id }}-pagination" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
-                        <div class="accordion-body">
-                            <div class="row" data-slider-settings-navigation-only>
-                                <div class="col-12 col-md-6">{{ form_row(form.paginationStyle) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.paginationPosition) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.paginationShape) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.paginationSize) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.paginationShadow) }}</div>
-                                <div class="col-12 col-md-6"></div>
-                                <div class="col-12 col-md-6">{{ form_row(form.paginationColor) }}</div>
-                                <div class="col-12 col-md-6">{{ form_row(form.paginationActiveColor) }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h3 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-autoplay">
-                            <i class="bi bi-play-circle me-2"></i> Autoplay
-                        </button>
-                    </h3>
-                    <div id="{{ accordion_id }}-autoplay" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
-                        <div class="accordion-body">
-                            <div class="row">
-                                <div class="col-12 col-md-3">{{ form_row(form.autoplay.enabled, { attr: {
-                                    'data-slider-settings-target': 'autoplayEnabled',
-                                    'data-action': 'slider-settings#refresh',
-                                } }) }}</div>
-                                <div class="col-12 col-md-3" data-slider-settings-autoplay-only>{{ form_row(form.autoplay.interval) }}</div>
-                                <div class="col-12 col-md-3" data-slider-settings-autoplay-only>{{ form_row(form.autoplay.pauseOnHover) }}</div>
-                                <div class="col-12 col-md-3" data-slider-settings-autoplay-only>{{ form_row(form.showProgressBar) }}</div>
-                            </div>
-                        </div>
+                    {% endfor %}
+                    <div class="row" data-vanssa-context-breakpoint="desktop">
+                        <div class="col-12 col-md-4">{{ form_row(form.slideEffect) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.speed) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.parallax.strength) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.rewind) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.pauseOnHover) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.keyboardNavigation) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.touchSwipe) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.lazyLoadMedia) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.overlay) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.showTitle) }}</div>
+                        <div class="col-12 col-md-4">{{ form_row(form.justifySlideHeight) }}</div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-navigation">
+                    {{ ux_icon('tabler:arrows-left-right', {'class': 'icon me-2'}) }} Arrows &amp; Navigation
+                </button>
+            </h3>
+            <div id="{{ accordion_id }}-navigation" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+                <div class="accordion-body">
+                    <div data-vanssa-context-breakpoint="desktop">
+                        <div class="row">
+                            <div class="col-12 col-md-6">{{ form_row(form.showNavigation, { attr: {
+                                    'data-slider-settings-target': 'showNavigation',
+                                    'data-action': 'slider-settings#refresh',
+                                } }) }}</div>
+                            <div class="col-12 col-md-6" data-slider-settings-navigation-only>{{ form_row(form.showArrows, { attr: {
+                                    'data-slider-settings-target': 'showArrows',
+                                    'data-action': 'slider-settings#refresh',
+                                } }) }}</div>
+                        </div>
+                        <div class="row" data-slider-settings-arrows-only>
+                            <div class="col-12 col-md-6">{{ form_row(form.arrowsPosition) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.arrowsVerticalAlign) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.navigationIcon) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.navigationSize) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.navigationShadow) }}</div>
+                            <div class="col-12 col-md-6"></div>
+                            <div class="col-12 col-md-6">{{ form_row(form.navigationColor) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.navigationBackgroundColor) }}</div>
+                        </div>
+                    </div>
+                    {% for breakpoint in ['tablet', 'mobile'] %}
+                        <div data-vanssa-context-breakpoint="{{ breakpoint }}" class="d-none">
+                            <div class="alert alert-info py-2">Values left on "Inherit" fall back to the desktop version.</div>
+                            {% include '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/_override_fields.html.twig' with {
+                                form: attribute(form.responsive, breakpoint), groups: ['arrows'],
+                            } %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-pagination">
+                    {{ ux_icon('tabler:dots', {'class': 'icon me-2'}) }} Pagination
+                </button>
+            </h3>
+            <div id="{{ accordion_id }}-pagination" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+                <div class="accordion-body">
+                    <div data-vanssa-context-breakpoint="desktop">
+                        <div class="row" data-slider-settings-navigation-only>
+                            <div class="col-12 col-md-6">{{ form_row(form.paginationStyle) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.paginationPosition) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.paginationShape) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.paginationSize) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.paginationShadow) }}</div>
+                            <div class="col-12 col-md-6"></div>
+                            <div class="col-12 col-md-6">{{ form_row(form.paginationColor) }}</div>
+                            <div class="col-12 col-md-6">{{ form_row(form.paginationActiveColor) }}</div>
+                        </div>
+                    </div>
+                    {% for breakpoint in ['tablet', 'mobile'] %}
+                        <div data-vanssa-context-breakpoint="{{ breakpoint }}" class="d-none">
+                            <div class="alert alert-info py-2">Values left on "Inherit" fall back to the desktop version.</div>
+                            {% include '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/_override_fields.html.twig' with {
+                                form: attribute(form.responsive, breakpoint), groups: ['pagination'],
+                            } %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ accordion_id }}-autoplay">
+                    {{ ux_icon('tabler:player-play', {'class': 'icon me-2'}) }} Autoplay
+                </button>
+            </h3>
+            <div id="{{ accordion_id }}-autoplay" class="accordion-collapse collapse" data-bs-parent="#{{ accordion_id }}">
+                <div class="accordion-body">
+                    <div class="row">
+                        <div class="col-12 col-md-3">{{ form_row(form.autoplay.enabled, { attr: {
+                                'data-slider-settings-target': 'autoplayEnabled',
+                                'data-action': 'slider-settings#refresh',
+                            } }) }}</div>
+                        <div class="col-12 col-md-3" data-slider-settings-autoplay-only>{{ form_row(form.autoplay.interval) }}</div>
+                        <div class="col-12 col-md-3" data-slider-settings-autoplay-only>{{ form_row(form.autoplay.pauseOnHover) }}</div>
+                        <div class="col-12 col-md-3" data-slider-settings-autoplay-only>{{ form_row(form.showProgressBar) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>

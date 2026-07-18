@@ -1,2 +1,23 @@
 {% set form = hookable_metadata.context.form %}
 <div class="col-12 col-md-6">{{ form_row(form.name) }}</div>
+
+{# Per-locale slider settings overrides: everything left empty inherits the
+   non-translated settings. Desktop edits the locale's base overrides;
+   Tablet/Mobile edit the locale's breakpoint overrides — all driven by the
+   preview toolbar. #}
+<div class="col-12">
+    <div class="hr-text hr-text-start mt-2 mb-2">Settings overrides for this language</div>
+    <div data-vanssa-context-breakpoint="desktop">
+        {% include '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/_override_fields.html.twig' with {
+            form: form.settings.base,
+        } %}
+    </div>
+    {% for breakpoint in ['tablet', 'mobile'] %}
+        <div data-vanssa-context-breakpoint="{{ breakpoint }}" class="d-none">
+            <div class="alert alert-info py-2">Overrides for this language on the {{ breakpoint }} breakpoint; "Inherit" falls back to the non-translated {{ breakpoint }} settings.</div>
+            {% include '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/_override_fields.html.twig' with {
+                form: attribute(form.settings.responsive, breakpoint),
+            } %}
+        </div>
+    {% endfor %}
+</div>

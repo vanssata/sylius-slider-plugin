@@ -1,0 +1,60 @@
+{# Renders a group of slider OVERRIDE fields (SliderResponsiveBreakpointSettingsType
+   view) — used by the tablet/mobile blocks of each settings section and by
+   the per-locale override groups in Translations. Empty values inherit.
+   Params: form (the override FormView), groups (list of
+   layout|behavior|arrows|pagination; defaults to all). #}
+{% set groups = groups|default(['layout', 'behavior', 'arrows', 'pagination']) %}
+
+{% if 'layout' in groups %}
+    <div class="row">
+        <div class="col-12 col-md-6">{{ form_row(form.containerWidth) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.maxHeight) }}</div>
+    </div>
+    <div class="hr-text hr-text-start mt-3 mb-2">{{ 'vanssa_sylius_slider.ui.margin'|trans }}</div>
+    <div class="row">
+        <div class="col-6 col-md-3">{{ form_row(form.marginTop) }}</div>
+        <div class="col-6 col-md-3">{{ form_row(form.marginRight) }}</div>
+        <div class="col-6 col-md-3">{{ form_row(form.marginBottom) }}</div>
+        <div class="col-6 col-md-3">{{ form_row(form.marginLeft) }}</div>
+    </div>
+    <div class="hr-text hr-text-start mt-3 mb-2">{{ 'vanssa_sylius_slider.ui.padding'|trans }}</div>
+    <div class="row">
+        <div class="col-6 col-md-3">{{ form_row(form.paddingTop) }}</div>
+        <div class="col-6 col-md-3">{{ form_row(form.paddingRight) }}</div>
+        <div class="col-6 col-md-3">{{ form_row(form.paddingBottom) }}</div>
+        <div class="col-6 col-md-3">{{ form_row(form.paddingLeft) }}</div>
+    </div>
+{% endif %}
+
+{% if 'behavior' in groups %}
+    <div class="row">
+        <div class="col-12 col-md-6">{{ form_row(form.slideEffect) }}</div>
+    </div>
+{% endif %}
+
+{% if 'arrows' in groups %}
+    <div class="row">
+        <div class="col-12 col-md-6">{{ form_row(form.showNavigation) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.showArrows) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.arrowsPosition) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.arrowsVerticalAlign) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.navigationIcon) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.navigationSize) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.navigationShadow) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.navigationColor) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.navigationBackgroundColor) }}</div>
+    </div>
+{% endif %}
+
+{% if 'pagination' in groups %}
+    <div class="row">
+        <div class="col-12 col-md-6">{{ form_row(form.paginationStyle) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.paginationPosition) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.paginationShape) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.paginationSize) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.paginationShadow) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.showProgressBar) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.paginationColor) }}</div>
+        <div class="col-12 col-md-6">{{ form_row(form.paginationActiveColor) }}</div>
+    </div>
+{% endif %}

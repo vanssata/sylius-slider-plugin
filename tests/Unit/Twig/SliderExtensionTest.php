@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Vanssa\SyliusSliderPlugin\Unit\Twig;
 
-use Twig\TwigFilter;
-use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
-use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
-use Vanssa\SyliusSliderPlugin\Twig\SliderExtension;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
 use Twig\Loader\ArrayLoader;
+use Twig\TwigFilter;
+use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
+use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
+use Vanssa\SyliusSliderPlugin\Twig\SliderExtension;
 
 final class SliderExtensionTest extends TestCase
 {

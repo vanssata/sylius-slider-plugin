@@ -182,6 +182,9 @@ final class SliderSettingsType extends AbstractType
             ->add('autoplay', AutoplaySettingsType::class, [
                 'help' => 'Configure automatic slide cycling behavior.',
             ])
+            ->add('responsive', ResponsiveSliderSettingsWrapperType::class, [
+                'required' => false,
+            ])
             ->add('parallax', ParallaxSettingsType::class, [
                 'help' => 'Configure optional parallax movement for slide media.',
             ])

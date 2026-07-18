@@ -10,6 +10,21 @@ use Vanssa\SyliusSliderPlugin\Entity\SlideTranslation;
 
 final class SlideOverridesTest extends TestCase
 {
+    /**
+     * Bypasses setSlideSettings()'s normalization to simulate a translation
+     * persisted before the layout/colors/effects/visibility flags existed —
+     * Doctrine hydrates entities via reflection too, so a real legacy row
+     * would keep its raw, un-normalized JSON exactly like this.
+     *
+     * @param array<string, mixed> $slideSettings
+     */
+    private function setRawSlideSettings(SlideTranslation $translation, array $slideSettings): void
+    {
+        $property = new \ReflectionProperty(SlideTranslation::class, 'slideSettings');
+        $property->setAccessible(true);
+        $property->setValue($translation, $slideSettings);
+    }
+
     public function testMediaOverrideIsIgnoredWithoutTheFlag(): void
     {
         $slide = $this->createSlide();
@@ -60,7 +75,7 @@ final class SlideOverridesTest extends TestCase
         self::assertSame('/de', $slide->getLocalizedUrl('de_DE'));
     }
 
-    public function testTranslatedTextsAlwaysApplyWithoutSettingsOverride(): void
+    public function testTextsAndTypographyAlwaysApplyRegardlessOfAnyOverrideFlag(): void
     {
         $slide = $this->createSlide();
         $translation = $this->addTranslation($slide, 'de_DE');
@@ -76,50 +91,134 @@ final class SlideOverridesTest extends TestCase
                 'mobile' => [],
             ],
         ]);
-        $translation->setOverrides(['settings' => false]);
+        $translation->setOverrides([]);
 
         $settings = $slide->getLocalizedSlideSettings('de_DE');
 
         self::assertSame('DE Titel', $settings['responsive']['desktop']['title']);
         self::assertSame('DE Beschreibung', $settings['responsive']['desktop']['description']);
-        self::assertSame('h3', $settings['responsive']['desktop']['headlineElement'], 'Heading tag must come from the base slide without the settings override.');
-        self::assertSame('left', $settings['responsive']['desktop']['contentTextAlign']);
+        self::assertSame('h1', $settings['responsive']['desktop']['headlineElement'], 'Texts & Typography (title, description, headline tag, font sizes) always applies, with no override flag needed.');
+        self::assertSame('left', $settings['responsive']['desktop']['contentTextAlign'], 'Layout must still fall back to the base slide without the layout override.');
     }
 
-    public function testSettingsOverrideAppliesAllDisplaySettings(): void
+    public function testLayoutOverrideAppliesIndependentlyOfColors(): void
     {
         $slide = $this->createSlide();
         $translation = $this->addTranslation($slide, 'de_DE');
         $translation->setSlideSettings([
             'responsive' => [
                 'desktop' => [
-                    'title' => 'DE Titel',
-                    'headlineElement' => 'h1',
                     'contentTextAlign' => 'right',
+                    'textColor' => 'rgba(255, 0, 0, 1)',
                 ],
                 'tablet' => [],
                 'mobile' => [],
             ],
         ]);
-        $translation->setOverrides(['settings' => true]);
+        $translation->setOverrides(['layout' => true, 'colors' => false]);
+
+        $settings = $slide->getLocalizedSlideSettings('de_DE');
+
+        self::assertSame('right', $settings['responsive']['desktop']['contentTextAlign'], 'Layout override is enabled, so it must apply.');
+        self::assertArrayNotHasKey('textColor', $settings['responsive']['desktop'], 'Colors override is disabled, so the translated color must not apply.');
+    }
+
+    public function testLegacyCombinedSettingsFlagStillEnablesAllGranularGroups(): void
+    {
+        $slide = $this->createSlide();
+        $translation = $this->addTranslation($slide, 'de_DE');
+        // Legacy data saved before layout/colors/effects/visibility flags
+        // existed: only the old combined "settings" flag is present.
+        $this->setRawSlideSettings($translation, [
+            'overrides' => ['settings' => true],
+            'responsive' => [
+                'desktop' => [
+                    'headlineElement' => 'h1',
+                    'contentTextAlign' => 'right',
+                    'textColor' => 'rgba(255, 0, 0, 1)',
+                ],
+                'tablet' => [],
+                'mobile' => [],
+            ],
+        ]);
 
         $settings = $slide->getLocalizedSlideSettings('de_DE');
 
         self::assertSame('h1', $settings['responsive']['desktop']['headlineElement']);
         self::assertSame('right', $settings['responsive']['desktop']['contentTextAlign']);
+        self::assertSame('rgba(255, 0, 0, 1)', $settings['responsive']['desktop']['textColor']);
     }
 
     public function testOverrideFlagsSurviveNormalization(): void
     {
         $translation = new SlideTranslation();
         $translation->setSlideSettings([
-            'overrides' => ['media' => true, 'settings' => false, 'button' => true],
+            'overrides' => ['media' => true, 'settings' => false, 'button' => true, 'layout' => true, 'colors' => false, 'effects' => true, 'visibility' => false],
             'responsive' => ['desktop' => [], 'tablet' => [], 'mobile' => []],
         ]);
 
         self::assertTrue($translation->isMediaOverrideEnabled());
         self::assertFalse($translation->isSettingsOverrideEnabled());
         self::assertTrue($translation->isButtonOverrideEnabled());
+        self::assertTrue($translation->isLayoutOverrideEnabled());
+        self::assertFalse($translation->isColorsOverrideEnabled());
+        self::assertTrue($translation->isEffectsOverrideEnabled());
+        self::assertFalse($translation->isVisibilityOverrideEnabled());
+    }
+
+    public function testParallaxStrengthSurvivesNormalization(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideSettings([
+            'parallax' => ['strength' => '2rem'],
+            'responsive' => ['desktop' => [], 'tablet' => [], 'mobile' => []],
+        ]);
+
+        self::assertSame(['strength' => '2rem'], $slide->getSlideSettings()['parallax'] ?? null);
+    }
+
+    public function testBlankParallaxStrengthIsDroppedByNormalization(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideSettings([
+            'parallax' => ['strength' => '  '],
+            'responsive' => ['desktop' => [], 'tablet' => [], 'mobile' => []],
+        ]);
+
+        self::assertArrayNotHasKey('parallax', $slide->getSlideSettings());
+    }
+
+    public function testExplicitZeroParallaxStrengthIsKept(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideSettings([
+            'parallax' => ['strength' => '0'],
+            'responsive' => ['desktop' => [], 'tablet' => [], 'mobile' => []],
+        ]);
+
+        self::assertSame(['strength' => '0'], $slide->getSlideSettings()['parallax'] ?? null);
+    }
+
+    public function testVideoPlaybackSurvivesNormalization(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideSettings([
+            'video' => ['playback' => 'click'],
+            'responsive' => ['desktop' => [], 'tablet' => [], 'mobile' => []],
+        ]);
+
+        self::assertSame(['playback' => 'click'], $slide->getSlideSettings()['video'] ?? null);
+    }
+
+    public function testUnknownVideoPlaybackIsDroppedByNormalization(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideSettings([
+            'video' => ['playback' => 'bogus'],
+            'responsive' => ['desktop' => [], 'tablet' => [], 'mobile' => []],
+        ]);
+
+        self::assertArrayNotHasKey('video', $slide->getSlideSettings());
     }
 
     public function testDesktopVideoAppliesToAllBreakpointsWhenOthersAreEmpty(): void

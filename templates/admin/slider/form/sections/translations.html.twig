@@ -1,12 +1,34 @@
-{% import '@SyliusAdmin/shared/helper/translations.html.twig' as translations %}
 {% set form = hookable_metadata.context.form %}
 {% set prefixes = hookable_metadata.prefixes %}
+{# Edit pages are toolbar-driven: the preview panel's language dropdown picks
+   which locale's name field is visible; on create every locale renders
+   stacked (flat — no nested accordion inside this accordion item). #}
+{% set toolbar_driven = form.vars.data.id|default(null) is not null %}
 
-<div class="card mb-3">
-    <div class="card-header">
-        <h2 class="card-title">{{ 'sylius.ui.translations'|trans }}</h2>
-    </div>
-    <div class="card-body">
-        {{ translations.with_hook(form.translations, prefixes, null, {accordion_id: 'slider-translations', accordion_flush: true}) }}
+<div class="accordion-item">
+    <h3 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#vanssa-slider-sections-translations">
+            {{ ux_icon('tabler:language', {'class': 'icon me-2'}) }} {{ 'sylius.ui.translations'|trans }}
+        </button>
+    </h3>
+    <div id="vanssa-slider-sections-translations" class="accordion-collapse collapse" data-bs-parent="#vanssa-slider-sections">
+        <div class="accordion-body">
+            {% for locale, translation_form in form.translations %}
+                {% if toolbar_driven %}
+                    <div class="d-none" data-vanssa-context-locale="{{ locale }}">
+                        <div class="row">
+                            {% hook 'translations' with { form: translation_form, locale, _prefixes: prefixes } %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="mb-3">
+                        <div class="hr-text hr-text-start mb-2">{{ locale|sylius_locale_name }}</div>
+                        <div class="row">
+                            {% hook 'translations' with { form: translation_form, locale, _prefixes: prefixes } %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
     </div>
 </div>

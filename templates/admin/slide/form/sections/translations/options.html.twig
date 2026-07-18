@@ -1,51 +1,55 @@
 {% set form = hookable_metadata.context.form %}
 {% set translation = form.vars.data %}
-{% set slide = translation is not null ? translation.translatable : null %}
 {% set tabs_id = form.vars.id ~ '-media' %}
+{# Edit pages are toolbar-driven (preview panel decides the visible
+   breakpoint); create pages keep the classic tabs. The slide entity sits two
+   form levels up (translation entry -> translations -> slide). #}
+{% set slide_entity = form.parent.parent.vars.data|default(null) %}
+{% set toolbar_driven = slide_entity is not null and slide_entity.id is not null %}
 {% set translation_breakpoints = [
-    { key: 'desktop', icon: 'bi-display', image_field: form.slideCoverFile, image_path: translation ? translation.slideCover : null, video_field: form.slideCoverVideoFile, video_path: translation ? translation.slideCoverVideo : null },
-    { key: 'mobile', icon: 'bi-phone', image_field: form.slideCoverMobileFile, image_path: translation ? translation.slideCoverMobile : null, video_field: form.slideCoverVideoMobileFile, video_path: translation ? translation.slideCoverVideoMobile : null },
-    { key: 'tablet', icon: 'bi-tablet', image_field: form.slideCoverTabletFile, image_path: translation ? translation.slideCoverTablet : null, video_field: form.slideCoverVideoTabletFile, video_path: translation ? translation.slideCoverVideoTablet : null },
+    { key: 'desktop', icon: 'tabler:device-desktop', image_field: form.slideCoverFile, image_path: translation ? translation.slideCover : null, video_field: form.slideCoverVideoFile, video_url_field: form.slideCoverVideoUrl, video_path: translation ? translation.slideCoverVideo : null },
+    { key: 'mobile', icon: 'tabler:device-mobile', image_field: form.slideCoverMobileFile, image_path: translation ? translation.slideCoverMobile : null, video_field: form.slideCoverVideoMobileFile, video_url_field: form.slideCoverVideoMobileUrl, video_path: translation ? translation.slideCoverVideoMobile : null },
+    { key: 'tablet', icon: 'tabler:device-tablet', image_field: form.slideCoverTabletFile, image_path: translation ? translation.slideCoverTablet : null, video_field: form.slideCoverVideoTabletFile, video_url_field: form.slideCoverVideoTabletUrl, video_path: translation ? translation.slideCoverVideoTablet : null },
 ] %}
 
-<div class="col-12" data-controller="slider-settings vanssa-slide-preview vanssa-responsive-copy">
-    <div class="row">
-        <div class="col-12">{{ form_row(form.name) }}</div>
-    </div>
+<div class="col-12 vanssa-slider-admin" data-controller="slider-settings vanssa-responsive-copy">
+    {% if toolbar_driven %}
+        {# The overwrite flags apply to the whole locale (not per breakpoint);
+           they must stay reachable whatever breakpoint the toolbar shows, so
+           they live here instead of inside the desktop accordion headers. #}
+        <div class="card bg-secondary-subtle border-0 mb-3">
+            <div class="card-body py-2">
+                <div class="row row-cols-auto g-3 align-items-center">
+                    <div class="col fw-bold">{{ 'Overwrite for this locale:'|trans }}</div>
+                    <div class="col">{{ form_row(form.overrideMedia, { label: 'sylius.ui.media'|trans }) }}</div>
+                    <div class="col">{{ form_row(form.overrideLayout, { label: 'Layout' }) }}</div>
+                    <div class="col">{{ form_row(form.overrideColors, { label: 'Colors' }) }}</div>
+                    <div class="col">{{ form_row(form.overrideEffects, { label: 'Effects' }) }}</div>
+                    <div class="col">{{ form_row(form.overrideVisibility, { label: 'Visibility' }) }}</div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 
-    <hr>
+    {% if not toolbar_driven %}
+        <ul class="nav nav-tabs" role="tablist">
+            {% for breakpoint in translation_breakpoints %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if loop.first %} active{% endif %}" data-bs-toggle="tab" data-bs-target="#{{ tabs_id }}-{{ breakpoint.key }}" data-breakpoint="{{ breakpoint.key }}" type="button" role="tab">
+                        {{ ux_icon(breakpoint.icon, {'class': 'icon me-1'}) }} {{ breakpoint.key|capitalize }}
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
-    {# Button / link override #}
-    <div class="row">
-        <div class="col-12">{{ form_row(form.addButton) }}</div>
-    </div>
-    <div class="row" data-slider-settings-button-only>
-        <div class="col-12 col-md-6">{{ form_row(form.buttonLabel) }}</div>
-        <div class="col-12 col-md-6">{{ form_row(form.url) }}</div>
-    </div>
-
-    <hr>
-
-    {# Media & display settings overrides, organized per breakpoint like the
-       main "Media & Settings" card. #}
-    <div class="row">
-        <div class="col-12 col-md-6">{{ form_row(form.overrideMedia) }}</div>
-        <div class="col-12 col-md-6">{{ form_row(form.overrideSettings) }}</div>
-    </div>
-
-    <ul class="nav nav-tabs" role="tablist">
+    <div class="{{ toolbar_driven ? 'pt-2' : 'tab-content pt-4' }}">
         {% for breakpoint in translation_breakpoints %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link{% if loop.first %} active{% endif %}" data-bs-toggle="tab" data-bs-target="#{{ tabs_id }}-{{ breakpoint.key }}" type="button" role="tab">
-                    <i class="bi {{ breakpoint.icon }} me-1"></i> {{ breakpoint.key|capitalize }}
-                </button>
-            </li>
-        {% endfor %}
-    </ul>
-
-    <div class="tab-content pt-4">
-        {% for breakpoint in translation_breakpoints %}
-            <div class="tab-pane fade{% if loop.first %} show active{% endif %}" id="{{ tabs_id }}-{{ breakpoint.key }}" role="tabpanel">
+            {% if toolbar_driven %}
+                <div data-vanssa-context-breakpoint="{{ breakpoint.key }}"{% if not loop.first %} class="d-none"{% endif %}>
+            {% else %}
+                <div class="tab-pane fade{% if loop.first %} show active{% endif %}" id="{{ tabs_id }}-{{ breakpoint.key }}" role="tabpanel">
+            {% endif %}
                 {% if breakpoint.key != 'desktop' %}
                     <div class="alert alert-info d-flex justify-content-between align-items-center py-2">
                         <span>Texts, media and layout settings left empty fall back to the desktop version.</span>
@@ -55,54 +59,36 @@
                             data-action="vanssa-responsive-copy#copyFromDesktop"
                             data-vanssa-responsive-copy-breakpoint-param="{{ breakpoint.key }}"
                         >
-                            <i class="bi bi-copy me-1"></i> Copy settings from desktop
+                            {{ ux_icon('tabler:copy', {'class': 'icon me-1'}) }} Copy settings from desktop
                         </button>
                     </div>
                 {% endif %}
 
-                {# Translated texts — always applied for this locale, no override needed. #}
                 {% set bp_form = attribute(form.settings.responsive, breakpoint.key) %}
-                <div class="card mb-3">
-                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-fonts me-1"></i> Texts</h4></div>
-                    <div class="card-body row">
-                        <div class="col-12 col-md-6">{{ form_row(bp_form.title, { label: 'Title', attr: {'data-preview-field': 'title'} }) }}</div>
-                        <div class="col-12 col-md-6">{{ form_row(bp_form.description, { label: 'Content', attr: {'data-preview-field': 'description'} }) }}</div>
-                    </div>
-                </div>
-
-                <div class="card mb-3 d-none" data-slider-settings-media-override-only>
-                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-image me-1"></i> {{ 'sylius.ui.media'|trans }}</h4></div>
-                    <div class="card-body row">
-                        <div class="col-12 col-md-6">
-                            {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
-                                field: breakpoint.image_field,
-                                image_path: breakpoint.image_path,
-                                preview_id: form.vars.id ~ '-' ~ breakpoint.key ~ '-preview'
-                            } %}
-                        </div>
-                        <div class="col-12 col-md-6">
-                            {{ form_row(breakpoint.video_field, { label: 'Video', help: 'Optional video for the ' ~ breakpoint.key ~ ' version of this locale.' }) }}
-                            {% if breakpoint.video_path %}
-                                <div class="text-secondary small mt-1"><i class="bi bi-camera-video me-1"></i>{{ breakpoint.video_path }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card mb-0 d-none" data-slider-settings-settings-override-only>
-                    <div class="card-header"><h4 class="card-title mb-0"><i class="bi bi-sliders me-1"></i> Layout settings</h4></div>
-                    <div class="card-body">
-                        {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_breakpoint_settings.html.twig' with {
-                            bp: bp_form,
-                            skip_texts: true
-                        } %}
-                    </div>
-                </div>
+                {# Classic mode: the override checkboxes render once, inline in
+                   the Desktop tab's accordion headers. Toolbar mode: they sit
+                   in the always-visible row above instead. #}
+                {% include '@VanssaSyliusSliderPlugin/admin/slide/form/sections/_breakpoint_settings.html.twig' with {
+                    bp: bp_form,
+                    button_form: breakpoint.key == 'desktop' ? form : null,
+                    gated: true,
+                    text_first: true,
+                    media_override_field: (not toolbar_driven and breakpoint.key == 'desktop') ? form.overrideMedia : null,
+                    layout_override_field: (not toolbar_driven and breakpoint.key == 'desktop') ? form.overrideLayout : null,
+                    colors_override_field: (not toolbar_driven and breakpoint.key == 'desktop') ? form.overrideColors : null,
+                    effects_override_field: (not toolbar_driven and breakpoint.key == 'desktop') ? form.overrideEffects : null,
+                    visibility_override_field: (not toolbar_driven and breakpoint.key == 'desktop') ? form.overrideVisibility : null,
+                    media: {
+                        image_field: breakpoint.image_field,
+                        image_path: breakpoint.image_path,
+                        video_field: breakpoint.video_field,
+                        video_url_field: breakpoint.video_url_field,
+                        video_path: breakpoint.video_path,
+                        preview_id: form.vars.id ~ '-' ~ breakpoint.key ~ '-preview',
+                        video_help: 'Optional video for the ' ~ breakpoint.key ~ ' version of this locale.'
+                    }
+                } %}
             </div>
         {% endfor %}
-    </div>
-
-    <div class="row mt-3">
-        <div class="col-12">{% include '@VanssaSyliusSliderPlugin/admin/shared/form/slide_preview.html.twig' with { slide: slide } %}</div>
     </div>
 </div>

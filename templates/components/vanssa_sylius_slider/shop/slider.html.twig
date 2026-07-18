@@ -50,11 +50,17 @@
 {% set touchSwipe = settings.touchSwipe ?? true %}
 {% set showProgressBar = settings.showProgressBar|default(false) and autoplay.enabled|default(autoplay.active|default(false)) %}
 {% set lazyLoadMedia = settings.lazyLoadMedia ?? true %}
+{% set hasSlideParallax = false %}
+{% for parallaxSlide in slides %}
+    {% set slideStrength = parallaxSlide.slideSettings.parallax.strength|default('')|trim %}
+    {% if slideStrength is not empty and slideStrength != '0' %}{% set hasSlideParallax = true %}{% endif %}
+{% endfor %}
+{% set structuralMaps = vanssa_slider_structural_maps(settings) %}
 {% set sliderClasses = [
     'vanssa-slider',
     settings.overlay|default(false) ? 'vanssa-slider--overlay' : '',
     (settings.justifySlideHeight ?? true) ? 'vanssa-slider--justify-height' : '',
-    parallaxStrength is not empty ? 'vanssa-slider--parallax' : '',
+    (parallaxStrength is not empty or hasSlideParallax) ? 'vanssa-slider--parallax' : '',
     maxHeight is not empty ? 'vanssa-slider--custom-max-height' : '',
     settings.containerWidth|default('content') == 'content' ? 'vanssa-slider--container-content' : 'vanssa-slider--container-full',
     'vanssa-slider--arrows-' ~ arrowsPosition,
@@ -75,12 +81,63 @@
     paginationShape: paginationShape,
     paginationSize: paginationSize,
     paginationStyle: paginationStyle,
+    paginationPosition: paginationPosition,
     keyboardNavigation: keyboardNavigation,
     touchSwipe: touchSwipe,
-    showProgressBar: showProgressBar
+    showProgressBar: showProgressBar,
+    containerWidth: settings.containerWidth|default('content'),
+    arrowsPosition: arrowsPosition,
+    arrowsVerticalAlign: arrowsVerticalAlign,
+    navigationIcon: navigationIcon,
+    maxHeight: maxHeight,
+    overlay: settings.overlay|default(false),
+    justifySlideHeight: settings.justifySlideHeight ?? true,
+    pauseOnHover: settings.pauseOnHover ?? true,
+    lazyLoadMedia: lazyLoadMedia,
+    responsive: structuralMaps
 } %}
+{# options.responsive = effective STRUCTURAL settings per breakpoint (locale
+   already merged server-side; tablet overlays desktop, mobile overlays
+   tablet) — the controller applies the matching map on viewport changes, so
+   arrows, pagination, container, effect etc. can differ per breakpoint. #}
+{# Any breakpoint enabling a control means its markup must exist — the
+   controller toggles visibility per breakpoint at runtime. #}
+{% set anyArrows = structuralMaps.desktop.showNavigation and structuralMaps.desktop.showArrows
+    or structuralMaps.tablet.showNavigation and structuralMaps.tablet.showArrows
+    or structuralMaps.mobile.showNavigation and structuralMaps.mobile.showArrows %}
+{% set anyPagination = structuralMaps.desktop.showNavigation or structuralMaps.tablet.showNavigation or structuralMaps.mobile.showNavigation %}
+{% set anyProgress = structuralMaps.desktop.showProgressBar or structuralMaps.tablet.showProgressBar or structuralMaps.mobile.showProgressBar %}
 
+{# Per-breakpoint slider layout overrides (tablet/mobile; empty inherits) —
+   emitted as a scoped media-query block after the section. #}
+{% set responsiveSlider = settings.responsive|default({}) %}
+{% set sliderBpVars = {} %}
+{% for bpKey in ['tablet', 'mobile'] %}
+    {% set bpSettings = responsiveSlider[bpKey]|default({}) %}
+    {% set vars = [] %}
+    {% for field, varName in {
+        'marginTop': 'margin-top', 'marginRight': 'margin-right', 'marginBottom': 'margin-bottom', 'marginLeft': 'margin-left',
+        'paddingTop': 'padding-top', 'paddingRight': 'padding-right', 'paddingBottom': 'padding-bottom', 'paddingLeft': 'padding-left',
+    } %}
+        {% if bpSettings[field]|default('') is not empty %}
+            {% set vars = vars|merge(['--vanssa-slider-' ~ varName ~ ': ' ~ bpSettings[field]]) %}
+        {% endif %}
+    {% endfor %}
+    {% if bpSettings.maxHeight|default('')|trim is not empty %}
+        {% set vars = vars|merge(['--vanssa-slider-max-height: ' ~ bpSettings.maxHeight|trim]) %}
+    {% endif %}
+    {% if bpSettings.navigationSize|default('') is not empty %}
+        {% set vars = vars|merge(['--vanssa-slider-nav-size: ' ~ bpSettings.navigationSize]) %}
+    {% endif %}
+    {% if bpSettings.paginationSize|default('') is not empty %}
+        {% set vars = vars|merge(['--vanssa-slider-pagination-size: ' ~ bpSettings.paginationSize]) %}
+    {% endif %}
+    {% if vars is not empty %}
+        {% set sliderBpVars = sliderBpVars|merge({ (bpKey): vars }) %}
+    {% endif %}
+{% endfor %}
 <section
+    data-slider-code="{{ this.slider.code }}"
     class="{{ sliderClasses|filter(className => className is not empty)|join(' ') }}"
     style="
         --vanssa-slider-speed: {{ settings.speed|default(400) }}ms;
@@ -101,6 +158,22 @@
         --vanssa-slider-padding-bottom: {{ settings.paddingBottom|default('0') }};
         --vanssa-slider-padding-left: {{ settings.paddingLeft|default('0') }};
         {% if maxHeight is not empty %}--vanssa-slider-max-height: {{ maxHeight }};{% endif %}
+        --vanssa-slider-effect: {{ settings.slideEffect|default('slide') }};
+        --vanssa-slider-container-width: {{ settings.containerWidth|default('content') }};
+        --vanssa-slider-arrows-position: {{ arrowsPosition }};
+        --vanssa-slider-arrows-align: {{ arrowsVerticalAlign }};
+        --vanssa-slider-pagination-position: {{ paginationPosition }};
+        --vanssa-slider-pagination-style: {{ paginationStyle }};
+        --vanssa-slider-pagination-shape: {{ paginationShape }};
+        --vanssa-slider-nav-icon: {{ navigationIcon }};
+        --vanssa-slider-rewind: {{ (settings.rewind ?? true) ? 1 : 0 }};
+        --vanssa-slider-pause-on-hover: {{ (settings.pauseOnHover ?? true) ? 1 : 0 }};
+        --vanssa-slider-autoplay: {{ autoplay.enabled|default(autoplay.active|default(false)) ? 1 : 0 }};
+        --vanssa-slider-autoplay-interval: {{ autoplay.interval|default(5000) }}ms;
+        --vanssa-slider-progress: {{ showProgressBar ? 1 : 0 }};
+        --vanssa-slider-overlay: {{ settings.overlay|default(false) ? 1 : 0 }};
+        --vanssa-slider-justify-height: {{ (settings.justifySlideHeight ?? true) ? 1 : 0 }};
+        {% if parallaxStrength is not empty %}--vanssa-slider-parallax-strength: {{ parallaxStrength }};{% endif %}
     "
     {{ stimulus_controller('vanssa-slider', { options: sliderOptions }) }}
     role="region"
@@ -130,7 +203,7 @@
                     {% endfor %}
                 </div>
 
-                {% if showNavigation and showArrows and slides|length > 1 %}
+                {% if anyArrows and slides|length > 1 %}
                     <div class="vanssa-slider__controls">
                         <button type="button" class="vanssa-slider__action vanssa-slider__action--prev vanssa-slider__action-icon--{{ navigationIcon }}" aria-label="Previous slide" {{ stimulus_target('vanssa-slider', 'prevButton') }}>
                             {% if navigationIcon == 'square' %}■{% elseif navigationIcon == 'angle' %}❮{% else %}‹{% endif %}
@@ -141,11 +214,25 @@
                     </div>
                 {% endif %}
 
-                {% if showNavigation and slides|length > 1 %}
-                    <div class="vanssa-slider__pagination" aria-label="Slider pagination" {{ stimulus_target('vanssa-slider', 'pagination') }}></div>
+                {% if anyPagination and slides|length > 1 %}
+                    {# Bullets are server-rendered so pagination is visible
+                       without JS too (the admin preview embeds this markup
+                       CSS-only); the controller rebuilds them on connect and
+                       on breakpoint changes when it runs. #}
+                    {% set paginationStyle = structuralMaps.desktop.paginationStyle in ['dots', 'lines', 'numbers'] ? structuralMaps.desktop.paginationStyle : 'dots' %}
+                    <div class="vanssa-slider__pagination" aria-label="Slider pagination" {{ stimulus_target('vanssa-slider', 'pagination') }}>
+                        {% for i in 1..slides|length %}
+                            <button
+                                type="button"
+                                class="vanssa-slider__bullet vanssa-slider__bullet--style-{{ paginationStyle }}{% if paginationStyle == 'dots' %} vanssa-slider__bullet--{{ structuralMaps.desktop.paginationShape|default('circle') }}{% endif %}{{ loop.first ? ' is-active' : '' }}"
+                                data-index="{{ loop.index0 }}"
+                                aria-label="Go to slide {{ i }}"
+                            >{% if paginationStyle == 'numbers' %}{{ i }}{% endif %}</button>
+                        {% endfor %}
+                    </div>
                 {% endif %}
 
-                {% if showProgressBar and slides|length > 1 %}
+                {% if anyProgress and slides|length > 1 %}
                     <div class="vanssa-slider__progress" aria-hidden="true">
                         <div class="vanssa-slider__progress-bar" {{ stimulus_target('vanssa-slider', 'progressBar') }}></div>
                     </div>
@@ -157,3 +244,17 @@
         {% endif %}
     </div>
 </section>
+{% if sliderBpVars is not empty %}
+    <style>
+        {% if sliderBpVars.tablet is defined %}
+            @media (max-width: 1024px) {
+                .vanssa-slider[data-slider-code="{{ this.slider.code }}"] { {{ sliderBpVars.tablet|join('; ') }}; }
+            }
+        {% endif %}
+        {% if sliderBpVars.mobile is defined %}
+            @media (max-width: 767px) {
+                .vanssa-slider[data-slider-code="{{ this.slider.code }}"] { {{ sliderBpVars.mobile|join('; ') }}; }
+            }
+        {% endif %}
+    </style>
+{% endif %}

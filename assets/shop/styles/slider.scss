@@ -52,14 +52,14 @@
         z-index: 4;
         border-radius: 999px;
         line-height: 1;
-        font-size: var(--vanssa-slider-nav-size, 1.5rem);
+        font-size: var(--vanssa-slider-nav-size, #{$vanssa-slider-nav-size});
         width: 1.75em;
         height: 1.75em;
         padding: 0;
         margin: 0;
         box-shadow: var(--vanssa-slider-nav-shadow, none);
-        color: var(--vanssa-slider-nav-color, $color-amber-400);
-        background: var(--vanssa-slider-nav-bg, rgb(17 24 39 / 85%));
+        color: var(--vanssa-slider-nav-color, #{$vanssa-slider-nav-color});
+        background: var(--vanssa-slider-nav-bg, #{$vanssa-slider-nav-bg});
 
         &--prev {
             left: 0.55rem;
@@ -78,7 +78,7 @@
         transform: translateX(-50%);
         display: flex;
         gap: 0.45rem;
-        font-size: var(--vanssa-slider-pagination-size, 0.625rem);
+        font-size: var(--vanssa-slider-pagination-size, #{$vanssa-slider-pagination-size});
     }
 
     &__bullet {
@@ -87,10 +87,10 @@
         border-radius: 999px;
         border: 0;
         box-shadow: var(--vanssa-slider-pagination-shadow, none);
-        background: var(--vanssa-slider-pagination-color, rgb(250 204 21 / 45%));
+        background: var(--vanssa-slider-pagination-color, #{$vanssa-slider-pagination-color});
 
         &.is-active {
-            background: var(--vanssa-slider-pagination-active, rgb(250 204 21));
+            background: var(--vanssa-slider-pagination-active, #{$vanssa-slider-pagination-active});
         }
 
         &--square {
@@ -205,7 +205,7 @@
     &__progress-bar {
         width: 0;
         height: 100%;
-        background: var(--vanssa-slider-pagination-active, rgb(250 204 21));
+        background: var(--vanssa-slider-pagination-active, #{$vanssa-slider-pagination-active});
 
         @media (prefers-reduced-motion: reduce) {
             transition: none !important;
@@ -219,8 +219,8 @@
     opacity: 0;
     transform: translateX(3%);
     transition:
-        opacity var(--vanssa-slider-speed, 400ms) ease,
-        transform var(--vanssa-slider-speed, 400ms) ease;
+        opacity var(--vanssa-slider-speed, #{$vanssa-slider-speed}) ease,
+        transform var(--vanssa-slider-speed, #{$vanssa-slider-speed}) ease;
     pointer-events: none;
 
     &.is-active {
@@ -258,6 +258,47 @@
         display: block;
     }
 
+    // External provider embed (YouTube iframe): covers like a video element;
+    // pointer events stay off so slider swipe/keyboard interaction works —
+    // playback is commanded by the vanssa-slide-video controller.
+    &__media--embed {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        pointer-events: none;
+    }
+
+    // Click-to-play overlay button (video playback mode "click").
+    &__video-play {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 4rem;
+        height: 4rem;
+        border: 0;
+        border-radius: 50%;
+        color: $color-white;
+        background: rgb(15 23 42 / 65%);
+        box-shadow: 0 6px 18px rgb(15 23 42 / 40%);
+        cursor: pointer;
+        transition: transform 0.15s ease, background-color 0.15s ease;
+
+        &:hover,
+        &:focus-visible {
+            background: rgb(15 23 42 / 85%);
+            transform: translate(-50%, -50%) scale(1.08);
+        }
+    }
+
+    &.is-video-started &__video-play {
+        display: none;
+    }
+
     // Breakpoint-specific media: each element is shown only in the viewport
     // range(s) it was resolved for (media without these classes covers all).
     &__media--on-desktop,
@@ -286,7 +327,9 @@
         }
     }
 
-    .vanssa-slider--parallax &__media {
+    // Gated per slide: the class reflects the effective strength (slide
+    // override wins over the slider setting, '0' disables just that slide).
+    &--parallax &__media {
         transform: translate3d(var(--vanssa-slide-parallax-x, 0px), var(--vanssa-slide-parallax-y, 0px), 0) scale(1.06);
         transition: transform 240ms ease-out;
         will-change: transform;
@@ -303,43 +346,41 @@
         position: absolute;
         inset: 0;
         display: flex;
-        padding: 1.5rem;
         z-index: 2;
+        padding: var(--vanssa-slide-content-gutter, 1.5rem);
         justify-content: var(--vanssa-slide-content-pos-x, flex-start);
         align-items: var(--vanssa-slide-content-pos-y, flex-end);
         transform: translate(var(--vanssa-slide-content-shift-x, 0px), var(--vanssa-slide-content-shift-y, 0px));
     }
 
     &__content-box {
-        max-width: min(54ch, 100%);
+        // contentWidth "full" overrides these via --vanssa-slide-content-*
+        // vars (edge-to-edge strip); contentMaxHeight caps the box at a
+        // share of the slide height — it grows with content up to the cap.
+        max-width: var(--vanssa-slide-content-max-width, min(54ch, 100%));
+        width: var(--vanssa-slide-content-width, auto);
+        max-height: var(--vanssa-slide-content-max-height, none);
+        overflow: hidden;
         display: flex;
         flex-direction: column;
-        color: var(--vanssa-slide-text-color, $color-white);
+        color: var(--vanssa-slide-text-color, #{$vanssa-slide-text-color});
         background: var(--vanssa-slide-background-color, transparent);
         border-radius: var(--vanssa-slide-radius, 0);
-        padding: var(--vanssa-slide-padding, 1.25rem);
+        padding: var(--vanssa-slide-padding, #{$vanssa-slide-content-padding});
         margin: var(--vanssa-slide-margin, 0);
         text-align: var(--vanssa-slide-text-align, left);
         backdrop-filter: blur(var(--vanssa-slide-bg-blur, 0));
 
         &.is-blurred {
-            backdrop-filter: blur(var(--vanssa-slide-blur, 12px));
+            backdrop-filter: blur(var(--vanssa-slide-blur, #{$vanssa-slide-content-blur}));
             background: color-mix(in srgb, var(--vanssa-slide-background-color, rgb(255 255 255 / 20%)) 78%, transparent);
         }
 
-        &.is-anim-fade-up {
-            animation: vanssa-fade-up var(--vanssa-slide-animation-duration, 500ms) ease both;
-            animation-delay: var(--vanssa-slide-animation-delay, 0ms);
-        }
-
-        &.is-anim-fade-right {
-            animation: vanssa-fade-right var(--vanssa-slide-animation-duration, 500ms) ease both;
-            animation-delay: var(--vanssa-slide-animation-delay, 0ms);
-        }
-
-        &.is-anim-zoom-in {
-            animation: vanssa-zoom-in var(--vanssa-slide-animation-duration, 500ms) ease both;
-            animation-delay: var(--vanssa-slide-animation-delay, 0ms);
+        @each $anim in $vanssa-content-animations {
+            &.is-anim-#{$anim} {
+                animation: vanssa-#{$anim} var(--vanssa-slide-animation-duration, #{$vanssa-slide-animation-duration}) ease both;
+                animation-delay: var(--vanssa-slide-animation-delay, #{$vanssa-slide-animation-delay});
+            }
         }
     }
 }
@@ -349,27 +390,17 @@
 // time a slide becomes active. Standalone slides (banner page) keep the
 // default animate-on-load behavior above.
 .vanssa-slider {
-    .vanssa-slide__content-box.is-anim-fade-up,
-    .vanssa-slide__content-box.is-anim-fade-right,
-    .vanssa-slide__content-box.is-anim-zoom-in {
+    .vanssa-slide__content-box[class*='is-anim-'] {
         animation: none;
         opacity: 0;
     }
 
     &.is-in-view .vanssa-slide.is-active {
-        .vanssa-slide__content-box.is-anim-fade-up {
-            animation: vanssa-fade-up var(--vanssa-slide-animation-duration, 500ms) ease both;
-            animation-delay: var(--vanssa-slide-animation-delay, 0ms);
-        }
-
-        .vanssa-slide__content-box.is-anim-fade-right {
-            animation: vanssa-fade-right var(--vanssa-slide-animation-duration, 500ms) ease both;
-            animation-delay: var(--vanssa-slide-animation-delay, 0ms);
-        }
-
-        .vanssa-slide__content-box.is-anim-zoom-in {
-            animation: vanssa-zoom-in var(--vanssa-slide-animation-duration, 500ms) ease both;
-            animation-delay: var(--vanssa-slide-animation-delay, 0ms);
+        @each $anim in $vanssa-content-animations {
+            .vanssa-slide__content-box.is-anim-#{$anim} {
+                animation: vanssa-#{$anim} var(--vanssa-slide-animation-duration, #{$vanssa-slide-animation-duration}) ease both;
+                animation-delay: var(--vanssa-slide-animation-delay, #{$vanssa-slide-animation-delay});
+            }
         }
     }
 }
@@ -588,6 +619,87 @@
     }
 
     to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes vanssa-fade-down {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -20px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes vanssa-fade-left {
+    from {
+        opacity: 0;
+        transform: translate3d(20px, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes vanssa-slide-up {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 60px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes vanssa-flip-in {
+    from {
+        opacity: 0;
+        transform: perspective(600px) rotateX(-24deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: perspective(600px) rotateX(0deg);
+    }
+}
+
+@keyframes vanssa-blur-in {
+    from {
+        opacity: 0;
+        filter: blur(10px);
+    }
+
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+@keyframes vanssa-bounce-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+
+    80% {
+        transform: scale(0.98);
+    }
+
+    100% {
         opacity: 1;
         transform: scale(1);
     }

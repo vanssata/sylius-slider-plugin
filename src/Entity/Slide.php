@@ -21,6 +21,21 @@ use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
 #[UniqueEntity(fields: ['code'], message: 'This slide code is already in use.')]
 class Slide implements ResourceInterface, TranslatableInterface
 {
+    /** @var list<string> Title, description and typography always apply for a translation, without needing an override flag. */
+    private const ALWAYS_APPLIED_RESPONSIVE_FIELDS = ['title', 'description', 'headlineElement', 'headlineFontSize', 'descriptionFontSize', 'buttonFontSize'];
+
+    /** @var list<string> */
+    private const LAYOUT_RESPONSIVE_FIELDS = ['contentHorizontalPosition', 'contentVerticalPosition', 'contentTextAlign', 'contentPadding', 'contentMargin', 'contentWidth', 'contentMaxHeight', 'borderRadius', 'customCssClass'];
+
+    /** @var list<string> */
+    private const COLORS_RESPONSIVE_FIELDS = ['textColor', 'headlineColor', 'descriptionColor', 'backgroundColor', 'mediaOverlayColor'];
+
+    /** @var list<string> */
+    private const EFFECTS_RESPONSIVE_FIELDS = ['contentAnimation', 'animationDuration', 'animationDelay', 'backgroundBlurPreset', 'enableTextBlur', 'contentBlurStrength'];
+
+    /** @var list<string> */
+    private const VISIBILITY_RESPONSIVE_FIELDS = ['hideTitle', 'hideDescription', 'hideButton'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -756,49 +771,75 @@ class Slide implements ResourceInterface, TranslatableInterface
             return null;
         }
 
-        if ($translation->isSettingsOverrideEnabled()) {
-            return $settings;
-        }
-
-        // Without the settings override, only the translated texts
-        // (title/description per breakpoint) apply on top of the base slide.
-        return self::extractTextOverrides($settings);
+        return self::buildGranularSettingsOverride($settings, $translation);
     }
 
     /**
+     * Texts & Typography (title, description, headline tag, font sizes) always
+     * apply for a translation. Linking and each responsive setting group
+     * (Layout / Colors & Surface / Effects / Visibility) only apply when their
+     * own override flag is enabled, so an admin can translate e.g. colors
+     * without also overriding layout.
+     *
      * @param array<string, mixed> $settings
      *
      * @return array<string, mixed>|null
      */
-    private static function extractTextOverrides(array $settings): ?array
+    private static function buildGranularSettingsOverride(array $settings, SlideTranslation $translation): ?array
     {
+        $override = [];
+
+        $linking = $settings['linking'] ?? null;
+        if ($translation->isButtonOverrideEnabled() && is_array($linking) && [] !== $linking) {
+            $override['linking'] = $linking;
+        }
+
         $responsive = $settings['responsive'] ?? null;
-        if (!is_array($responsive)) {
-            return null;
-        }
+        if (is_array($responsive)) {
+            $responsiveOverride = [];
 
-        $texts = ['responsive' => []];
-        foreach (['desktop', 'tablet', 'mobile'] as $breakpoint) {
-            $breakpointSettings = $responsive[$breakpoint] ?? null;
-            if (!is_array($breakpointSettings)) {
-                continue;
+            foreach (['desktop', 'tablet', 'mobile'] as $breakpoint) {
+                $breakpointSettings = $responsive[$breakpoint] ?? null;
+                if (!is_array($breakpointSettings)) {
+                    continue;
+                }
+
+                $fields = array_filter(
+                    array_intersect_key($breakpointSettings, array_flip(self::ALWAYS_APPLIED_RESPONSIVE_FIELDS)),
+                    static fn (mixed $value): bool => !is_string($value) || '' !== $value,
+                );
+
+                if ($translation->isLayoutOverrideEnabled()) {
+                    $fields += array_intersect_key($breakpointSettings, array_flip(self::LAYOUT_RESPONSIVE_FIELDS));
+                }
+
+                if ($translation->isColorsOverrideEnabled()) {
+                    $fields += array_intersect_key($breakpointSettings, array_flip(self::COLORS_RESPONSIVE_FIELDS));
+                }
+
+                if ($translation->isEffectsOverrideEnabled()) {
+                    $fields += array_intersect_key($breakpointSettings, array_flip(self::EFFECTS_RESPONSIVE_FIELDS));
+                }
+
+                if ($translation->isVisibilityOverrideEnabled()) {
+                    $fields += array_intersect_key($breakpointSettings, array_flip(self::VISIBILITY_RESPONSIVE_FIELDS));
+                }
+
+                if ([] !== $fields) {
+                    $responsiveOverride[$breakpoint] = $fields;
+                }
             }
 
-            $breakpointTexts = array_filter(
-                array_intersect_key($breakpointSettings, ['title' => true, 'description' => true]),
-                static fn (mixed $value): bool => is_string($value) && '' !== $value,
-            );
-
-            if ([] !== $breakpointTexts) {
-                $texts['responsive'][$breakpoint] = $breakpointTexts;
+            if ([] !== $responsiveOverride) {
+                $override['responsive'] = $responsiveOverride;
             }
         }
 
-        return [] === $texts['responsive'] ? null : $texts;
+        return [] === $override ? null : $override;
     }
 
     /**
-     * Keep only responsive/linking settings for slide configuration.
+     * Keep only responsive/linking/parallax settings for slide configuration.
      *
      * @param array<string, mixed> $slideSettings
      *
@@ -810,6 +851,20 @@ class Slide implements ResourceInterface, TranslatableInterface
 
         if (isset($slideSettings['linking']) && is_array($slideSettings['linking'])) {
             $normalized['linking'] = $slideSettings['linking'];
+        }
+
+        if (isset($slideSettings['parallax']) && is_array($slideSettings['parallax'])) {
+            $strength = $slideSettings['parallax']['strength'] ?? null;
+            if (is_string($strength) && trim($strength) !== '') {
+                $normalized['parallax'] = ['strength' => trim($strength)];
+            }
+        }
+
+        if (isset($slideSettings['video']) && is_array($slideSettings['video'])) {
+            $playback = $slideSettings['video']['playback'] ?? null;
+            if (in_array($playback, ['autoplay', 'click'], true)) {
+                $normalized['video'] = ['playback' => $playback];
+            }
         }
 
         $responsive = [];

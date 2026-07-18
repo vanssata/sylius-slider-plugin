@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Vanssa\SyliusSliderPlugin\Unit\Form\Type;
 
-use Vanssa\SyliusSliderPlugin\Form\DataTransformer\JsonArrayTransformer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Exception\TransformationFailedException;
+use Vanssa\SyliusSliderPlugin\Form\DataTransformer\JsonArrayTransformer;
 
 final class JsonArrayTransformerTest extends TestCase
 {

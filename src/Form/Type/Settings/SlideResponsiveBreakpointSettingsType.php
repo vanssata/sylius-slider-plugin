@@ -35,6 +35,8 @@ final class SlideResponsiveBreakpointSettingsType extends AbstractType
         $contentBlurValues = $this->settingsPresetProvider->values('slide', 'content_blur_strength', [4, 8, 12, 16, 24]);
         $contentPaddingValues = $this->settingsPresetProvider->values('slide', 'content_padding', ['0', '0.75rem', '1rem', '1.5rem', '2rem']);
         $contentMarginValues = $this->settingsPresetProvider->values('slide', 'content_margin', ['0', '0.5rem', '1rem', '1.5rem', '2rem']);
+        $contentWidthValues = $this->settingsPresetProvider->values('slide', 'content_width', ['boxed', 'full']);
+        $contentMaxHeightValues = $this->settingsPresetProvider->values('slide', 'content_max_height', ['none', '20%', '30%', '40%', '50%', '100%']);
         $borderRadiusValues = $this->settingsPresetProvider->values('slide', 'border_radius', [0, 6, 10, 16, 24]);
         $fontSizeValues = $this->settingsPresetProvider->values('slide', 'headline_font_size', ['0.8rem', '1rem', '1.2rem', '1.5rem', '2rem', '2.5rem', '3rem']);
         $headlineFontSizeDefault = (string) $this->settingsPresetProvider->safeDefault('slide', 'headline_font_size', '1.5rem', $fontSizeValues);
@@ -178,6 +180,18 @@ final class SlideResponsiveBreakpointSettingsType extends AbstractType
                 'help' => 'Outer spacing around content block.',
                 'constraints' => [new Assert\Choice(['choices' => $contentMarginValues])],
             ])
+            ->add('contentWidth', ChoiceType::class, [
+                'choices' => self::contentWidthChoices($contentWidthValues),
+                'required' => false,
+                'help' => 'Boxed keeps a reading width; Full width stretches the content edge to edge (e.g. a bottom strip).',
+                'constraints' => [new Assert\Choice(['choices' => $contentWidthValues])],
+            ])
+            ->add('contentMaxHeight', ChoiceType::class, [
+                'choices' => self::contentMaxHeightChoices($contentMaxHeightValues),
+                'required' => false,
+                'help' => 'The content block grows with its content up to this share of the slide height.',
+                'constraints' => [new Assert\Choice(['choices' => $contentMaxHeightValues])],
+            ])
             ->add('customCssClass', TextType::class, [
                 'required' => false,
                 'help' => 'Custom CSS class(es) for this breakpoint.',
@@ -240,6 +254,48 @@ final class SlideResponsiveBreakpointSettingsType extends AbstractType
         ]);
 
         $resolver->setAllowedTypes('include_texts', 'bool');
+    }
+
+    /**
+     * @param array<int, bool|float|int|string> $values
+     *
+     * @return array<string, string>
+     */
+    private static function contentWidthChoices(array $values): array
+    {
+        $labels = [
+            'boxed' => 'Boxed (reading width)',
+            'full' => 'Full width (edge to edge)',
+        ];
+
+        $choices = [];
+        foreach ($values as $value) {
+            $valueString = (string) $value;
+            $choices[$labels[$valueString] ?? ucfirst($valueString)] = $valueString;
+        }
+
+        return $choices;
+    }
+
+    /**
+     * @param array<int, bool|float|int|string> $values
+     *
+     * @return array<string, string>
+     */
+    private static function contentMaxHeightChoices(array $values): array
+    {
+        $choices = [];
+        foreach ($values as $value) {
+            $valueString = (string) $value;
+            $label = match ($valueString) {
+                'none' => 'No limit',
+                '100%' => 'Full slider height',
+                default => sprintf('%s of slide height', $valueString),
+            };
+            $choices[$label] = $valueString;
+        }
+
+        return $choices;
     }
 
     /**

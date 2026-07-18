@@ -21,14 +21,20 @@ final class ParallaxSettingsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $strengthValues = $this->settingsPresetProvider->values('slider', 'parallax_strength', ['0.5rem', '1rem', '2rem', '3rem', '4rem']);
-        $strengthChoiceValues = array_map(static fn (mixed $value): string => (string) $value, $strengthValues);
+        $choices = self::strengthChoices($strengthValues);
+        if ($options['inherit']) {
+            $choices = ['Disabled' => '0'] + $choices;
+        }
+        $strengthChoiceValues = array_values($choices);
 
         $builder
             ->add('strength', ChoiceType::class, [
-                'choices' => self::strengthChoices($strengthValues),
+                'choices' => $choices,
                 'required' => false,
-                'placeholder' => 'Disabled',
-                'help' => 'Parallax intensity. If empty, parallax effect is disabled.',
+                'placeholder' => $options['inherit'] ? 'Inherit from slider' : 'Disabled',
+                'help' => $options['inherit']
+                    ? 'Parallax intensity for this slide. If empty, the slider setting applies; "Disabled" turns parallax off for this slide only.'
+                    : 'Parallax intensity. If empty, parallax effect is disabled.',
                 'constraints' => [
                     new Assert\Choice(['choices' => $strengthChoiceValues]),
                 ],
@@ -43,7 +49,10 @@ final class ParallaxSettingsType extends AbstractType
             'empty_data' => static fn (): array => [
                 'strength' => null,
             ],
+            'inherit' => false,
         ]);
+
+        $resolver->setAllowedTypes('inherit', 'bool');
     }
 
     /**

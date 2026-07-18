@@ -17,6 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
@@ -28,12 +29,21 @@ use Vanssa\SyliusSliderPlugin\Entity\Slider;
 use Vanssa\SyliusSliderPlugin\Form\Type\Settings\SlideSettingsType;
 use Vanssa\SyliusSliderPlugin\Form\Type\Translation\SlideTranslationType;
 use Vanssa\SyliusSliderPlugin\Service\UploadedMediaStorage;
+use Vanssa\SyliusSliderPlugin\Video\VideoProviderRegistry;
 
 final class SlideType extends AbstractType
 {
+    /** @var array<string, array{url: string, getter: string, setter: string}> file field => external-URL wiring per video slot */
+    private const VIDEO_SLOTS = [
+        'slideCoverVideoFile' => ['url' => 'slideCoverVideoUrl', 'getter' => 'getSlideCoverVideo', 'setter' => 'setSlideCoverVideo'],
+        'slideCoverVideoMobileFile' => ['url' => 'slideCoverVideoMobileUrl', 'getter' => 'getSlideCoverVideoMobile', 'setter' => 'setSlideCoverVideoMobile'],
+        'slideCoverVideoTabletFile' => ['url' => 'slideCoverVideoTabletUrl', 'getter' => 'getSlideCoverVideoTablet', 'setter' => 'setSlideCoverVideoTablet'],
+    ];
+
     public function __construct(
         private readonly UploadedMediaStorage $uploadedMediaStorage,
         private readonly ManagerRegistry $managerRegistry,
+        private readonly VideoProviderRegistry $videoProviderRegistry,
     ) {
     }
 
@@ -64,6 +74,9 @@ final class SlideType extends AbstractType
             ->add('slideCoverVideoFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('slideCoverVideoMobileFile', FileType::class, ['required' => false, 'mapped' => false])
             ->add('slideCoverVideoTabletFile', FileType::class, ['required' => false, 'mapped' => false])
+            ->add('slideCoverVideoUrl', TextType::class, self::videoUrlFieldOptions())
+            ->add('slideCoverVideoMobileUrl', TextType::class, self::videoUrlFieldOptions())
+            ->add('slideCoverVideoTabletUrl', TextType::class, self::videoUrlFieldOptions())
             ->add('position', IntegerType::class)
             ->add('enabled', ChoiceType::class, [
                 'required' => false,
@@ -132,6 +145,15 @@ final class SlideType extends AbstractType
                 null !== $slide->getButtonLabel() || null !== $slide->getUrl(),
             );
 
+            // Prefill the external-URL inputs when the stored reference is an
+            // external provider URL (self-hosted paths stay file-managed).
+            foreach (self::VIDEO_SLOTS as $slot) {
+                $stored = $slide->{$slot['getter']}();
+                if (is_string($stored) && $this->videoProviderRegistry->isExternal($stored)) {
+                    $event->getForm()->get($slot['url'])->setData($stored);
+                }
+            }
+
             $codes = $slide->getChannelCodes();
             if ([] === $codes) {
                 return;
@@ -188,24 +210,57 @@ final class SlideType extends AbstractType
                 $slide->setSlideCoverTablet($this->uploadedMediaStorage->store($tablet, 'slider/base-cover-tablet'));
             }
 
-            /** @var UploadedFile|null $video */
-            $video = $form->get('slideCoverVideoFile')->getData();
-            if ($video instanceof UploadedFile) {
-                $slide->setSlideCoverVideo($this->uploadedMediaStorage->store($video, 'slider/base-cover-video'));
+            // External video URLs win over file uploads for their slot; a
+            // cleared URL whose stored value was external removes the video.
+            $externalHandled = [];
+            foreach (self::VIDEO_SLOTS as $fileField => $slot) {
+                $urlValue = $form->get($slot['url'])->getData();
+                $url = is_string($urlValue) ? trim($urlValue) : '';
+                if ('' !== $url) {
+                    $normalized = $this->videoProviderRegistry->normalize($url);
+                    if (null === $normalized) {
+                        $form->get($slot['url'])->addError(new FormError('Unsupported video URL — only YouTube links are accepted.'));
+
+                        continue;
+                    }
+
+                    $slide->{$slot['setter']}($normalized);
+                    $externalHandled[$fileField] = true;
+
+                    continue;
+                }
+
+                $stored = $slide->{$slot['getter']}();
+                if (is_string($stored) && $this->videoProviderRegistry->isExternal($stored)) {
+                    $slide->{$slot['setter']}(null);
+                }
             }
 
-            /** @var UploadedFile|null $videoMobile */
-            $videoMobile = $form->get('slideCoverVideoMobileFile')->getData();
-            if ($videoMobile instanceof UploadedFile) {
-                $slide->setSlideCoverVideoMobile($this->uploadedMediaStorage->store($videoMobile, 'slider/base-cover-video'));
-            }
+            foreach (self::VIDEO_SLOTS as $fileField => $slot) {
+                if (isset($externalHandled[$fileField])) {
+                    continue;
+                }
 
-            /** @var UploadedFile|null $videoTablet */
-            $videoTablet = $form->get('slideCoverVideoTabletFile')->getData();
-            if ($videoTablet instanceof UploadedFile) {
-                $slide->setSlideCoverVideoTablet($this->uploadedMediaStorage->store($videoTablet, 'slider/base-cover-video'));
+                $video = $form->get($fileField)->getData();
+                if ($video instanceof UploadedFile) {
+                    $slide->{$slot['setter']}($this->uploadedMediaStorage->store($video, 'slider/base-cover-video'));
+                }
             }
         });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function videoUrlFieldOptions(): array
+    {
+        return [
+            'required' => false,
+            'mapped' => false,
+            'label' => 'External video URL',
+            'help' => 'Paste a YouTube link instead of uploading a file — it wins over the upload for this slot; clear it to remove the external video.',
+            'attr' => ['placeholder' => 'https://www.youtube.com/watch?v=…'],
+        ];
     }
 
     private function addCodeField(FormBuilderInterface|FormInterface $form, bool $disabled): void
@@ -213,6 +268,9 @@ final class SlideType extends AbstractType
         $form->add('code', TextType::class, [
             'label' => 'sylius.ui.code',
             'disabled' => $disabled,
+            // Empty submissions map '' (not null) so NotBlank renders a form
+            // error instead of a TypeError 500 in the strict-typed setter.
+            'empty_data' => '',
             'constraints' => [
                 new Assert\NotBlank(),
                 new Assert\Length(['max' => 64]),
