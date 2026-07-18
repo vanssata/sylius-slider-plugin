@@ -57,10 +57,10 @@
                     </div>
 
                     <div class="vanssa-slider-slides-preview__actions d-flex align-items-center gap-1">
+                        {# Single edit affordance: opens the edit modal; the
+                           full workspace editor is linked from the modal
+                           header. #}
                         {% include '@VanssaSyliusSliderPlugin/admin/slide/preview/_trigger.html.twig' with { slide: slide, icon_only: true } only %}
-                        <a class="btn btn-icon btn-sm btn-ghost-secondary" href="{{ path('vanssa_sylius_slider_admin_slide_update', {'id': slideId}) }}" title="{{ 'sylius.ui.edit'|trans }}" aria-label="{{ 'sylius.ui.edit'|trans }}">
-                            {{ ux_icon('tabler:pencil', {'class': 'icon'}) }}
-                        </a>
                         {# Detaches the slide from THIS slider only — the
                            slide itself is never deleted here. #}
                         <button

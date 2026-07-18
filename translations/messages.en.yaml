@@ -23,6 +23,8 @@ vanssa_sylius_slider:
         start_from_preset: Start from a preset
         config_preset: config
         custom_preset: custom
+        edit_slide: Edit slide
+        open_full_editor: Open full editor
 
 vanssa:
     sylius:

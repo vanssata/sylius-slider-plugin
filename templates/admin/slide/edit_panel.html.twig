@@ -30,8 +30,11 @@
 
             {# The Update button lives in the modal footer (form="slide") so
                it sits next to Close; standalone (non-modal) access still
-               needs an in-form submit. #}
-            <div class="d-flex justify-content-end my-3" data-vanssa-standalone-submit>
+               needs an in-form submit. No d-flex here: Bootstrap utilities
+               carry !important and would defeat the modal's display:none
+               guard (preview_modal.scss) — and the standalone document loads
+               no stylesheets anyway. #}
+            <div class="my-3" data-vanssa-standalone-submit>
                 <button type="submit" class="btn btn-primary">{{ 'sylius.ui.update'|trans }}</button>
             </div>
         {{ form_end(form, { render_rest: false }) }}

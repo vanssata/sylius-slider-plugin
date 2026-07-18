@@ -53,9 +53,7 @@ sylius_grid:
                     create:
                         type: slide_preset_create
                 item:
-                    preview:
-                        type: slide_preview
-                    update:
-                        type: update
+                    edit:
+                        type: slide_edit_modal
                     delete:
                         type: delete

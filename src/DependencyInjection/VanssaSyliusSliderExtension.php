@@ -40,7 +40,7 @@ final class VanssaSyliusSliderExtension extends AbstractResourceExtension implem
         $container->prependExtensionConfig('sylius_grid', [
             'templates' => [
                 'action' => [
-                    'slide_preview' => '@VanssaSyliusSliderPlugin/admin/slide/grid/action/preview.html.twig',
+                    'slide_edit_modal' => '@VanssaSyliusSliderPlugin/admin/slide/grid/action/edit_modal.html.twig',
                     'slider_preview' => '@VanssaSyliusSliderPlugin/admin/slider/grid/action/preview.html.twig',
                     'slide_preset_create' => '@VanssaSyliusSliderPlugin/admin/slide/grid/action/preset_create.html.twig',
                 ],

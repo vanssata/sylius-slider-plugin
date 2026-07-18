@@ -55,8 +55,11 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="{{ modal_id }}-label">Preview</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'sylius.ui.close'|trans }}"></button>
+                    <h1 class="modal-title fs-5" id="{{ modal_id }}-label">{{ 'vanssa_sylius_slider.ui.edit_slide'|trans }}</h1>
+                    <a class="btn btn-outline-secondary btn-sm ms-auto me-2" href="{{ path('vanssa_sylius_slider_admin_slide_update', { id: slide.id }) }}">
+                        {{ 'vanssa_sylius_slider.ui.open_full_editor'|trans }}
+                    </a>
+                    <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="{{ 'sylius.ui.close'|trans }}"></button>
                 </div>
                 <div class="modal-body">
                     {# Same structure as the edit workspace: preview (with its
@@ -74,11 +77,16 @@
                         </div>
 
                         {# The real SlideType edit form, fetched on modal open
-                           and unloaded on close (preview_frame_controller). #}
+                           and unloaded on close (preview_frame_controller).
+                           vanssa-form-context must live on THIS persistent
+                           frame: Turbo swaps only the incoming frame's
+                           children, so a data-controller on the fetched
+                           fragment's own <turbo-frame> never connects here. #}
                         <div class="vanssa-modal-workspace__form">
                             <turbo-frame
                                 id="vanssa-slide-edit-panel-{{ slide.id }}"
                                 data-vanssa-preview-frame-target="panelFrame"
+                                data-controller="vanssa-form-context"
                             >
                                 <div class="text-secondary small">Loading…</div>
                             </turbo-frame>
@@ -88,8 +96,13 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ 'sylius.ui.close'|trans }}</button>
                     {# Submits the edit-panel form loaded in the frame above
-                       (form="slide" reaches it from outside the frame). #}
-                    <button type="submit" class="btn btn-primary" form="slide">{{ 'sylius.ui.update'|trans }}</button>
+                       (form="slide" reaches it from outside the frame).
+                       data-turbo="true" is required: Turbo Drive is off, so a
+                       submitter OUTSIDE the turbo-frame is otherwise deemed
+                       non-navigatable and the POST becomes a full-page
+                       navigation to the raw edit-panel document instead of a
+                       frame render. #}
+                    <button type="submit" class="btn btn-primary" form="slide" data-turbo="true">{{ 'sylius.ui.update'|trans }}</button>
                 </div>
             </div>
         </div>
