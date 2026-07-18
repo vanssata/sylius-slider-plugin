@@ -1,0 +1,108 @@
+{# Shared inner markup of the slider preview surface (toolbar + breakpoint
+   tabs + live turbo-frame), used by both the inline edit-page panel and the
+   grid modal — see preview_modal.html.twig for the two shells. Channel is
+   resolved automatically server-side (first channel the slider is restricted
+   to, or the first enabled channel).
+   Params: slider, locales, frame_id, current_locale, style_presets #}
+{% set style_presets = style_presets|default([]) %}
+{# workspace = inline editing surface: locale + breakpoint controls live in
+   the settings drawer head; the toolbar keeps only preview-specific
+   controls. The grid modal (workspace false) keeps its full toolbar. #}
+{% set workspace = workspace|default(false) %}
+
+{% if not workspace %}
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-12">
+            <label class="form-label">Language <span class="text-secondary fw-normal">— drives the translation fields below</span></label>
+            <select class="form-select" data-vanssa-preview-frame-target="locale" data-action="change->vanssa-preview-frame#changeLocale">
+                {% for locale in locales %}
+                    <option value="{{ locale.code }}" {% if locale.code == current_locale %}selected{% endif %}>{{ locale.name }} ({{ locale.code }})</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+{% endif %}
+
+<ul class="nav nav-tabs mb-3" role="tablist" aria-label="Preview toolbar">
+    {% if not workspace %}
+        <li class="nav-item" role="presentation">
+            <button type="button" class="nav-link active" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="100%" data-vanssa-preview-frame-breakpoint-param="desktop">
+                {{ ux_icon('tabler:device-desktop', {'class': 'icon me-1'}) }} Desktop
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button type="button" class="nav-link" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="390px" data-vanssa-preview-frame-breakpoint-param="mobile">
+                {{ ux_icon('tabler:device-mobile', {'class': 'icon me-1'}) }} Mobile
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button type="button" class="nav-link" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="768px" data-vanssa-preview-frame-breakpoint-param="tablet">
+                {{ ux_icon('tabler:device-tablet', {'class': 'icon me-1'}) }} Tablet
+            </button>
+        </li>
+    {% endif %}
+    {% if style_presets|length > 0 %}
+        <li
+            class="nav-item dropdown{{ workspace ? '' : ' ms-auto' }}"
+            data-controller="vanssa-preset-applier"
+            data-vanssa-preset-applier-presets-value="{{ style_presets|json_encode|e('html_attr') }}"
+        >
+            <button class="nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ ux_icon('tabler:wand', {'class': 'icon me-1'}) }} Preset
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><h6 class="dropdown-header">Hover to preview on the banner; click to apply, then Update</h6></li>
+                {% for name, preset in style_presets %}
+                    <li>
+                        <button
+                            type="button"
+                            class="dropdown-item"
+                            data-action="vanssa-preset-applier#apply mouseenter->vanssa-preview-frame#previewPreset mouseleave->vanssa-preview-frame#endPresetPreview focus->vanssa-preview-frame#previewPreset blur->vanssa-preview-frame#endPresetPreview"
+                            data-vanssa-preset-applier-preset-param="{{ name }}"
+                            data-vanssa-preview-frame-overrides-param="{{ preset.fields|url_encode }}"
+                        >
+                            {{ preset.label }}
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% endif %}
+    {% if workspace %}
+        <li class="nav-item ms-auto d-flex align-items-center" role="presentation">
+            <button type="button" class="btn btn-primary btn-sm" data-action="vanssa-preview-frame#toggleDrawer" title="Toggle settings panel" data-vanssa-preview-frame-target="drawerToggle">
+                {{ ux_icon('tabler:adjustments', {'class': 'icon me-1'}) }} Settings
+            </button>
+        </li>
+    {% endif %}
+    {% if show_fullscreen|default(false) %}
+        <li class="nav-item{{ workspace ? '' : ' ms-auto' }}" role="presentation">
+            <button type="button" class="nav-link" data-action="vanssa-preview-frame#toggleFullscreen" title="Toggle fullscreen workspace">
+                <span data-vanssa-preview-frame-target="fullscreenEnter">{{ ux_icon('tabler:arrows-maximize', {'class': 'icon'}) }}</span>
+                <span class="d-none" data-vanssa-preview-frame-target="fullscreenExit">{{ ux_icon('tabler:arrows-minimize', {'class': 'icon'}) }}</span>
+            </button>
+        </li>
+    {% endif %}
+</ul>
+
+<div id="{{ frame_id }}-wrapper" class="border rounded bg-body" data-vanssa-preview-frame-target="frameWrapper">
+    <div class="vanssa-preview-scale" data-vanssa-preview-frame-target="scaleBox">
+        <turbo-frame
+            id="{{ frame_id }}"
+            class="d-block mx-auto"
+            style="width: 100%;"
+            {# Eager: the frame starts zero-height inside the overflow-hidden
+               scale wrapper, which defeats lazy-loading's IntersectionObserver. #}
+            data-vanssa-preview-frame-target="frame"
+        ></turbo-frame>
+    </div>
+</div>
+
+{# See admin/slide/preview/_panel_body.html.twig for why this override must
+   live in the host page rather than the frame response. #}
+<style>
+    #{{ frame_id }} .vanssa-slider .vanssa-slide__content-box[class*="is-anim-"] {
+        opacity: 1;
+        animation: none;
+    }
+</style>

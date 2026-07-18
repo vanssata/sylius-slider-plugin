@@ -1,0 +1,10 @@
+{# The preview modal component for a single slider — everything EXCEPT the
+   trigger button, so callers with their own button styling can reuse just
+   this part. Use _trigger.html.twig instead when a plain "Preview" button is
+   enough. Include admin/slide/preview/_assets.html.twig once per page
+   alongside this (shared with the slide preview — same shop stylesheet). #}
+{% set slider = slider|default(null) %}
+
+{% if slider is not null and slider.id is not null %}
+    {{ component('vanssa_sylius_slider:admin:slider_preview_panel', { slider: slider }) }}
+{% endif %}

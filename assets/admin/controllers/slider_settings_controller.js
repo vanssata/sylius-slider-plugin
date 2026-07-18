@@ -1,7 +1,21 @@
 import { Controller } from '@hotwired/stimulus';
 
+const OVERRIDE_GROUPS = ['media', 'layout', 'colors', 'effects', 'visibility'];
+
 export default class extends Controller {
-    static targets = ['linkingType', 'translationEnabled', 'showNavigation', 'showArrows', 'autoplayEnabled', 'addButton', 'overrideMedia', 'overrideSettings'];
+    static targets = [
+        'linkingType',
+        'translationEnabled',
+        'showNavigation',
+        'showArrows',
+        'autoplayEnabled',
+        'addButton',
+        'overrideMedia',
+        'overrideLayout',
+        'overrideColors',
+        'overrideEffects',
+        'overrideVisibility',
+    ];
 
     connect() {
         this.refresh();
@@ -39,19 +53,44 @@ export default class extends Controller {
         });
 
         const addButton = this.hasAddButtonTarget ? this.addButtonTarget.checked : true;
-        const overrideMedia = this.hasOverrideMediaTarget ? this.overrideMediaTarget.checked : true;
-        const overrideSettings = this.hasOverrideSettingsTarget ? this.overrideSettingsTarget.checked : true;
-
         this.scopedAll('[data-slider-settings-button-only]').forEach((element) => {
             element.classList.toggle('d-none', !addButton);
         });
+        this.applyItemGuard('button', addButton);
 
-        this.scopedAll('[data-slider-settings-media-override-only]').forEach((element) => {
-            element.classList.toggle('d-none', !overrideMedia);
+        OVERRIDE_GROUPS.forEach((name) => {
+            const targetName = `override${name[0].toUpperCase()}${name.slice(1)}`;
+            const hasTargetProp = `has${targetName[0].toUpperCase()}${targetName.slice(1)}Target`;
+            const checked = this[hasTargetProp] ? this[`${targetName}Target`].checked : true;
+
+            this.scopedAll(`[data-slider-settings-${name}-override-only]`).forEach((element) => {
+                element.classList.toggle('d-none', !checked);
+            });
+            this.applyItemGuard(name, checked);
         });
+    }
 
-        this.scopedAll('[data-slider-settings-settings-override-only]').forEach((element) => {
-            element.classList.toggle('d-none', !overrideSettings);
+    // Disables (and force-collapses) accordion items marked with
+    // data-slider-settings-item-guard="<name>" so they can only be opened
+    // while their own "Overwrite" checkbox is checked.
+    applyItemGuard(name, enabled) {
+        this.scopedAll(`[data-slider-settings-item-guard="${name}"]`).forEach((item) => {
+            const button = item.querySelector(':scope > .accordion-header .accordion-button');
+            if (!button) {
+                return;
+            }
+
+            button.disabled = !enabled;
+            button.setAttribute('aria-disabled', String(!enabled));
+
+            if (!enabled) {
+                const collapse = item.querySelector(':scope > .accordion-collapse');
+                if (collapse) {
+                    collapse.classList.remove('show');
+                }
+                button.classList.add('collapsed');
+                button.setAttribute('aria-expanded', 'false');
+            }
         });
     }
 

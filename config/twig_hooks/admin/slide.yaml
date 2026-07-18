@@ -1,6 +1,9 @@
 sylius_twig_hooks:
     hooks:
         'sylius_admin.slide.create.content':
+            preset_gallery:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/preset_gallery.html.twig'
+                priority: 160
             form:
                template: '@VanssaSyliusSliderPlugin/admin/shared/form/form.html.twig'
                configuration:
@@ -8,11 +11,19 @@ sylius_twig_hooks:
                priority: 100
 
         'sylius_admin.slide.update.content':
+            # Single two-column workspace (preview main area + settings
+            # drawer) below the header (300)/error alert (200). The nested
+            # {% hook 'form' %} inside the included form template still
+            # resolves to sylius_admin.slide.update.content.form — hook-name
+            # derivation follows the hook being rendered, not the template.
+            # Named "form" to OVERRIDE the vendor's common fallback form
+            # hookable (sylius_admin.common.update.content -> form) — a
+            # different name would let both render and double-render the form.
             form:
-                template: '@VanssaSyliusSliderPlugin/admin/shared/form/form.html.twig'
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/workspace.html.twig'
                 configuration:
                     render_rest: false
-                priority: 100
+                priority: 150
 
         'sylius_admin.slide.create.content.form':
             sections:
@@ -106,6 +117,40 @@ sylius_twig_hooks:
                 priority: 100
 
         'sylius_admin.slide.update.content.form.content.sections.translations':
+            options:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/options.html.twig'
+                priority: 100
+
+        # Dedicated hook set for the modal edit panel (/admin/slides/{id}/edit-panel)
+        # — reuses the edit page's section templates verbatim; the nested
+        # 'general'/'translations' hooks below are fired by those templates
+        # with the auto-derived prefix.
+        'vanssa_sylius_slider.slide_edit_panel':
+            media:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/media.html.twig'
+                priority: 400
+            translations:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations.html.twig'
+                priority: 300
+            general:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general.html.twig'
+                priority: 100
+
+        'vanssa_sylius_slider.slide_edit_panel.general':
+            slider:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/slider.html.twig'
+                priority: 500
+            code:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/code.html.twig'
+                priority: 400
+            channels:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/channels.html.twig'
+                priority: 300
+            state:
+                template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/general/state.html.twig'
+                priority: 0
+
+        'vanssa_sylius_slider.slide_edit_panel.translations':
             options:
                 template: '@VanssaSyliusSliderPlugin/admin/slide/form/sections/translations/options.html.twig'
                 priority: 100

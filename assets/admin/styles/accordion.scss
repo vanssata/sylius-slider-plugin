@@ -1,0 +1,17 @@
+.vanssa-slider-admin {
+    .accordion-button {
+        .accordion-chevron {
+            transition: transform 0.2s ease;
+        }
+
+        &:not(.collapsed) .accordion-chevron {
+            transform: rotate(180deg);
+        }
+
+        &:disabled,
+        &.disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+    }
+}

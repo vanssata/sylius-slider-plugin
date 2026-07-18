@@ -13,6 +13,7 @@
         <defaults autowire="true" autoconfigure="true" public="false">
             <bind key="$projectDir">%kernel.project_dir%</bind>
             <bind key="$sliderPresets">%vanssa_sylius_slider.presets%</bind>
+            <bind key="$stylePresets">%vanssa_sylius_slider.style_presets%</bind>
         </defaults>
 
         <prototype namespace="Vanssa\SyliusSliderPlugin\" resource="../src/*" exclude="../src/{DependencyInjection,Entity,Factory,Migrations,VanssaSyliusSliderPlugin.php}" />
@@ -23,8 +24,31 @@
             <argument key="$profiler" type="service" id="profiler" on-invalid="null" />
         </service>
 
+        <service id="Vanssa\SyliusSliderPlugin\Controller\Admin\SlidePreviewController" public="true">
+            <argument key="$profiler" type="service" id="profiler" on-invalid="null" />
+        </service>
+
+        <service id="Vanssa\SyliusSliderPlugin\Controller\Admin\SlideEditPanelController" public="true">
+            <argument key="$profiler" type="service" id="profiler" on-invalid="null" />
+        </service>
+
+        <service id="Vanssa\SyliusSliderPlugin\Controller\Admin\SlideCreatePanelController" public="true">
+            <argument key="$slideFactory" type="service" id="vanssa_sylius_slider.factory.slide" />
+            <argument key="$profiler" type="service" id="profiler" on-invalid="null" />
+        </service>
+
         <service id="Vanssa\SyliusSliderPlugin\Context\Admin\PreviewChannelContext">
             <tag name="sylius.context.channel" priority="192" />
+        </service>
+
+        <!-- Resource-managed Doctrine repository; aliased so it can be
+             autowired by class (the prototype cannot construct it). -->
+        <service id="Vanssa\SyliusSliderPlugin\Repository\StylePresetRepository" alias="vanssa_sylius_slider.repository.style_preset" />
+
+        <!-- External video providers, collected by VideoProviderRegistry.
+             Third parties add providers by tagging their own services. -->
+        <service id="Vanssa\SyliusSliderPlugin\Video\YouTubeVideoProvider">
+            <tag name="vanssa_sylius_slider.video_provider" />
         </service>
     </services>
 </container>

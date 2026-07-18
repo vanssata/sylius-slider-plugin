@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="{{ localeCode|slice(0, 2) }}"{% if themeName %} data-theme="{{ themeName }}"{% endif %}>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{{ slide.getLocalizedName(localeCode, fallbackLocaleCode) }} — {{ channel.name }}</title>
+    {% for entrypoint in shopEntrypoints %}
+        {% set entry_parts = entrypoint|split(':') %}
+        {% if entry_parts|length > 1 %}
+            {{ encore_entry_link_tags(entry_parts[1], null, entry_parts[0]) }}
+        {% else %}
+            {{ encore_entry_link_tags(entry_parts[0]) }}
+        {% endif %}
+    {% endfor %}
+    <style>
+        body.vanssa-slide-preview-body {
+            margin: 0;
+            background: #f4f5f7;
+        }
+
+        /* The content-reveal animation (is-anim-*) is normally gated behind
+           an .is-in-view class that the shop's vanssa-slider Stimulus
+           controller adds via IntersectionObserver. This preview loads the
+           theme's CSS but not its JS (see preview/_assets.html.twig), so
+           without this override the content stays permanently hidden.
+           Only matters for direct/non-turbo-frame access to this URL — when
+           embedded, Turbo discards this <head> and the matching override in
+           the host page (preview/_trigger.html.twig) applies instead. */
+        #vanssa-slide-preview-frame-{{ slide.id }} .vanssa-slider .vanssa-slide__content-box.is-anim-fade-up,
+        #vanssa-slide-preview-frame-{{ slide.id }} .vanssa-slider .vanssa-slide__content-box.is-anim-fade-right,
+        #vanssa-slide-preview-frame-{{ slide.id }} .vanssa-slider .vanssa-slide__content-box.is-anim-zoom-in {
+            opacity: 1;
+            animation: none;
+        }
+    </style>
+</head>
+<body class="vanssa-slide-preview-body">
+    {# Reuses the real shop slider's outer shell (classes + CSS custom
+       properties) so this single slide renders with the exact same theme
+       styling it would have live, without going through SliderComponent's
+       enabled/channel filtering or mutating the slide's real parent slider
+       association — this is a read-only preview of one slide, not a slider. #}
+    {% set settings = sliderSettings|default({}) %}
+    {% set maxHeight = settings.maxHeight|default('')|trim %}
+    {% set sliderClasses = [
+        'vanssa-slider',
+        settings.overlay|default(false) ? 'vanssa-slider--overlay' : '',
+        (settings.justifySlideHeight ?? true) ? 'vanssa-slider--justify-height' : '',
+        maxHeight is not empty ? 'vanssa-slider--custom-max-height' : '',
+        settings.containerWidth|default('content') == 'content' ? 'vanssa-slider--container-content' : 'vanssa-slider--container-full',
+        settings.cssClasses|default('')
+    ] %}
+
+    <turbo-frame id="vanssa-slide-preview-frame-{{ slide.id }}">
+        <section
+            class="{{ sliderClasses|filter(className => className is not empty)|join(' ') }}"
+            style="
+                --vanssa-slider-margin-top: {{ settings.marginTop|default('0') }};
+                --vanssa-slider-margin-right: {{ settings.marginRight|default('0') }};
+                --vanssa-slider-margin-bottom: {{ settings.marginBottom|default('0') }};
+                --vanssa-slider-margin-left: {{ settings.marginLeft|default('0') }};
+                --vanssa-slider-padding-top: {{ settings.paddingTop|default('0') }};
+                --vanssa-slider-padding-right: {{ settings.paddingRight|default('0') }};
+                --vanssa-slider-padding-bottom: {{ settings.paddingBottom|default('0') }};
+                --vanssa-slider-padding-left: {{ settings.paddingLeft|default('0') }};
+                {% if maxHeight is not empty %}--vanssa-slider-max-height: {{ maxHeight }};{% endif %}
+            "
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="{{ slide.getLocalizedName(localeCode, fallbackLocaleCode) }}"
+        >
+            <div class="vanssa-slider__container">
+                <div class="vanssa-slider__inner">
+                    <div class="vanssa-slider__wrapper">
+                        {{ component('vanssa_sylius_slider:shop:slide', {
+                            slide: slide,
+                            index: 0,
+                            localeCode: localeCode,
+                            fallbackLocaleCode: fallbackLocaleCode,
+                            sliderSettings: settings,
+                            lazyLoad: false
+                        }) }}
+                    </div>
+                </div>
+            </div>
+        </section>
+    </turbo-frame>
+
+    {% for entrypoint in shopEntrypoints %}
+        {% set entry_parts = entrypoint|split(':') %}
+        {% if entry_parts|length > 1 %}
+            {{ encore_entry_script_tags(entry_parts[1], null, entry_parts[0]) }}
+        {% else %}
+            {{ encore_entry_script_tags(entry_parts[0]) }}
+        {% endif %}
+    {% endfor %}
+</body>
+</html>

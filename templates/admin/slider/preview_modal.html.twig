@@ -1,0 +1,66 @@
+{# Slider live-preview surface (component vanssa_sylius_slider:admin:slider_preview_panel)
+   in one of two shells:
+
+   - inline (edit page): a sticky card pinned above the edit form — every
+     form change live-refreshes the preview via the localStorage-draft
+     mechanism.
+   - modal (grid rows): a read-only preview of the saved slider.
+
+   Ids are suffixed by slider.id since several modal instances can exist on
+   one page (grid rows). #}
+{% set slider = this.slider %}
+{% set modal_id = 'vanssa-slider-preview-modal-' ~ slider.id %}
+{% set frame_id = 'vanssa-slider-preview-frame-' ~ slider.id %}
+{% set url_template = path('vanssa_sylius_slider_admin_slider_preview', { id: slider.id, locale: '__LOCALE__' }) %}
+
+{% if this.inline %}
+    <div
+        class="card vanssa-preview-panel vanssa-slider-admin mb-3"
+    >
+        {# Workspace mode: controller + values live on the surrounding
+           .vanssa-workspace wrapper (form/workspace.html.twig). #}
+        <div class="card-body">
+            {% include '@VanssaSyliusSliderPlugin/admin/slider/preview/_panel_body.html.twig' with {
+                slider: slider,
+                locales: this.locales,
+                frame_id: frame_id,
+                current_locale: app.request.locale,
+                style_presets: this.stylePresets,
+                show_fullscreen: true,
+                workspace: true,
+            } only %}
+        </div>
+    </div>
+{% else %}
+    <div
+        class="modal fade vanssa-preview-modal vanssa-slider-admin"
+        id="{{ modal_id }}"
+        tabindex="-1"
+        aria-hidden="true"
+        aria-labelledby="{{ modal_id }}-label"
+        data-controller="vanssa-preview-frame"
+        data-vanssa-preview-frame-url-template-value="{{ url_template }}"
+        data-vanssa-preview-frame-form-selector-value="#slider"
+        data-vanssa-preview-frame-draft-key-value="vanssa-slider-draft-{{ slider.id }}"
+    >
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="{{ modal_id }}-label">Preview</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'sylius.ui.close'|trans }}"></button>
+                </div>
+                <div class="modal-body">
+                    {% include '@VanssaSyliusSliderPlugin/admin/slider/preview/_panel_body.html.twig' with {
+                        slider: slider,
+                        locales: this.locales,
+                        frame_id: frame_id,
+                        current_locale: app.request.locale,
+                    } only %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ 'sylius.ui.close'|trans }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}

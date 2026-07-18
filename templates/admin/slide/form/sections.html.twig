@@ -1,3 +1,6 @@
-<div class="col-12">
+{# vanssa-form-context: toolbar-driven visibility of locale/breakpoint
+   sections on edit pages (no marked sections exist on create pages, where
+   the classic tabs/accordion render instead — the controller is inert). #}
+<div class="col-12" data-controller="vanssa-form-context">
     {% hook 'sections' %}
 </div>

@@ -1,0 +1,34 @@
+{# Language + breakpoint switchers driving BOTH the preview frame and the
+   settings sections (via vanssa-preview-frame → vanssa-preview:context
+   events). Must render inside the vanssa-preview-frame controller scope.
+   Params:
+   - locales: LocaleInterface[]
+   - include_default: bool — prepend the "Default (base settings)" sentinel
+     (slide pages; the slider page always edits a concrete locale)
+   - current_locale: string|null — preselected locale (slider pages) #}
+<div class="vanssa-context-controls d-flex flex-wrap align-items-center gap-2">
+    <select
+        class="form-select form-select-sm w-auto flex-grow-1"
+        aria-label="Language"
+        data-vanssa-preview-frame-target="locale"
+        data-action="change->vanssa-preview-frame#changeLocale"
+    >
+        {% if include_default|default(false) %}
+            <option value="default" selected>{{ 'Default (base settings)'|trans }}</option>
+        {% endif %}
+        {% for locale in locales %}
+            <option value="{{ locale.code }}" {% if current_locale|default(null) == locale.code %}selected{% endif %}>{{ locale.name }} ({{ locale.code }})</option>
+        {% endfor %}
+    </select>
+    <div class="btn-group" role="group" aria-label="Preview resolution">
+        <button type="button" class="btn btn-sm btn-outline-secondary active" title="Desktop" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="100%" data-vanssa-preview-frame-breakpoint-param="desktop">
+            {{ ux_icon('tabler:device-desktop', {'class': 'icon'}) }}
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" title="Mobile" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="390px" data-vanssa-preview-frame-breakpoint-param="mobile">
+            {{ ux_icon('tabler:device-mobile', {'class': 'icon'}) }}
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" title="Tablet" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="768px" data-vanssa-preview-frame-breakpoint-param="tablet">
+            {{ ux_icon('tabler:device-tablet', {'class': 'icon'}) }}
+        </button>
+    </div>
+</div>

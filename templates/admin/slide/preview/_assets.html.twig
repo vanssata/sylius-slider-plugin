@@ -1,0 +1,34 @@
+{# Shared shop-theme stylesheet for any page embedding a slide preview
+   turbo-frame (see _trigger.html.twig) — include this ONCE per page even
+   when _trigger.html.twig is rendered multiple times (e.g. one per row in a
+   list), to avoid duplicating the same imports per row.
+
+   The shop CSS is imported into a CSS cascade LAYER: un-layered rules (the
+   whole admin theme) always beat layered ones, so the storefront Bootstrap
+   cannot bleed into the admin chrome (sidebar nav-links etc.) while the
+   preview markup — styled by .vanssa-* selectors the admin theme never
+   touches — still gets the full shop look.
+
+   Deliberately CSS only, no encore_entry_script_tags(): the shop JS bundle
+   starts its own Stimulus application, which would then also try (and fail)
+   to connect every admin-side controller already running on the page. #}
+{% set shop_css_files = [] %}
+{% for entrypoint in vanssa_slider_preview_shop_entrypoints() %}
+    {% set entry_parts = entrypoint|split(':') %}
+    {% set files = entry_parts|length > 1
+        ? encore_entry_css_files(entry_parts[1], entry_parts[0])
+        : encore_entry_css_files(entry_parts[0])
+    %}
+    {% for file in files %}
+        {% if file not in shop_css_files %}
+            {% set shop_css_files = shop_css_files|merge([file]) %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+{% if shop_css_files|length > 0 %}
+    <style>
+        {%- for file in shop_css_files %}
+        @import url("{{ file }}") layer(vanssa-shop-preview);
+        {%- endfor %}
+    </style>
+{% endif %}

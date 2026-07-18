@@ -21,6 +21,7 @@ final class VanssaSyliusSliderExtension extends AbstractResourceExtension implem
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
         $container->setParameter('vanssa_sylius_slider.presets', $config['presets']);
+        $container->setParameter('vanssa_sylius_slider.style_presets', $config['style_presets']);
         $container->setParameter('vanssa_sylius_slider.preview.shop_entrypoints', $config['preview']['shop_entrypoints']);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
@@ -30,6 +31,22 @@ final class VanssaSyliusSliderExtension extends AbstractResourceExtension implem
 
     public function prepend(ContainerBuilder $container): void
     {
+        // Custom grid action types are resolved by name from this global
+        // map (sylius.grid.templates.action), not from the per-action
+        // `options.template` key in grids/admin/*.yaml (that key only
+        // reaches the template as a Twig variable, it doesn't select it).
+        // Slide and slider each need their own type name since the map has
+        // no per-grid scoping — "preview" alone would collide.
+        $container->prependExtensionConfig('sylius_grid', [
+            'templates' => [
+                'action' => [
+                    'slide_preview' => '@VanssaSyliusSliderPlugin/admin/slide/grid/action/preview.html.twig',
+                    'slider_preview' => '@VanssaSyliusSliderPlugin/admin/slider/grid/action/preview.html.twig',
+                    'slide_preset_create' => '@VanssaSyliusSliderPlugin/admin/slide/grid/action/preset_create.html.twig',
+                ],
+            ],
+        ]);
+
         $container->prependExtensionConfig('doctrine', [
             'orm' => [
                 'mappings' => [

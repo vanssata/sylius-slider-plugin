@@ -4,41 +4,33 @@ declare(strict_types=1);
 
 namespace Vanssa\SyliusSliderPlugin\Twig\Component\Admin;
 
-use Sylius\Component\Channel\Model\ChannelInterface;
-use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
 use Sylius\Component\Locale\Model\LocaleInterface;
 use Sylius\Resource\Doctrine\Persistence\RepositoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Vanssa\SyliusSliderPlugin\Entity\Slider;
+use Vanssa\SyliusSliderPlugin\Preset\StylePresetProvider;
 
-#[AsTwigComponent(name: 'vanssa_sylius_slider:admin:slider_preview_panel', template: '@VanssaSyliusSliderPlugin/admin/slider/preview_panel.html.twig')]
+#[AsTwigComponent(name: 'vanssa_sylius_slider:admin:slider_preview_panel', template: '@VanssaSyliusSliderPlugin/admin/slider/preview_modal.html.twig')]
 final class SliderPreviewPanelComponent
 {
     /**
-     * @param ChannelRepositoryInterface<ChannelInterface> $channelRepository
      * @param RepositoryInterface<LocaleInterface> $localeRepository
      */
     public function __construct(
-        #[Autowire(service: 'sylius.repository.channel')]
-        private readonly ChannelRepositoryInterface $channelRepository,
         #[Autowire(service: 'sylius.repository.locale')]
         private readonly RepositoryInterface $localeRepository,
+        private readonly StylePresetProvider $stylePresetProvider,
     ) {
     }
 
     public Slider $slider;
 
     /**
-     * @return array<int, ChannelInterface>
+     * Inline mode renders the panel as a sticky card on the edit page
+     * (next to the real form) instead of the grid modal shell.
      */
-    public function getChannels(): array
-    {
-        /** @var array<int, ChannelInterface> $channels */
-        $channels = $this->channelRepository->findBy(['enabled' => true]);
-
-        return $channels;
-    }
+    public bool $inline = false;
 
     /**
      * @return array<int, LocaleInterface>
@@ -49,5 +41,13 @@ final class SliderPreviewPanelComponent
         $locales = $this->localeRepository->findAll();
 
         return $locales;
+    }
+
+    /**
+     * @return array<string, array{label: string, fields: array<string, bool|float|int|string>}>
+     */
+    public function getStylePresets(): array
+    {
+        return $this->stylePresetProvider->sliderPresets();
     }
 }

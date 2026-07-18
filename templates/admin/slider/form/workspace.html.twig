@@ -1,0 +1,44 @@
+{# Two-column editing workspace on the slider edit page — see the slide twin
+   (templates/admin/slide/form/workspace.html.twig) for the full rationale.
+   The preview column stays OUTSIDE the <form>; the drawer Save submits via
+   form="...". #}
+{% set resource = hookable_metadata.context.resource %}
+{% set form = hookable_metadata.context.form %}
+
+{% if resource is not null and resource.id is not null %}
+    <div
+        class="container-xl vanssa-workspace vanssa-slider-admin"
+        data-controller="vanssa-preview-frame"
+        data-vanssa-preview-frame-inline-value="true"
+        data-vanssa-preview-frame-url-template-value="{{ path('vanssa_sylius_slider_admin_slider_preview', { id: resource.id, locale: '__LOCALE__', channel: '__CHANNEL__' }) }}"
+        data-vanssa-preview-frame-form-selector-value="#{{ form.vars.id }}"
+        data-vanssa-preview-frame-draft-key-value="vanssa-slider-draft-{{ resource.id }}"
+    >
+        <div class="vanssa-workspace__preview vanssa-preview-panel--sticky">
+            {% include '@VanssaSyliusSliderPlugin/admin/slide/preview/_assets.html.twig' %}
+            {{ component('vanssa_sylius_slider:admin:slider_preview_panel', { slider: resource, inline: true }) }}
+        </div>
+        <aside class="vanssa-workspace__drawer" aria-label="Slider settings">
+            <div class="vanssa-workspace__drawer-head">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <button type="submit" class="btn btn-primary btn-sm" form="{{ form.vars.id }}">
+                        {{ ux_icon('tabler:device-floppy', {'class': 'icon me-1'}) }} {{ 'sylius.ui.save_changes'|trans }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" data-action="vanssa-preview-frame#toggleDrawer" title="Close settings" aria-label="Close settings">
+                        {{ ux_icon('tabler:x', {'class': 'icon'}) }}
+                    </button>
+                </div>
+                {% include '@VanssaSyliusSliderPlugin/admin/shared/preview/_context_controls.html.twig' with {
+                    locales: vanssa_slider_admin_locales(),
+                    include_default: false,
+                    current_locale: app.request.locale,
+                } %}
+            </div>
+            <div class="vanssa-workspace__drawer-body">
+                {% include '@VanssaSyliusSliderPlugin/admin/shared/form/form.html.twig' %}
+            </div>
+        </aside>
+    </div>
+{% else %}
+    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/form.html.twig' %}
+{% endif %}

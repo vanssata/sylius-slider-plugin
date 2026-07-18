@@ -5,6 +5,24 @@ vanssa_sylius_slider:
         slide: Slide
         slides: Slides
         section: Slider Management
+        margin: Margin
+        padding: Padding
+        style_presets: Style Presets
+        slider_presets: Slider Presets
+        slide_presets: Slide Presets
+        preset: Preset
+        presets: Presets
+        slide_preset: Slide preset
+        slider_preset: Slider preset
+        mockup: Mockup
+        mockup_help: Pick a bundled mockup image, or upload a custom one below — it represents this preset in the selection gallery.
+        current_custom_mockup: Current custom mockup
+        preset_settings: Preset settings
+        blank: Blank
+        choose_preset: Choose preset
+        start_from_preset: Start from a preset
+        config_preset: config
+        custom_preset: custom
 
 vanssa:
     sylius:

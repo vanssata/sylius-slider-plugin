@@ -2,38 +2,58 @@
     "controllers": {
         "@vanssa/sylius-slider-plugin": {
             "slider": {
-                "enabled": true,
-                "fetch": "eager"
-            },
-            "slide-preview": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "eager"
             },
             "slider-settings": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "eager"
             },
             "slider-slides-preview": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "eager"
             },
             "rgba-color-picker": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "eager",
                 "autoimport": {
                     "@simonwep/pickr/dist/themes/classic.min.css": true
                 }
             },
             "responsive-copy": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "eager"
             },
-            "slider-preview-frame": {
-                "enabled": true,
+            "preview-frame": {
+                "enabled": false,
+                "fetch": "eager"
+            },
+            "preset-applier": {
+                "enabled": false,
+                "fetch": "eager"
+            },
+            "preset-gallery": {
+                "enabled": false,
+                "fetch": "eager"
+            },
+            "form-context": {
+                "enabled": false,
+                "fetch": "eager"
+            },
+            "animation-settings": {
+                "enabled": false,
+                "fetch": "eager"
+            },
+            "mockup-picker": {
+                "enabled": false,
+                "fetch": "eager"
+            },
+            "modal-portal": {
+                "enabled": false,
                 "fetch": "eager"
             },
             "slide-video": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "eager"
             }
         }

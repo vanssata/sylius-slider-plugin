@@ -12,7 +12,8 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=8.3",
-        "sylius/sylius": "^2.1"
+        "sylius/sylius": "^2.1",
+        "symfony/ux-turbo": "^2.22"
     },
     "require-dev": {
         "behat/behat": "^3.16",

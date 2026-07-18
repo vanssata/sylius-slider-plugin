@@ -1,6 +1,9 @@
 sylius_twig_hooks:
     hooks:
         'sylius_admin.slider.create.content':
+            preset_gallery:
+                template: '@VanssaSyliusSliderPlugin/admin/slider/form/preset_gallery.html.twig'
+                priority: 160
             form:
                 template: '@VanssaSyliusSliderPlugin/admin/shared/form/form.html.twig'
                 configuration:
@@ -8,11 +11,19 @@ sylius_twig_hooks:
                 priority: 100
 
         'sylius_admin.slider.update.content':
+            # Single two-column workspace (preview main area + settings
+            # drawer) below the header (300)/error alert (200). The nested
+            # {% hook 'form' %} inside the included form template still
+            # resolves to sylius_admin.slider.update.content.form — hook-name
+            # derivation follows the hook being rendered, not the template.
+            # Named "form" to OVERRIDE the vendor's common fallback form
+            # hookable (sylius_admin.common.update.content -> form) — a
+            # different name would let both render and double-render the form.
             form:
-                template: '@VanssaSyliusSliderPlugin/admin/shared/form/form.html.twig'
+                template: '@VanssaSyliusSliderPlugin/admin/slider/form/workspace.html.twig'
                 configuration:
                     render_rest: false
-                priority: 100
+                priority: 150
 
         'sylius_admin.slider.create.content.form':
             sections:
@@ -52,6 +63,9 @@ sylius_twig_hooks:
             general:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general.html.twig'
                 priority: 400
+            settings:
+                template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/settings.html.twig'
+                priority: 300
             translations:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/translations.html.twig'
                 priority: 200
@@ -63,15 +77,15 @@ sylius_twig_hooks:
             general:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general.html.twig'
                 priority: 400
+            settings:
+                template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/settings.html.twig'
+                priority: 300
             translations:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/translations.html.twig'
                 priority: 200
             slides:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/slides.html.twig'
                 priority: 100
-            preview:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/preview.html.twig'
-                priority: 50
 
         'sylius_admin.slider.create.content.form.content.sections.general':
             default: { enabled: false }
@@ -87,9 +101,6 @@ sylius_twig_hooks:
             cssClasses:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/cssClasses.html.twig'
                 priority: 100
-            settings:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/settings.html.twig'
-                priority: -100
 
         'sylius_admin.slider.update.content.form.content.sections.general':
             default: { enabled: false }
@@ -105,9 +116,6 @@ sylius_twig_hooks:
             cssClasses:
                 template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/cssClasses.html.twig'
                 priority: 100
-            settings:
-                template: '@VanssaSyliusSliderPlugin/admin/slider/form/sections/general/settings.html.twig'
-                priority: -100
 
         'sylius_admin.slider.create.content.form.content.sections.translations':
             name:

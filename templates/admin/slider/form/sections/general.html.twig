@@ -1,10 +1,16 @@
-<div class="card mb-3">
-    <div class="card-header">
-        <h2 class="card-title">{{ 'sylius.ui.general'|trans }}</h2>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            {% hook 'general' %}
+{# "General" item of the flat slider settings accordion (see
+   form/sections.html.twig). Open by default. #}
+<div class="accordion-item">
+    <h3 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#vanssa-slider-sections-general">
+            {{ ux_icon('tabler:settings', {'class': 'icon me-2'}) }} {{ 'sylius.ui.general'|trans }}
+        </button>
+    </h3>
+    <div id="vanssa-slider-sections-general" class="accordion-collapse collapse show" data-bs-parent="#vanssa-slider-sections">
+        <div class="accordion-body">
+            <div class="row">
+                {% hook 'general' %}
+            </div>
         </div>
     </div>
 </div>

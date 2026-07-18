@@ -1,0 +1,22 @@
+{# Reusable "Preview" button + modal for a single slider — usable anywhere a
+   slider is listed (admin grid rows), not just the slider edit page. For a
+   custom-styled trigger button (e.g. the edit page's own header action),
+   include _modal.html.twig directly instead and build the button yourself.
+
+   Include admin/slide/preview/_assets.html.twig ONCE per page alongside
+   this (possibly-repeated) partial for the shared shop stylesheet. #}
+{% set slider = slider|default(null) %}
+{% set label = label|default('Preview'|trans) %}
+{% set button_class = button_class|default('btn btn-outline-primary btn-sm') %}
+
+{% if slider is not null and slider.id is not null %}
+    <button
+        type="button"
+        class="{{ button_class }}"
+        data-bs-toggle="modal"
+        data-bs-target="#vanssa-slider-preview-modal-{{ slider.id }}"
+    >
+        {{ ux_icon('tabler:eye', {'class': 'icon me-1'}) }} {{ label }}
+    </button>
+    {% include '@VanssaSyliusSliderPlugin/admin/slider/preview/_modal.html.twig' with { slider: slider } only %}
+{% endif %}

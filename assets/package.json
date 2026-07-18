@@ -11,12 +11,6 @@
                 "fetch": "eager",
                 "enabled": true
             },
-            "slide-preview": {
-                "main": "admin/controllers/slide_preview_controller.js",
-                "name": "vanssa-slide-preview",
-                "fetch": "eager",
-                "enabled": true
-            },
             "slider-settings": {
                 "main": "admin/controllers/slider_settings_controller.js",
                 "name": "slider-settings",
@@ -41,9 +35,45 @@
                 "fetch": "eager",
                 "enabled": true
             },
-            "slider-preview-frame": {
-                "main": "admin/controllers/slider_preview_frame_controller.js",
-                "name": "vanssa-slider-preview-frame",
+            "preview-frame": {
+                "main": "admin/controllers/preview_frame_controller.js",
+                "name": "vanssa-preview-frame",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "preset-applier": {
+                "main": "admin/controllers/preset_applier_controller.js",
+                "name": "vanssa-preset-applier",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "preset-gallery": {
+                "main": "admin/controllers/preset_gallery_controller.js",
+                "name": "vanssa-preset-gallery",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "form-context": {
+                "main": "admin/controllers/form_context_controller.js",
+                "name": "vanssa-form-context",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "animation-settings": {
+                "main": "admin/controllers/animation_settings_controller.js",
+                "name": "vanssa-animation-settings",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "mockup-picker": {
+                "main": "admin/controllers/mockup_picker_controller.js",
+                "name": "vanssa-mockup-picker",
+                "fetch": "eager",
+                "enabled": true
+            },
+            "modal-portal": {
+                "main": "admin/controllers/modal_portal_controller.js",
+                "name": "vanssa-modal-portal",
                 "fetch": "eager",
                 "enabled": true
             },
@@ -59,6 +89,7 @@
         "@hotwired/stimulus": "^3.0.0"
     },
     "dependencies": {
+        "@hotwired/turbo": "^8.0.0",
         "@simonwep/pickr": "^1.9.0"
     }
 }

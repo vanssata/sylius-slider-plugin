@@ -1,0 +1,60 @@
+// The preview modals are rendered from header/list hooks, nested inside a
+// flex row rather than Sylius's usual modal component placement —
+// .modal-content otherwise picks up a transparent background there instead
+// of the theme's card/modal surface color. A shared class (not an id) is
+// used because multiple slide/slider preview modal instances can exist on
+// one page (grid rows, "Slides in this slider" list), each with its own
+// id-suffixed id to avoid collisions.
+// Inside the modal the Update button lives in the footer (next to Close);
+// the in-form fallback is only for standalone edit-panel access.
+.vanssa-preview-modal [data-vanssa-standalone-submit] {
+    display: none;
+}
+
+// Two-column modal workspace mirroring the edit page: preview left, form in
+// an independently scrolling right column. Stacked on narrow screens.
+.vanssa-modal-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 440px;
+    gap: 1rem;
+    align-items: start;
+
+    &__form {
+        max-height: 70vh;
+        overflow-y: auto;
+        border-left: 1px solid var(--bs-border-color, #e6e7e9);
+        padding-left: 1rem;
+
+        // One setting per row inside the narrow column (same treatment as
+        // the workspace drawer).
+        .row > [class*='col-'] {
+            flex: 0 0 100%;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .row.row-cols-auto > .col {
+            flex: 0 0 auto;
+            width: auto;
+            max-width: none;
+        }
+    }
+
+    @media (max-width: 1199.98px) {
+        grid-template-columns: minmax(0, 1fr);
+
+        &__form {
+            border-left: 0;
+            padding-left: 0;
+            max-height: none;
+        }
+    }
+}
+
+.vanssa-preview-modal .modal-content {
+    background-color: var(--bs-body-bg, #fff);
+}
+
+.vanssa-preview-modal .modal-dialog {
+    max-width: min(1600px, 95vw);
+}

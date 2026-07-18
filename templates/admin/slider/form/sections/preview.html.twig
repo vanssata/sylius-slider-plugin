@@ -1,6 +1,0 @@
-{% set form = hookable_metadata.context.form %}
-{% set slider = form.vars.data %}
-
-{% if slider is not null and slider.id is not null %}
-    {{ component('vanssa_sylius_slider:admin:slider_preview_panel', { slider: slider }) }}
-{% endif %}

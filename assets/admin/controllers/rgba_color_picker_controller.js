@@ -22,6 +22,18 @@ export default class extends Controller {
     };
 
     connect() {
+        // Moving this field elsewhere in the document (e.g. the preview
+        // modal's settings-mount reparenting a real edit-form fieldset)
+        // disconnects and reconnects this controller even though the
+        // element never left the document. If the disconnect below skipped
+        // teardown, a `.pickr` wrapper is already here — Pickr consumed the
+        // original button target when it first initialized, so re-running
+        // Pickr.create() would crash looking for a target that no longer
+        // exists as such (and would double-init the widget either way).
+        if (this.element.querySelector('.pickr')) {
+            return;
+        }
+
         this.onSaveBound = (color) => this.onSave(color);
         this.onClearBound = () => this.onClear();
 
@@ -36,6 +48,17 @@ export default class extends Controller {
     }
 
     disconnect() {
+        // Only tear down on a genuine removal from the document. A reparent
+        // still fires disconnect(), but the move is a synchronous DOM
+        // operation that completes before any observer callback runs, so
+        // isConnected already reflects the final (still-attached) position
+        // by the time this executes — destroying the picker here would lose
+        // it permanently, since Pickr consumes its anchor element and
+        // connect() can't rebuild that on a plain reconnect.
+        if (this.element.isConnected) {
+            return;
+        }
+
         if (this.picker) {
             this.picker.off('save', this.onSaveBound);
             this.picker.off('clear', this.onClearBound);
@@ -174,13 +197,24 @@ export default class extends Controller {
     }
 
     updateSwatch() {
-        if (!this.hasButtonTarget) {
+        const color = this.inputTarget.value?.trim() || 'rgba(255, 255, 255, 1)';
+
+        if (this.hasButtonTarget) {
+            this.buttonTarget.style.background = color;
+            this.buttonTarget.style.borderColor = color;
+
             return;
         }
 
-        const color = this.inputTarget.value?.trim() || 'rgba(255, 255, 255, 1)';
-        this.buttonTarget.style.background = color;
-        this.buttonTarget.style.borderColor = color;
+        // Pickr consumed the original button target on init, replacing it
+        // with its own .pcr-button (colored via the --pcr-color custom
+        // property) — keep that in sync too, or values written directly to
+        // the input (typing, presets, copy-from-desktop) never tint the
+        // swatch.
+        const pcrButton = this.element.querySelector('.pcr-button');
+        if (pcrButton) {
+            pcrButton.style.setProperty('--pcr-color', color);
+        }
     }
 
     deepMerge(base, custom) {

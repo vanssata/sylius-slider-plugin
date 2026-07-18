@@ -25,6 +25,18 @@ final class SliderPreviewTest extends FunctionalTestCase
         self::assertSelectorExists('.vanssa-slide');
     }
 
+    public function testPreviewResolvesChannelAutomaticallyWhenOmitted(): void
+    {
+        $this->ensureChannel();
+        $slider = $this->createSlider('functional-preview-auto-channel-slider');
+        $this->logInAsAdmin();
+
+        $this->client->request('GET', sprintf('/admin/sliders/%d/preview', $slider->getId()));
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('section.vanssa-slider');
+    }
+
     public function testPreviewFailsForUnknownChannel(): void
     {
         $this->ensureChannel();

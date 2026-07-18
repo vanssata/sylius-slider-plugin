@@ -9,6 +9,14 @@ export default class extends Controller {
     }
 
     disconnect() {
+        // A reparent (e.g. the preview modal's settings-mount) also fires
+        // disconnect() even though the element never left the document —
+        // only release the object URL on a genuine removal, or a
+        // just-selected image preview would go blank after the move.
+        if (this.element.isConnected) {
+            return;
+        }
+
         this.releaseObjectUrl();
     }
 

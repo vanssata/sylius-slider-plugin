@@ -1,3 +1,12 @@
-<div class="col-12">
-    {% hook 'sections' %}
+{# All slider settings render as items of ONE flat accordion (General,
+   Layout & Spacing, Behavior, Arrows, Pagination, Autoplay, Translations,
+   Slides) — no nested cards/accordions. Section templates append their
+   accordion-items here with data-bs-parent="#vanssa-slider-sections".
+
+   vanssa-form-context: toolbar-driven visibility of locale sections on edit
+   pages. slider-settings: dependent-field gating for the settings items. #}
+<div class="col-12 vanssa-slider-admin" data-controller="vanssa-form-context slider-settings">
+    <div class="accordion" id="vanssa-slider-sections">
+        {% hook 'sections' %}
+    </div>
 </div>

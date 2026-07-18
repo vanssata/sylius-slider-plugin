@@ -1,10 +1,43 @@
 vanssa_sylius_slider_admin_slider_preview:
     path: /sliders/{id}/preview
-    methods: [GET]
+    methods: [GET, POST]
     requirements:
         id: '\d+'
     defaults:
         _controller: Vanssa\SyliusSliderPlugin\Controller\Admin\SliderPreviewController
+        _sylius:
+            section: admin
+            permission: true
+
+vanssa_sylius_slider_admin_slide_preview:
+    path: /slides/{id}/preview
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
+    defaults:
+        _controller: Vanssa\SyliusSliderPlugin\Controller\Admin\SlidePreviewController
+        _sylius:
+            section: admin
+            permission: true
+
+vanssa_sylius_slider_admin_slide_edit_panel:
+    path: /slides/{id}/edit-panel
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
+    defaults:
+        _controller: Vanssa\SyliusSliderPlugin\Controller\Admin\SlideEditPanelController
+        _sylius:
+            section: admin
+            permission: true
+
+vanssa_sylius_slider_admin_slide_create_panel:
+    path: /slides/create-panel/{sliderId}
+    methods: [GET, POST]
+    requirements:
+        sliderId: '\d+'
+    defaults:
+        _controller: Vanssa\SyliusSliderPlugin\Controller\Admin\SlideCreatePanelController
         _sylius:
             section: admin
             permission: true
@@ -27,6 +60,25 @@ vanssa_sylius_slider_admin_slide_create_for_slider:
                 route:
                     parameters:
                         sliderId: $sliderId
+
+vanssa_sylius_slider_admin_slider_create_from_preset:
+    path: /sliders/new/from-preset/{presetCode}
+    methods: [GET, POST]
+    defaults:
+        _controller: vanssa_sylius_slider.controller.slider::createAction
+        _sylius:
+            section: admin
+            permission: true
+            template: '@SyliusAdmin/shared/crud/create.html.twig'
+            redirect: vanssa_sylius_slider_admin_slider_update
+            factory:
+                method: createFromStylePreset
+                arguments:
+                    - 'expr:notFoundOnNull(service("vanssa_sylius_slider.repository.style_preset").findEnabledOneByCodeAndType($presetCode, "slider"))'
+            vars:
+                route:
+                    parameters:
+                        presetCode: $presetCode
 
 vanssa_sylius_slider_admin_slider:
     resource: |
@@ -51,5 +103,18 @@ vanssa_sylius_slider_admin_slide:
         grid: vanssa_sylius_slider_admin_slide
         vars:
             hook_prefix: 'vanssa_sylius_slider_admin.slide'
+        permission: true
+    type: sylius.resource
+
+vanssa_sylius_slider_admin_style_preset:
+    resource: |
+        alias: vanssa_sylius_slider.style_preset
+        section: admin
+        templates: "@SyliusAdmin\\shared\\crud"
+        except: ['show']
+        redirect: update
+        grid: vanssa_sylius_slider_admin_style_preset
+        vars:
+            hook_prefix: 'vanssa_sylius_slider_admin.style_preset'
         permission: true
     type: sylius.resource

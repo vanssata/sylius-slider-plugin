@@ -1,0 +1,97 @@
+{# Slide live-preview surface (component vanssa_sylius_slider:admin:slide_preview_panel)
+   in one of two shells:
+
+   - inline (edit page): a sticky card pinned above the edit form — the form
+     is right there, every change live-refreshes the preview via the
+     localStorage-draft mechanism.
+   - modal (grid rows, slider slide lists): the preview plus the REAL edit
+     form, lazy-loaded into a second turbo-frame from the edit-panel endpoint
+     when the modal opens (and unloaded on close, so `#slide` never exists
+     twice) — the slide can be edited and saved without leaving the grid.
+
+   "Default" in the language select ignores every translation and shows the
+   slide's own base fields; picking a locale reflects that translation's live
+   (unsaved) settings and text. Ids are suffixed by slide.id since several
+   modal instances can exist on one page. #}
+{% set slide = this.slide %}
+{% set locales = this.locales %}
+{% set channels = this.channels %}
+{% set has_channel_choice = channels|length > 1 %}
+{% set modal_id = 'vanssa-slide-preview-modal-' ~ slide.id %}
+{% set frame_id = 'vanssa-slide-preview-frame-' ~ slide.id %}
+{% set url_template = path('vanssa_sylius_slider_admin_slide_preview', has_channel_choice ? { id: slide.id, locale: '__LOCALE__', channel: '__CHANNEL__' } : { id: slide.id, locale: '__LOCALE__' }) %}
+
+{% if this.inline %}
+    {# Workspace mode: the vanssa-preview-frame controller + its values live
+       on the surrounding .vanssa-workspace wrapper (form/workspace.html.twig)
+       so the drawer's locale/breakpoint controls share the same instance. #}
+    <div class="card vanssa-preview-panel vanssa-slider-admin mb-3">
+        <div class="card-body">
+            {% include '@VanssaSyliusSliderPlugin/admin/slide/preview/_panel_body.html.twig' with {
+                slide: slide,
+                locales: locales,
+                channels: channels,
+                frame_id: frame_id,
+                style_presets: this.stylePresets,
+                show_fullscreen: true,
+                workspace: true,
+            } only %}
+        </div>
+    </div>
+{% else %}
+    <div
+        class="modal fade vanssa-preview-modal vanssa-slider-admin"
+        id="{{ modal_id }}"
+        data-live-id="{{ modal_id }}-live"
+        tabindex="-1"
+        aria-hidden="true"
+        aria-labelledby="{{ modal_id }}-label"
+        data-controller="vanssa-preview-frame"
+        data-vanssa-preview-frame-url-template-value="{{ url_template }}"
+        data-vanssa-preview-frame-form-selector-value="#slide"
+        data-vanssa-preview-frame-draft-key-value="vanssa-slide-draft-{{ slide.id }}"
+        data-vanssa-preview-frame-panel-url-value="{{ path('vanssa_sylius_slider_admin_slide_edit_panel', { id: slide.id }) }}"
+    >
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="{{ modal_id }}-label">Preview</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'sylius.ui.close'|trans }}"></button>
+                </div>
+                <div class="modal-body">
+                    {# Same structure as the edit workspace: preview (with its
+                       locale/breakpoint toolbar) on the left, the settings
+                       form in an independently scrolling right column. #}
+                    <div class="vanssa-modal-workspace">
+                        <div class="vanssa-modal-workspace__preview">
+                            {% include '@VanssaSyliusSliderPlugin/admin/slide/preview/_panel_body.html.twig' with {
+                                slide: slide,
+                                locales: locales,
+                                channels: channels,
+                                frame_id: frame_id,
+                                style_presets: this.stylePresets,
+                            } only %}
+                        </div>
+
+                        {# The real SlideType edit form, fetched on modal open
+                           and unloaded on close (preview_frame_controller). #}
+                        <div class="vanssa-modal-workspace__form">
+                            <turbo-frame
+                                id="vanssa-slide-edit-panel-{{ slide.id }}"
+                                data-vanssa-preview-frame-target="panelFrame"
+                            >
+                                <div class="text-secondary small">Loading…</div>
+                            </turbo-frame>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ 'sylius.ui.close'|trans }}</button>
+                    {# Submits the edit-panel form loaded in the frame above
+                       (form="slide" reaches it from outside the frame). #}
+                    <button type="submit" class="btn btn-primary" form="slide">{{ 'sylius.ui.update'|trans }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
