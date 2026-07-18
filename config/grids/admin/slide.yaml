@@ -6,8 +6,16 @@ sylius_grid:
                 options:
                     class: Vanssa\SyliusSliderPlugin\Entity\Slide
             sorting:
-                position: asc
+                code: asc
             fields:
+                cover:
+                    type: twig
+                    label: sylius.ui.media
+                    path: .
+                    options:
+                        template: '@VanssaSyliusSliderPlugin/admin/grid/field/slide_cover.html.twig'
+                        vars:
+                            th_class: 'w-1'
                 code:
                     type: string
                     label: sylius.ui.code
@@ -15,10 +23,6 @@ sylius_grid:
                 name:
                     type: string
                     label: sylius.ui.name
-                    sortable: ~
-                position:
-                    type: string
-                    label: sylius.ui.position
                     sortable: ~
                 slider:
                     type: twig
@@ -47,8 +51,10 @@ sylius_grid:
             actions:
                 main:
                     create:
-                        type: create
+                        type: slide_preset_create
                 item:
+                    preview:
+                        type: slide_preview
                     update:
                         type: update
                     delete:

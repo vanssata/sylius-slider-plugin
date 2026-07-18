@@ -16,6 +16,14 @@ sylius_grid:
                     type: string
                     label: sylius.ui.name
                     sortable: ~
+                slidesCount:
+                    type: twig
+                    label: vanssa_sylius_slider.ui.slides
+                    path: .
+                    options:
+                        template: '@VanssaSyliusSliderPlugin/admin/grid/field/slider_slides_count.html.twig'
+                        vars:
+                            th_class: 'w-1 text-center'
                 enabled:
                     type: twig
                     label: sylius.ui.enabled
@@ -39,6 +47,8 @@ sylius_grid:
                     create:
                         type: create
                 item:
+                    preview:
+                        type: slider_preview
                     update:
                         type: update
                     delete:

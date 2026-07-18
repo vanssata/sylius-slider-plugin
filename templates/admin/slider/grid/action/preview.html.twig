@@ -1,0 +1,14 @@
+{# Custom grid action: opens the same preview modal used on the slider edit
+   page (channel/theme auto-resolved server-side, same as there). #}
+{% include '@VanssaSyliusSliderPlugin/admin/slide/preview/_assets.html.twig' %}
+{% include '@VanssaSyliusSliderPlugin/admin/slider/preview/_modal.html.twig' with { slider: data } only %}
+
+<button
+    type="button"
+    class="btn btn-icon"
+    data-bs-toggle="modal"
+    data-bs-target="#vanssa-slider-preview-modal-{{ data.id }}"
+    title="{{ 'Preview'|trans }}"
+>
+    {{ ux_icon(action.icon|default('tabler:eye')) }}
+</button>

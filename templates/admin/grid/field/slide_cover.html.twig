@@ -1,0 +1,12 @@
+{% if data.slideCover %}
+    <img
+        src="{{ data.slideCover }}"
+        alt="{{ data.name }}"
+        class="rounded"
+        style="width: 64px; height: 48px; object-fit: cover;"
+    >
+{% elseif data.slideCoverVideo %}
+    <span class="badge bg-blue-lt">Video</span>
+{% else %}
+    <div class="rounded bg-secondary-subtle" style="width: 64px; height: 48px;"></div>
+{% endif %}
