@@ -71,6 +71,14 @@ vendor/bin/ecs check
 make ecs  # Docker
 ```
 
+### Docker Compose command quoting
+
+`docker compose run --rm nodejs <cmd>` — the `nodejs` service already has `entrypoint: ["/bin/sh","-c"]`, so passing `sh -lc "..."` as `<cmd>` double-wraps it and the command silently does nothing useful. Pass the raw shell command as a single string argument instead:
+
+```bash
+docker compose run --rm nodejs "cd vendor/sylius/test-application && yarn build"
+```
+
 ### Composer Scripts
 ```bash
 # Database reset with fixtures
@@ -117,6 +125,29 @@ Database credentials should be configured in:
 - `tests/TestApplication/.env` (for development)
 - `tests/TestApplication/.env.test` (for testing)
 
+## Stimulus Controller Manifests (Important Gotchas)
+
+When adding, renaming, or removing a Stimulus controller in `assets/admin/controllers/` or `assets/shop/controllers/`, **three** places must stay in sync, or the webpack build breaks or runs stale code:
+
+- `assets/admin/entrypoint.js` / `assets/shop/entrypoint.js` — the ONLY place plugin controllers are registered (`app.register('vanssa-...', Controller)`).
+- `assets/controllers.json` — top-level project manifest (`controllers["@vanssa/sylius-slider-plugin"][name] = {enabled, fetch}`). **Every plugin controller here is deliberately `"enabled": false`** — see below.
+- `assets/package.json`'s embedded `"symfony": { "controllers": {...} }` section — the source for `@symfony/stimulus-bridge`'s npm-package resolution (it carries the `main` file path and the registered `name`).
+
+**Why `enabled: false`:** the test application's webpack merges this plugin's `controllers.json` into the bridge manifest used by BOTH `app-admin-entry` and `plugin-admin-entry` (same Encore config). Each entry calls `startStimulusApp()`, creating TWO Stimulus applications — with `enabled: true` every plugin controller (and every action/event handler) ran **twice** per page. Disabling bridge registration leaves exactly one registration: the explicit `app.register(...)` calls in our entrypoints. The `live` controller (`@symfony/ux-live-component`, registered by the test app's own `controllers.json`) still exists once — do NOT disable it there, and do not "fix" our manifest back to `enabled: true` or live-component actions start double-firing again (symptoms: toggles cancel themselves, LiveComponent lists duplicate rows).
+
+If the manifests disagree, expect "Controller ... does not exist in the package" or "contains a reference to the file ..." build errors, or (worse) two divergent versions of the "same" controller running simultaneously on one page.
+
+**LiveComponent morphing:** ux-live-component 2.31 morphs with idiomorph, which matches nodes by real `id` attributes only — `data-live-id` does nothing. Any list a LiveComponent re-renders while outside code mutates its DOM (drag reorder, modals re-parented to `<body>`) needs a unique `id` on every row (and stable ids on sibling anchors), or re-renders duplicate rows. `data-model` selects also need explicit `selected` attributes rendered from the server prop.
+
+Additionally, `vendor/sylius/test-application/package.json` depends on this plugin's assets via `"@vanssa/sylius-slider-plugin": "file:../../../assets"`. Yarn classic (v1) **copies** this into `node_modules/@vanssa/sylius-slider-plugin` rather than symlinking it, and a plain `yarn install` does **not** refresh that copy when only source files change (lockfile unaffected). After editing `assets/package.json` or controller source files, refresh with:
+
+```bash
+docker compose run --rm nodejs "cd vendor/sylius/test-application && yarn install --force"
+docker compose run --rm nodejs "cd vendor/sylius/test-application && yarn build"
+```
+
+If Playwright/browser testing doesn't reflect a fresh JS build, also restart the `chrome` container (`docker compose restart chrome`) — it can hold a stale bundle in memory.
+
 ## AI Development Guides
 
 This project includes specialized AI guides to assist with common plugin development tasks:
@@ -153,3 +184,5 @@ This project uses the Symfony UX frontend stack. Seven agent skills are installe
 - Map containers must have an explicit height (`style="height: 400px;"`)
 - Use `fitBoundsToMarkers()` instead of manually calculating center/zoom
 - Lock on-demand icons before deploying: `php bin/console ux:icons:lock`
+- Use Playwright to get what how pages is like. 
+- Use Playwright to get browsers test. 

@@ -17,6 +17,26 @@ A Sylius plugin for building and managing rich storefront sliders with:
 
 ![Storefront slider](docs/screenshots/frontend-slider-homepage-main.png)
 
+## Feature Tour
+
+Editing workspace — live preview with the settings drawer (toolbar-driven
+breakpoints and languages, live draft refresh):
+
+![Editing workspace](docs/media/admin-workspace.gif)
+
+Style preset try-on — hover previews the preset on the actual banner, click
+applies it:
+
+![Preset try-on](docs/media/preset-tryon.gif)
+
+Preset gallery on the create pages:
+
+![Preset gallery](docs/media/preset-gallery.gif)
+
+Storefront slider:
+
+![Storefront slider](docs/media/storefront-slider.gif)
+
 ## System Requirements
 
 | Dependency | Version |
@@ -83,6 +103,14 @@ yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/as
 
 7. Register plugin Stimulus controllers in `assets/controllers.json`:
 
+> The canonical controller list ships in
+> `vendor/vanssa/sylius-slider-plugin/assets/controllers.json`. There the
+> entries are `"enabled": false` because the plugin's bundled test
+> application loads TWO Stimulus applications and registers the controllers
+> explicitly in its entrypoints — in a normal Sylius-Standard project (one
+> Stimulus application) register them from the manifest with
+> `"enabled": true` as below, and register each controller only once.
+
 ```json
 {
   "controllers": {
@@ -94,34 +122,21 @@ yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/as
           "@vanssa/sylius-slider-plugin/shop/styles/slider.scss": true
         }
       },
-      "slide-preview": {
-        "enabled": true,
-        "fetch": "eager",
-        "autoimport": {
-          "@vanssa/sylius-slider-plugin/admin/styles/slide_preview.scss": true
-        }
-      },
-      "slider-settings": {
-        "enabled": true,
-        "fetch": "eager"
-      },
-      "slider-slides-preview": {
-        "enabled": true,
-        "fetch": "eager"
-      },
-      "responsive-copy": {
-        "enabled": true,
-        "fetch": "eager"
-      },
-      "slider-preview-frame": {
-        "enabled": true,
-        "fetch": "eager"
-      },
+      "slide-video": { "enabled": true, "fetch": "eager" },
+      "slider-settings": { "enabled": true, "fetch": "eager" },
+      "slider-slides-preview": { "enabled": true, "fetch": "eager" },
+      "responsive-copy": { "enabled": true, "fetch": "eager" },
+      "preview-frame": { "enabled": true, "fetch": "eager" },
+      "preset-applier": { "enabled": true, "fetch": "eager" },
+      "preset-gallery": { "enabled": true, "fetch": "eager" },
+      "form-context": { "enabled": true, "fetch": "eager" },
+      "animation-settings": { "enabled": true, "fetch": "eager" },
+      "mockup-picker": { "enabled": true, "fetch": "eager" },
+      "modal-portal": { "enabled": true, "fetch": "eager" },
       "rgba-color-picker": {
         "enabled": true,
         "fetch": "eager",
         "autoimport": {
-          "@vanssa/sylius-slider-plugin/admin/styles/rgba_color_picker.scss": true,
           "@simonwep/pickr/dist/themes/classic.min.css": true
         }
       }
@@ -210,13 +225,51 @@ tag. Anything left empty on Mobile/Tablet falls back to the Desktop version,
 so nothing needs to be duplicated. Translations can override texts directly
 and media/display settings per locale via explicit checkboxes.
 
-## Admin Slider Preview
+### Slide videos
 
-The slider edit page includes a live preview panel: pick a **channel** and a
-**language** first, then the slider renders in an iframe using the storefront
-styles of that channel (its theme assets), with a desktop / tablet / mobile
-resolution switcher. "Open in new tab" shows the preview standalone with an
-"Edit slider" shortcut back to the form.
+Each video slot accepts either a **self-hosted upload** or an **external
+video URL** — currently YouTube (any watch/short/embed link; it is
+normalized and stored as a canonical URL, and the storefront renders a
+privacy-enhanced `youtube-nocookie` embed). The URL wins over the upload for
+its slot; clearing it removes the external video. The provider architecture
+is extensible — see docs/EXTENDING.md to add another provider.
+
+Video behavior:
+
+- **Video playback** (Media & Settings, slide-global): *Start automatically*
+  (default — the video plays while its slide is visible) or *Play button* —
+  the visitor starts it via an overlay button; rotating away pauses it and
+  brings the button back.
+- **Autoplay waits for videos**: when the slider autoplays and the active
+  slide shows an auto-playing video, the slider advances when the video
+  **ends** instead of after the fixed interval (self-hosted videos drop
+  their loop in that case; the interval remains a fallback if the video
+  never starts). Click-mode videos never hold the rotation.
+
+## Admin Editing Workspace
+
+The slider and slide edit pages are a two-column **workspace**: the live
+preview is the main surface, and the settings form lives in a right-hand
+**drawer** — hidden by default, opened with the *Settings* toolbar button.
+The drawer scrolls independently while its head keeps the **Save** button,
+the **language** switcher and the desktop / tablet / mobile **breakpoint**
+switcher always visible. Those toolbar controls **drive the form**: picking
+`en_US` + *Tablet* and overriding an option stores that override for exactly
+that locale and breakpoint.
+
+The previewed slide is **scaled to fit** entirely inside the panel (no
+clipping/scrolling); while a change is being applied a **loading overlay**
+covers the preview until it refreshes. The **fullscreen icon** expands the
+whole workspace to the full viewport (Escape exits). In the *Preset*
+dropdown, **hovering** a preset temporarily shows it on the actual banner —
+without touching the form — and clicking applies it.
+
+The preview always shows **exactly the selected language and breakpoint**:
+the preview endpoint receives the toolbar's breakpoint and flattens the
+effective settings server-side (desktop → tablet → mobile cascade merged
+with the language's overrides), so tablet/mobile variants and per-locale
+differences render faithfully even though the embedded preview cannot use
+real media queries. Unsaved per-language overrides preview live as well.
 
 ![Admin slider preview panel](docs/screenshots/admin-slider-preview-panel.png)
 
@@ -257,6 +310,144 @@ Slider behavior presets also include:
 
 - `vanssa_sylius_slider.presets.slider.parallax_strength`
   Optional parallax levels (for example: `0.5rem`, `1rem`, `2rem`, `3rem`, `4rem`). If not set, parallax is disabled.
+
+## Style Presets
+
+Style presets are one-click style bundles for sliders and slides. They come
+from two sources, merged together everywhere presets are offered:
+
+1. **Configuration presets** — defined under
+   `vanssa_sylius_slider.style_presets` (read-only in the admin, labeled
+   *config* in the gallery).
+2. **Database presets** — created and managed in the admin under
+   *Slider Management → Style Presets* (labeled *custom*). A database preset
+   with the same code as a configuration preset **overrides** it.
+
+Presets are offered in two places:
+
+- The **"Preset" dropdown** of the live-preview panels on the edit pages —
+  applying one fills the mapped form fields (the live preview updates
+  instantly); nothing persists until the form is saved.
+- The **preset gallery modal** that opens automatically on the slider/slide
+  *create* pages: start **Blank** or pick a preset card (each shows its
+  mockup image). Slide presets and configuration slider presets pre-fill the
+  form; database slider presets that carry source slides navigate to
+  `/admin/sliders/new/from-preset/{code}` where the server **clones** those
+  slides into independent copies (editing the clones never touches the
+  preset's source slides).
+
+### Managing presets in the admin
+
+*Slider Management → Style Presets* provides full CRUD. A preset has:
+
+- `code` (unique, fixed after creation) and `type` (slide or slider)
+- `label`, `enabled`, `position`
+- **Mockup image** — pick one of the bundled mockups (dark, light,
+  with-text, center-bold, minimal, gradient, glass) or upload a custom
+  image; it represents the preset in the selection gallery.
+- **Settings** — a flat JSON map of dot-paths to values (same shape as
+  configuration presets, see below).
+- **Capture from an existing slide/slider** — leave the settings empty and
+  pick a resource; its current style is serialized into the preset on save.
+- **Slides** (slider presets only) — the source slides cloned when a slider
+  is created from this preset.
+
+### Defining a preset in configuration
+
+Configuration presets live in your project config. Each preset is a `label`
+plus a flat map of **dot-paths** (relative to the form root) to scalar
+values — the dot-path mirrors the form's field structure exactly:
+
+```yaml
+# config/packages/vanssa_sylius_slider.yaml
+vanssa_sylius_slider:
+    style_presets:
+        slide:
+            brand_hero:
+                label: 'Brand Hero'
+                settings:
+                    # slide[settings][responsive][desktop][headlineColor]
+                    settings.responsive.desktop.headlineColor: 'rgba(250, 204, 21, 1)'
+                    settings.responsive.desktop.backgroundColor: 'rgba(15, 23, 42, 0.75)'
+                    settings.responsive.desktop.contentAnimation: 'fade-up'
+                    settings.responsive.desktop.animationDuration: 700
+                    # button/link fields live under settings.linking
+                    settings.linking.buttonAppearance: 'primary'
+        slider:
+            brand_carousel:
+                label: 'Brand Carousel'
+                settings:
+                    settings.slideEffect: 'fade'
+                    settings.speed: 700
+                    settings.autoplay.enabled: true
+                    settings.autoplay.interval: 6000
+                    settings.parallax.strength: '1rem'
+```
+
+Valid dot-path groups:
+
+- **Slide presets** — `settings.responsive.<desktop|tablet|mobile>.<field>`
+  where `<field>` is any per-breakpoint form field (texts & typography:
+  `title`, `description`, `headlineElement`, `headlineFontSize`,
+  `descriptionFontSize`, `buttonFontSize`; layout:
+  `contentHorizontalPosition`, `contentVerticalPosition`,
+  `contentTextAlign`, `contentPadding`, `contentMargin`, `contentWidth`
+  (`boxed` reading width or `full` edge-to-edge strip), `contentMaxHeight`
+  (content box grows with its content up to `20%`–`50%` of the slide
+  height), `borderRadius`,
+  `customCssClass`; colors: `textColor`, `headlineColor`,
+  `descriptionColor`, `backgroundColor`, `mediaOverlayColor`; effects:
+  `contentAnimation`, `animationDuration`, `animationDelay`,
+  `backgroundBlurPreset`, `enableTextBlur`, `contentBlurStrength`;
+  visibility: `hideTitle`, `hideDescription`, `hideButton`), plus
+  `settings.linking.<field>` (`type`, `buttonAppearance`, `buttonSize`,
+  `buttonPosition`, `overlay`, `openExternal`, `showProductFocusImage`).
+- **Slider presets** — `settings.<field>` for any slider settings field
+  (see the Slider Options Reference above), nested groups as
+  `settings.autoplay.<enabled|interval|pauseOnHover>` and
+  `settings.parallax.strength`.
+
+The plugin ships slide presets `hero_dark`, `clean_light`, `minimal`,
+`bold_center`, `split_left_light`, `gradient_overlay`, `glass_card`,
+`promo_badge_right` and slider presets `classic_arrows`, `minimal_fade`,
+`autoplay_showcase`, `fullscreen_hero`, `compact_banner`,
+`parallax_showcase`. Projects can override any of them by reusing the code.
+
+Slide presets target the desktop breakpoint — use the "Copy settings from
+desktop" button afterwards to propagate to mobile/tablet.
+
+## Parallax
+
+Parallax (cursor-driven media shift) can be configured at two levels:
+
+- **Slider**: *Behavior & Effects → Parallax strength* — applies to every
+  slide in the slider.
+- **Slide**: *Media & Settings → Parallax* — overrides the slider setting
+  for that slide only. Empty = inherit from the slider; **Disabled** turns
+  parallax off for that slide even inside a parallax slider.
+
+## CSS & JS Variables
+
+Every admin-configured value is exposed on the storefront so themes and
+custom JS can consume it:
+
+- **CSS custom properties** — `--vanssa-slider-*` on the
+  `<section class="vanssa-slider">` root (speed, effect, container width,
+  margins/paddings, arrows/pagination position & style, navigation
+  colors/sizes/shadows, autoplay/rewind/progress flags, parallax strength,
+  max height) and `--vanssa-slide-*` on `.vanssa-slide__content` per
+  breakpoint (colors, sizes, padding/margin, position, animation
+  name/duration/delay, blur, text-blur).
+- **Data attributes** on the slide root for non-visual values:
+  `data-vanssa-headline-element`, `data-vanssa-animation`,
+  `data-vanssa-button-position/-appearance/-size`,
+  `data-vanssa-parallax-strength`.
+- **SCSS build-time defaults** — `$vanssa-slider-*` / `$vanssa-slide-*`
+  `!default` variables in `assets/styles/_tokens.scss`; override them before
+  importing the plugin SCSS to retheme without touching the admin.
+- **JS** — the `vanssa-slider` Stimulus controller receives all behavioral
+  settings in its `options` value and exposes `cssVar(name)` to read any
+  custom property from the slider root.
 
 ## Reusable Color Picker Field
 
@@ -325,6 +516,23 @@ behavior, arrows & navigation, pagination, autoplay); dependent options hide
 while their parent toggle is off.
 
 ![Slider edit page](docs/screenshots/admin-slider-edit-homepage-main.png)
+
+The **Slides** section lists the slider's slides as one-line rows (thumbnail,
+title, preview / edit / detach icon actions — detaching removes the slide
+from this slider without deleting it). **Add** opens a browser over every
+slide in the admin with search, a membership filter (in this slider / not in
+it / all) and pagination: checking rows marks pending changes ("will be
+added" / "will be removed" badges) and **Save changes** commits them all at
+once — closing the modal discards the marks. **Create** runs the full slide
+creation flow in a modal, pre-attached to the slider.
+
+![Add slides browser modal](docs/screenshots/admin-slider-add-slides-modal.png)
+
+### Creating from the grid
+
+The slides grid's **Create** button opens the preset gallery first: pick
+**Blank** or any preset card, and the create form opens with that choice
+already applied (`?preset=<code>`).
 
 ## Storefront Usage
 
@@ -407,10 +615,19 @@ vendor/bin/behat --strict --tags='@slider_admin'
 vendor/bin/behat --strict --tags='@slider_frontend'
 ```
 
-For JS scenarios (if enabled in your CI/project):
+Browser (@javascript) scenarios drive a real headless Chrome over CDP
+(`features/admin/slider_editor_ux.feature`: settings drawer, toolbar-driven
+locale/breakpoint editing, live draft preview, preset try-on, fullscreen,
+scale-to-fit). They need the app served under `APP_ENV=test` and a Chrome
+reachable at the `chrome` session's `api_url` (defaults to
+`http://127.0.0.1:9222`; in the Docker setup copy `behat.yml.dist` to
+`behat.yml` and point it at `http://chrome:9222`):
 
 ```bash
-vendor/bin/behat --strict --tags='@javascript,@mink:chromedriver'
+# Docker: serve the test env, then run against it
+ENV=test docker compose up -d php nginx
+docker compose run --rm -e APP_ENV=test -e BEHAT_BASE_URL=http://nginx \
+    php vendor/bin/behat --strict --tags='@javascript'
 ```
 
 ## Optional Integrations

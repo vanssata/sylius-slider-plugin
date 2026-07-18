@@ -24,9 +24,11 @@
 
 # Local AI tooling (kept out of git, functional on disk)
 /.claude/
+/CLAUDE.local.md
 /.ai/
 /mate/
 /bin/codex
 /bin/codex.bat
 /mcp.json
 /.mcp.json
+.env.local

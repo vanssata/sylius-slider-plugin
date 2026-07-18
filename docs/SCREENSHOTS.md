@@ -26,16 +26,25 @@ Path: `/admin/slides`
 
 ![Admin slides list](./screenshots/admin-slides-index.png)
 
-## Admin: Slider edit (settings accordion + preview panel)
+## Admin: Slider editing workspace
 
-Path: `/admin/sliders/{id}/edit` (fixture slider: `homepage-main`)
+Path: `/admin/sliders/{id}/edit` (fixture slider: `homepage-main`) — the
+live preview is the main surface; the settings drawer (one flat accordion:
+General, Layout & Spacing, Behavior, Arrows, Pagination, Autoplay,
+Translations, Slides) opens fullscreen with Save/language/breakpoint always
+visible:
 
 ![Admin slider edit](./screenshots/admin-slider-edit-homepage-main.png)
 
-The edit page includes the channel/language preview panel with a
-desktop/tablet/mobile resolution switcher:
+The preview toolbar (presets left; Settings + fullscreen right):
 
 ![Admin slider preview panel](./screenshots/admin-slider-preview-panel.png)
+
+The Slides section's **Add** browser (search + membership filter +
+pagination; checking marks pending changes, **Save changes** commits them,
+Close discards):
+
+![Add slides browser modal](./screenshots/admin-slider-add-slides-modal.png)
 
 ## Admin: Slide edit (per-breakpoint media & settings)
 
@@ -55,6 +64,17 @@ Per locale: Desktop/Mobile/Tablet tabs with Texts (always applied) and
 checkbox-gated media/display-settings overrides:
 
 ![Slide translations](./screenshots/admin-slide-translations.png)
+
+## Admin: Style presets
+
+Path: `/admin/style-presets/` — admin-managed presets (merged with the
+config-defined ones) with mockup thumbnails:
+
+![Style presets](./screenshots/admin-style-presets-index.png)
+
+The creation pages open a preset gallery first (Blank or a preset):
+
+![Preset gallery](./screenshots/admin-preset-gallery.png)
 
 ## Frontend: Slider usage
 
