@@ -29,6 +29,7 @@ export default class extends Controller {
         this.handleShow = this.handleShow.bind(this);
         this.handleHide = this.handleHide.bind(this);
         this.handleFrameLoad = this.handleFrameLoad.bind(this);
+        this.handleSaved = this.handleSaved.bind(this);
 
         if (!this.inlineValue) {
             // The modal is rendered deep inside the page's markup, so its own
@@ -66,6 +67,7 @@ export default class extends Controller {
         document.addEventListener('change', this.handleFieldEvent);
         document.addEventListener('submit', this.handleSubmit);
         document.addEventListener('turbo:frame-load', this.handleFrameLoad);
+        document.addEventListener('vanssa-preview:saved', this.handleSaved);
 
         // The test harness loads this controller's Stimulus registration
         // twice (once via the plugin's own entry, once via the app's shared
@@ -112,6 +114,7 @@ export default class extends Controller {
         document.removeEventListener('change', this.handleFieldEvent);
         document.removeEventListener('submit', this.handleSubmit);
         document.removeEventListener('turbo:frame-load', this.handleFrameLoad);
+        document.removeEventListener('vanssa-preview:saved', this.handleSaved);
 
         if (!this.inlineValue) {
             this.element.removeEventListener('show.bs.modal', this.handleShow);
@@ -220,10 +223,30 @@ export default class extends Controller {
         // visibility state — re-align it with the toolbar.
         this.dispatchContext();
 
+        // A save response just rendered (the panel shows its success alert):
+        // persisted state changed, so previews OUTSIDE this modal render
+        // stale data now — announce it (see handleSaved).
+        if (this.hasPanelFrameTarget && event.target === this.panelFrameTarget && event.target.querySelector('.alert-success') !== null) {
+            document.dispatchEvent(new CustomEvent('vanssa-preview:saved', { detail: { source: this.element.id || null } }));
+        }
+
         if (this.pendingSaveRefresh || this.readDraft() !== null) {
             this.pendingSaveRefresh = false;
             this.refresh();
         }
+    }
+
+    // Another preview instance persisted changes (a slide modal's Update
+    // while this instance is, say, the slider workspace hosting that
+    // modal). Only inline panels react: they render from the DB and are
+    // visible behind the modal. Other modals' preview frames are hidden
+    // and refreshing one per grid row would fan out useless requests.
+    handleSaved(event) {
+        if (!this.inlineValue || (event.detail?.source ?? null) === this.element.id) {
+            return;
+        }
+
+        this.refresh();
     }
 
     // Resolves the preview URL from the template: locale from the toolbar,
