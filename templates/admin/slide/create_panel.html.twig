@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+{# Turbo-frame fragment serving the SlideType CREATE form to the slider
+   page's "add slide" modal (see SlideCreatePanelController). Reuses the
+   edit-panel hook tree so the form matches the regular slide form. #}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex, nofollow">
+    <title>New slide for {{ slider.code }}</title>
+</head>
+<body>
+    <turbo-frame id="vanssa-slide-create-panel-{{ slider.id }}" class="vanssa-slider-admin">
+        {% if created %}
+            <div class="alert alert-success" role="alert">
+                Slide has been created and attached to this slider.
+            </div>
+            <a class="btn btn-primary" href="{{ path('vanssa_sylius_slider_admin_slider_update', { id: slider.id }) }}" data-turbo="false">
+                {{ ux_icon('tabler:refresh', {'class': 'icon me-1'}) }} Reload the slider page
+            </a>
+        {% else %}
+            {% if style_presets|length > 0 %}
+                <div
+                    class="d-flex justify-content-end mb-2"
+                    data-controller="vanssa-preset-applier"
+                    data-vanssa-preset-applier-presets-value="{{ style_presets|json_encode|e('html_attr') }}"
+                >
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ ux_icon('tabler:wand', {'class': 'icon me-1'}) }} Preset
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            {% for name, preset in style_presets %}
+                                <li>
+                                    <button type="button" class="dropdown-item" data-action="vanssa-preset-applier#apply" data-vanssa-preset-applier-preset-param="{{ name }}">
+                                        {{ preset.label }}
+                                    </button>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% form_theme form '@SyliusAdmin/shared/form_theme.html.twig' %}
+            {{ form_start(form, {
+                'action': path('vanssa_sylius_slider_admin_slide_create_panel', { sliderId: slider.id }),
+                'attr': { 'novalidate': 'novalidate', 'id': form.vars.id },
+            }) }}
+                {{ form_errors(form) }}
+                {{ form_widget(form._token) }}
+
+                {% hook 'vanssa_sylius_slider.slide_edit_panel' with { form, resource: slide } %}
+
+                <div class="d-flex justify-content-end my-3">
+                    <button type="submit" class="btn btn-primary">{{ 'sylius.ui.create'|trans }}</button>
+                </div>
+            {{ form_end(form, { render_rest: false }) }}
+        {% endif %}
+    </turbo-frame>
+</body>
+</html>

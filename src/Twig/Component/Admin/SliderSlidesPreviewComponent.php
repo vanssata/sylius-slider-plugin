@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
+use Symfony\UX\LiveComponent\Attribute\LiveListener;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Vanssa\SyliusSliderPlugin\Entity\Slide;
@@ -48,6 +49,15 @@ final class SliderSlidesPreviewComponent
         }
 
         return $slider->getOrderedSlides();
+    }
+
+    /**
+     * Re-renders the list when the "Add slides" browser attaches/detaches a
+     * slide (nothing to do — rendering re-reads the association).
+     */
+    #[LiveListener('vanssa:slider-slides-changed')]
+    public function onSlidesChanged(): void
+    {
     }
 
     #[LiveAction]

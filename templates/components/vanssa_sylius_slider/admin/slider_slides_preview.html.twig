@@ -1,8 +1,16 @@
 <div {{ attributes.defaults(stimulus_controller('vanssa-slider-slides-preview')) }}>
     {% if this.slides|length == 0 %}
-        <div class="alert alert-info mb-0">No slides assigned yet.</div>
+        <div class="alert alert-info mb-0" id="vanssa-slides-empty">No slides assigned yet.</div>
     {% else %}
-        <div class="vanssa-slider-slides-preview list-group" {{ stimulus_target('vanssa-slider-slides-preview', 'list') }}>
+        {# Real id attributes keep the morph stable — idiomorph (what
+           LiveComponent 2.31 morphs with) matches nodes by their id
+           attribute only; the per-row preview modals get re-parented to
+           <body> after the first render, so without ids the diff
+           duplicated rows on attach/detach. #}
+        <div id="vanssa-slides-preview-assets">
+            {% include '@VanssaSyliusSliderPlugin/admin/slide/preview/_assets.html.twig' %}
+        </div>
+        <div class="vanssa-slider-slides-preview list-group" id="vanssa-slides-list" {{ stimulus_target('vanssa-slider-slides-preview', 'list') }}>
             {% for slide in this.slides %}
                 {% set slideId = slide.id %}
                 {% set slideName = slide.name %}
@@ -17,6 +25,10 @@
                 <article
                     class="list-group-item vanssa-slider-slides-preview__item {{ not slide.enabled ? 'is-disabled' : '' }}"
                     draggable="true"
+                    {# Morph key (idiomorph matches by id): drag reorder and
+                       modal re-parenting mutate this list outside the
+                       component — without ids the diff duplicates rows. #}
+                    id="vanssa-slide-item-{{ slideId }}"
                     data-slide-id="{{ slideId }}"
                     {{ stimulus_target('vanssa-slider-slides-preview', 'item') }}
                     data-action="dragstart->vanssa-slider-slides-preview#onDragStart dragover->vanssa-slider-slides-preview#onDragOver drop->vanssa-slider-slides-preview#onDrop dragend->vanssa-slider-slides-preview#onDragEnd"
@@ -28,46 +40,40 @@
                             <img src="{{ slide.slideCover }}" alt="{{ slideTitle ?: slideName }}">
                         {% elseif hasVideo %}
                             <div class="vanssa-slider-slides-preview__video-placeholder">
-                                <span class="badge bg-blue-lt">Video</span>
+                                {{ ux_icon('tabler:video', {'class': 'icon'}) }}
                             </div>
                         {% else %}
                             <div class="vanssa-slider-slides-preview__image-placeholder"></div>
                         {% endif %}
                     </div>
 
-                    <div class="vanssa-slider-slides-preview__content">
-                        <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
-                            <div>
-                                <h4 class="mb-1">{{ slideTitle ?: slideName }}</h4>
-                                <div class="text-muted small">{{ slide.code }}</div>
-                            </div>
-                            <div class="text-muted small text-nowrap">#{{ loop.index }}</div>
+                    <div class="vanssa-slider-slides-preview__content flex-grow-1" style="min-width: 0;">
+                        <div class="fw-bold text-truncate">{{ slideTitle ?: slideName }}</div>
+                        <div class="text-muted small text-truncate">
+                            {{ slide.code }}
+                            {%- if hasVideo %} · Video{% endif %}
+                            {%- if not slide.enabled %} · <span class="text-danger">Disabled</span>{% endif %}
                         </div>
+                    </div>
 
-                        {% if slideDescription %}
-                            <p class="mb-2 text-muted small">{{ slideDescription|striptags|u.truncate(140, '...') }}</p>
-                        {% endif %}
-
-                        <div class="small text-muted mb-2">
-                            <span class="me-2">{{ hasVideo ? 'Video' : (hasImage ? 'Image' : 'No media') }}</span>
-                            <span>Content: {{ contentHorizontal }}/{{ contentVertical }}</span>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-2">
-                            {% if not slide.enabled %}
-                                <span class="badge bg-danger text-white">Disabled</span>
-                            {% endif %}
-                            <a class="btn btn-outline-primary btn-sm" href="{{ path('vanssa_sylius_slider_admin_slide_update', {'id': slideId}) }}">{{ 'sylius.ui.edit'|trans }}</a>
-                            <button
-                                type="button"
-                                class="btn btn-outline-danger btn-sm"
-                                data-action="live#action:prevent"
-                                data-live-action-param="removeSlide"
-                                data-live-slide-id-param="{{ slideId }}"
-                            >
-                                {{ 'sylius.ui.delete'|trans }}
-                            </button>
-                        </div>
+                    <div class="vanssa-slider-slides-preview__actions d-flex align-items-center gap-1">
+                        {% include '@VanssaSyliusSliderPlugin/admin/slide/preview/_trigger.html.twig' with { slide: slide, icon_only: true } only %}
+                        <a class="btn btn-icon btn-sm btn-ghost-secondary" href="{{ path('vanssa_sylius_slider_admin_slide_update', {'id': slideId}) }}" title="{{ 'sylius.ui.edit'|trans }}" aria-label="{{ 'sylius.ui.edit'|trans }}">
+                            {{ ux_icon('tabler:pencil', {'class': 'icon'}) }}
+                        </a>
+                        {# Detaches the slide from THIS slider only — the
+                           slide itself is never deleted here. #}
+                        <button
+                            type="button"
+                            class="btn btn-icon btn-sm btn-ghost-danger"
+                            data-action="live#action:prevent"
+                            data-live-action-param="removeSlide"
+                            data-live-slide-id-param="{{ slideId }}"
+                            title="Remove from this slider (the slide is kept)"
+                            aria-label="Remove from this slider"
+                        >
+                            {{ ux_icon('tabler:unlink', {'class': 'icon'}) }}
+                        </button>
                     </div>
                 </article>
             {% endfor %}

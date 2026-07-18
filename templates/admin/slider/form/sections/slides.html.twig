@@ -1,20 +1,76 @@
 {% set form = hookable_metadata.context.form %}
 {% set slider = form.vars.data %}
 
-<div class="card mb-3">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h2 class="card-title mb-0">{{ 'sylius.ui.slides'|trans }}</h2>
-        {% if slider.id is null %}
-            <a class="btn btn-primary disabled" href="#" aria-disabled="true">{{ 'sylius.ui.create'|trans }}</a>
-        {% else %}
-            <a class="btn btn-primary" href="{{ path('vanssa_sylius_slider_admin_slide_create_for_slider', {'sliderId': slider.id}) }}">{{ 'sylius.ui.create'|trans }}</a>
-        {% endif %}
-    </div>
-    <div class="card-body">
-        {% if slider.id is null %}
-            <div class="alert alert-info mb-0">Save slider first to preview related slides.</div>
-        {% else %}
-            {{ component('vanssa_sylius_slider:admin:slider_slides_preview', { sliderId: slider.id }) }}
-        {% endif %}
+{# "Slides" item of the flat slider settings accordion. #}
+<div class="accordion-item">
+    <h3 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#vanssa-slider-sections-slides">
+            {{ ux_icon('tabler:photo', {'class': 'icon me-2'}) }} {{ 'vanssa_sylius_slider.ui.slides'|trans }}
+        </button>
+    </h3>
+    <div id="vanssa-slider-sections-slides" class="accordion-collapse collapse" data-bs-parent="#vanssa-slider-sections">
+        <div class="accordion-body">
+            {% if slider.id is null %}
+                <div class="alert alert-info mb-0">Save slider first to preview related slides.</div>
+            {% else %}
+                <div class="d-flex justify-content-end gap-2 mb-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#vanssa-slide-browser-modal-{{ slider.id }}">
+                        {{ ux_icon('tabler:link', {'class': 'icon me-1'}) }} Add
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#vanssa-slide-create-modal-{{ slider.id }}">
+                        {{ ux_icon('tabler:plus', {'class': 'icon me-1'}) }} {{ 'sylius.ui.create'|trans }}
+                    </button>
+                </div>
+                {{ component('vanssa_sylius_slider:admin:slider_slides_preview', { sliderId: slider.id }) }}
+
+                {# "Add" browser: pick existing admin slides to attach to /
+                   detach from this slider (with search, membership filter
+                   and pagination); nothing is deleted here. #}
+                <div class="modal fade vanssa-preview-modal vanssa-slider-admin" id="vanssa-slide-browser-modal-{{ slider.id }}" data-controller="vanssa-modal-portal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5">Add slides to this slider</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'sylius.ui.close'|trans }}"></button>
+                            </div>
+                            <div class="modal-body">
+                                {{ component('vanssa_sylius_slider:admin:slider_slide_browser', { sliderId: slider.id }) }}
+                            </div>
+                            {# Same footer shape as the slide preview modal
+                               (Close + primary action). Save commits the
+                               checked changes via the component's hidden
+                               applyChanges proxy, then the modal closes. #}
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ 'sylius.ui.close'|trans }}</button>
+                                <button type="button" class="btn btn-primary" data-action="vanssa-modal-portal#save">{{ 'sylius.ui.save_changes'|trans }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# In-modal slide creation: the regular SlideType create form
+                   (presets included) loads lazily into the frame when the
+                   modal opens; the new slide is pre-attached to this slider. #}
+                <div class="modal fade vanssa-preview-modal vanssa-slider-admin" id="vanssa-slide-create-modal-{{ slider.id }}" data-controller="vanssa-modal-portal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5">{{ 'sylius.ui.create'|trans }} — {{ 'vanssa_sylius_slider.ui.slide'|trans }}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ 'sylius.ui.close'|trans }}"></button>
+                            </div>
+                            <div class="modal-body">
+                                <turbo-frame
+                                    id="vanssa-slide-create-panel-{{ slider.id }}"
+                                    src="{{ path('vanssa_sylius_slider_admin_slide_create_panel', { sliderId: slider.id }) }}"
+                                    loading="lazy"
+                                >
+                                    <div class="text-secondary small">Loading…</div>
+                                </turbo-frame>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>

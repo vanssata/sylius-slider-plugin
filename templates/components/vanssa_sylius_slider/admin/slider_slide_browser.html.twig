@@ -1,0 +1,86 @@
+<div {{ attributes }}>
+    <div class="row g-2 mb-3">
+        <div class="col">
+            <input
+                type="search"
+                class="form-control"
+                placeholder="Search by name or code…"
+                data-model="debounce(300)|search"
+            >
+        </div>
+        <div class="col-auto">
+            {# Explicit selected flags: the morph rebuilds this select on
+               re-render, so the server-side prop must win visually. #}
+            <select class="form-select" data-model="membership" aria-label="Filter by membership">
+                <option value="all" {{ this.membership == 'all' ? 'selected' }}>All slides</option>
+                <option value="in" {{ this.membership == 'in' ? 'selected' }}>In this slider</option>
+                <option value="out" {{ this.membership == 'out' ? 'selected' }}>Not in this slider</option>
+            </select>
+        </div>
+    </div>
+
+    {% set result = this.results %}
+    {% if result.items|length == 0 %}
+        <div class="alert alert-info mb-0">No slides match these filters.</div>
+    {% else %}
+        <div class="list-group vanssa-slider-slides-preview">
+            {% for slide in result.items %}
+                {% set checked = this.isChecked(slide) %}
+                {% set persisted = this.isAttached(slide) %}
+                <label class="list-group-item vanssa-slider-slides-preview__item" id="vanssa-slide-browser-item-{{ slide.id }}" data-live-id="vanssa-slide-browser-item-{{ slide.id }}">
+                    {# Marks the DESIRED state as a pending change (idempotent);
+                       nothing is written until the modal's Save button. #}
+                    <input
+                        type="checkbox"
+                        class="form-check-input m-0"
+                        {{ checked ? 'checked' : '' }}
+                        data-action="change->live#action"
+                        data-live-action-param="markSlide"
+                        data-live-slide-id-param="{{ slide.id }}"
+                        data-live-attached-param="{{ checked ? '0' : '1' }}"
+                        aria-label="Attach {{ slide.name }} to this slider"
+                    >
+                    <div class="vanssa-slider-slides-preview__media">
+                        {% if slide.slideCover %}
+                            <img src="{{ slide.slideCover }}" alt="{{ slide.name }}">
+                        {% elseif slide.slideCoverVideo %}
+                            <div class="vanssa-slider-slides-preview__video-placeholder">{{ ux_icon('tabler:video', {'class': 'icon'}) }}</div>
+                        {% else %}
+                            <div class="vanssa-slider-slides-preview__image-placeholder"></div>
+                        {% endif %}
+                    </div>
+                    <div class="vanssa-slider-slides-preview__content flex-grow-1" style="min-width: 0;">
+                        <div class="fw-bold text-truncate">{{ slide.name }}</div>
+                        <div class="text-muted small text-truncate">{{ slide.code }}{% if not slide.enabled %} · <span class="text-danger">Disabled</span>{% endif %}</div>
+                    </div>
+                    {% if checked != persisted %}
+                        <span class="badge {{ checked ? 'bg-green-lt' : 'bg-red-lt' }}">{{ checked ? 'will be added' : 'will be removed' }}</span>
+                    {% endif %}
+                </label>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <div class="text-secondary small">
+                {{ result.total }} slide(s) — page {{ result.page }} of {{ result.pages }}
+                {% if this.pendingCount > 0 %}
+                    · <span class="fw-bold" data-vanssa-pending-count>{{ this.pendingCount }} unsaved change(s)</span>
+                {% endif %}
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-action="live#action" data-live-action-param="previousPage" {{ result.page <= 1 ? 'disabled' : '' }}>
+                    {{ ux_icon('tabler:chevron-left', {'class': 'icon'}) }}
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-action="live#action" data-live-action-param="nextPage" {{ result.page >= result.pages ? 'disabled' : '' }}>
+                    {{ ux_icon('tabler:chevron-right', {'class': 'icon'}) }}
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Proxy targets for the modal shell (vanssa-modal-portal): its footer
+       Save button and its close/cancel path click these to reach the live
+       actions from outside the component subtree. #}
+    <button type="button" class="d-none" data-vanssa-browser-action="apply" data-action="live#action" data-live-action-param="applyChanges"></button>
+    <button type="button" class="d-none" data-vanssa-browser-action="reset" data-action="live#action" data-live-action-param="resetPending"></button>
+</div>
