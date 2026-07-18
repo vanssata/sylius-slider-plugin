@@ -110,15 +110,3 @@
         ></turbo-frame>
     </div>
 </div>
-
-{# The content-reveal animation (is-anim-*) is normally gated behind an
-   .is-in-view class the shop's vanssa-slider Stimulus controller adds via
-   IntersectionObserver — absent here since only the shop CSS is loaded
-   (preview/_assets.html.twig). Must live in the host page: Turbo discards
-   everything outside the matched <turbo-frame> in a frame-scoped response. #}
-<style>
-    #{{ frame_id }} .vanssa-slider .vanssa-slide__content-box[class*="is-anim-"] {
-        opacity: 1;
-        animation: none;
-    }
-</style>

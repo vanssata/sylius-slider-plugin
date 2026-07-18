@@ -18,19 +18,12 @@
             margin: 0;
             background: #f4f5f7;
         }
-
-        /* The content-reveal animation (is-anim-*) is normally gated behind
-           an .is-in-view class that the shop's vanssa-slider Stimulus
-           controller adds via IntersectionObserver. This preview loads the
-           theme's CSS but not its JS (see preview_button.html.twig), so
-           without this override the content stays permanently hidden. */
-        #vanssa-slider-preview-frame-{{ slider.id }} .vanssa-slider .vanssa-slide__content-box.is-anim-fade-up,
-        #vanssa-slider-preview-frame-{{ slider.id }} .vanssa-slider .vanssa-slide__content-box.is-anim-fade-right,
-        #vanssa-slider-preview-frame-{{ slider.id }} .vanssa-slider .vanssa-slide__content-box.is-anim-zoom-in {
-            opacity: 1;
-            animation: none;
-        }
     </style>
+    {# No is-anim override needed anymore: the vanssa-slider controller runs
+       both standalone (script tags below) and embedded (registered in the
+       ADMIN Stimulus app — see assets/admin/entrypoint.js), so .is-in-view
+       arrives via its IntersectionObserver and the entrance animations play
+       exactly like the storefront. #}
 </head>
 <body class="vanssa-slider-preview-body">
     <turbo-frame id="vanssa-slider-preview-frame-{{ slider.id }}">

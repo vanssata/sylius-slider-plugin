@@ -97,12 +97,3 @@
         ></turbo-frame>
     </div>
 </div>
-
-{# See admin/slide/preview/_panel_body.html.twig for why this override must
-   live in the host page rather than the frame response. #}
-<style>
-    #{{ frame_id }} .vanssa-slider .vanssa-slide__content-box[class*="is-anim-"] {
-        opacity: 1;
-        animation: none;
-    }
-</style>

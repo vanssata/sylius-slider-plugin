@@ -18,21 +18,6 @@
             margin: 0;
             background: #f4f5f7;
         }
-
-        /* The content-reveal animation (is-anim-*) is normally gated behind
-           an .is-in-view class that the shop's vanssa-slider Stimulus
-           controller adds via IntersectionObserver. This preview loads the
-           theme's CSS but not its JS (see preview/_assets.html.twig), so
-           without this override the content stays permanently hidden.
-           Only matters for direct/non-turbo-frame access to this URL — when
-           embedded, Turbo discards this <head> and the matching override in
-           the host page (preview/_trigger.html.twig) applies instead. */
-        #vanssa-slide-preview-frame-{{ slide.id }} .vanssa-slider .vanssa-slide__content-box.is-anim-fade-up,
-        #vanssa-slide-preview-frame-{{ slide.id }} .vanssa-slider .vanssa-slide__content-box.is-anim-fade-right,
-        #vanssa-slide-preview-frame-{{ slide.id }} .vanssa-slider .vanssa-slide__content-box.is-anim-zoom-in {
-            opacity: 1;
-            animation: none;
-        }
     </style>
 </head>
 <body class="vanssa-slide-preview-body">
@@ -43,8 +28,14 @@
        association — this is a read-only preview of one slide, not a slider. #}
     {% set settings = sliderSettings|default({}) %}
     {% set maxHeight = settings.maxHeight|default('')|trim %}
+    {# is-in-view is baked in: this shell has no vanssa-slider controller
+       (single-slide, read-only render), so nothing would ever add the class
+       that gates the content-box entrance animations (is-anim-*). Static, it
+       makes the animation replay on every frame render — exactly when the
+       admin changes a setting and the preview refreshes. #}
     {% set sliderClasses = [
         'vanssa-slider',
+        'is-in-view',
         settings.overlay|default(false) ? 'vanssa-slider--overlay' : '',
         (settings.justifySlideHeight ?? true) ? 'vanssa-slider--justify-height' : '',
         maxHeight is not empty ? 'vanssa-slider--custom-max-height' : '',

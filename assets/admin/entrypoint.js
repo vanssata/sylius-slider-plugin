@@ -12,6 +12,13 @@ import ResponsiveCopyController from './controllers/responsive_copy_controller.j
 import RgbaColorPickerController from './controllers/rgba_color_picker_controller.js';
 import SliderSettingsController from './controllers/slider_settings_controller.js';
 import SliderSlidesPreviewController from './controllers/slider_slides_preview_controller.js';
+// Shop-side slider behavior, registered into the ADMIN Stimulus app so the
+// turbo-frame previews animate like the storefront (transitions, autoplay,
+// arrows/dots, is-in-view entrance animations). Loading the shop JS BUNDLE
+// instead is not an option: it starts a second Stimulus application that
+// tries to connect every admin controller too (see preview/_assets.html.twig).
+import ShopSliderController from '../shop/controllers/slider_controller.js';
+import ShopSlideVideoController from '../shop/controllers/slide_video_controller.js';
 import './styles/rgba_color_picker.scss';
 import './styles/accordion.scss';
 import './styles/preview_modal.scss';
@@ -68,3 +75,5 @@ app.register('vanssa-preview-frame', PreviewFrameController);
 app.register('vanssa-rgba-color-picker', RgbaColorPickerController);
 app.register('slider-settings', SliderSettingsController);
 app.register('vanssa-slider-slides-preview', SliderSlidesPreviewController);
+app.register('vanssa-slider', ShopSliderController);
+app.register('vanssa-slide-video', ShopSlideVideoController);
