@@ -20,14 +20,14 @@
             <option value="{{ locale.code }}" {% if current_locale|default(null) == locale.code %}selected{% endif %}>{{ locale.name }} ({{ locale.code }})</option>
         {% endfor %}
     </select>
-    <div class="btn-group" role="group" aria-label="Preview resolution">
-        <button type="button" class="btn btn-sm btn-outline-secondary active" title="Desktop" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="100%" data-vanssa-preview-frame-breakpoint-param="desktop">
+    <div class="btn-group btn-group-sm" role="group" aria-label="Preview resolution">
+        <button type="button" class="btn btn-outline-secondary active" title="Desktop" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="100%" data-vanssa-preview-frame-breakpoint-param="desktop">
             {{ ux_icon('tabler:device-desktop', {'class': 'icon'}) }}
         </button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" title="Mobile" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="390px" data-vanssa-preview-frame-breakpoint-param="mobile">
+        <button type="button" class="btn btn-outline-secondary" title="Mobile" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="390px" data-vanssa-preview-frame-breakpoint-param="mobile">
             {{ ux_icon('tabler:device-mobile', {'class': 'icon'}) }}
         </button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" title="Tablet" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="768px" data-vanssa-preview-frame-breakpoint-param="tablet">
+        <button type="button" class="btn btn-outline-secondary" title="Tablet" data-vanssa-preview-frame-target="sizeButton" data-action="vanssa-preview-frame#resize" data-vanssa-preview-frame-width-param="768px" data-vanssa-preview-frame-breakpoint-param="tablet">
             {{ ux_icon('tabler:device-tablet', {'class': 'icon'}) }}
         </button>
     </div>

@@ -89,8 +89,8 @@
         </li>
     {% endif %}
     {% if show_fullscreen|default(false) %}
-        <li class="nav-item{{ workspace ? '' : ' ms-auto' }}" role="presentation">
-            <button type="button" class="nav-link" data-action="vanssa-preview-frame#toggleFullscreen" title="Toggle fullscreen workspace">
+        <li class="nav-item d-flex align-items-center{{ workspace ? ' ms-2' : ' ms-auto' }}" role="presentation">
+            <button type="button" class="btn btn-sm btn-icon btn-outline-secondary" data-action="vanssa-preview-frame#toggleFullscreen" title="Toggle fullscreen workspace">
                 <span data-vanssa-preview-frame-target="fullscreenEnter">{{ ux_icon('tabler:arrows-maximize', {'class': 'icon'}) }}</span>
                 <span class="d-none" data-vanssa-preview-frame-target="fullscreenExit">{{ ux_icon('tabler:arrows-minimize', {'class': 'icon'}) }}</span>
             </button>
