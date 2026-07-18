@@ -6,6 +6,8 @@ default:
             contexts:
                 - vanssa_sylius_slider.context.ui.admin.slide_translations
                 - vanssa_sylius_slider.context.ui.admin.slider_management
+                - vanssa_sylius_slider.context.ui.admin.admin_browser
+                - vanssa_sylius_slider.context.ui.admin.slider_editor_js
 
             filters:
                 tags: "@slider_admin"

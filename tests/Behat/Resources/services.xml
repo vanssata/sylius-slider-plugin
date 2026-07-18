@@ -17,5 +17,15 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="Vanssa\SyliusSliderPlugin\Fixture\SliderDemoFixture" />
         </service>
+
+        <service id="vanssa_sylius_slider.context.ui.admin.admin_browser" class="Tests\Vanssa\SyliusSliderPlugin\Behat\Context\Ui\Admin\AdminBrowserContext">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="sylius.security.password_updater" />
+        </service>
+
+        <service id="vanssa_sylius_slider.context.ui.admin.slider_editor_js" class="Tests\Vanssa\SyliusSliderPlugin\Behat\Context\Ui\Admin\SliderEditorJsContext">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="Vanssa\SyliusSliderPlugin\Fixture\SliderDemoFixture" />
+        </service>
     </services>
 </container>

@@ -66,4 +66,25 @@ final class SliderRenderingTest extends FunctionalTestCase
         self::assertSame(2, $images->count());
         self::assertNull($images->eq(1)->attr('loading'));
     }
+
+    public function testResponsiveSliderLayoutOverridesRenderMediaBlock(): void
+    {
+        $this->ensureChannel();
+        $slider = $this->createSlider('functional-bp-slider', [
+            'marginTop' => '2rem',
+            'responsive' => [
+                'tablet' => ['marginTop' => '1rem'],
+                'mobile' => ['marginTop' => '0.5rem', 'maxHeight' => '320px'],
+            ],
+        ]);
+
+        $crawler = $this->client->request('GET', '/slider/functional-bp-slider');
+
+        self::assertResponseIsSuccessful();
+        $html = (string) $this->client->getResponse()->getContent();
+        self::assertStringContainsString('data-slider-code="functional-bp-slider"', $html);
+        self::assertStringContainsString('--vanssa-slider-margin-top: 1rem', $html);
+        self::assertStringContainsString('--vanssa-slider-margin-top: 0.5rem', $html);
+        self::assertStringContainsString('--vanssa-slider-max-height: 320px', $html);
+    }
 }

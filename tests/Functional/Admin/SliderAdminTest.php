@@ -15,7 +15,9 @@ final class SliderAdminTest extends FunctionalTestCase
         $this->logInAsAdmin();
 
         $this->client->followRedirects(true);
-        $this->client->request('GET', '/admin/sliders/');
+        // limit=100: the shared test DB accumulates functional fixtures, so
+        // the default page size could paginate this row away.
+        $this->client->request('GET', '/admin/sliders/?limit=100');
 
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('body', 'functional-index-slider');

@@ -77,6 +77,43 @@ final class SliderFrontendContext extends RawMinkContext implements Context
     }
 
     /**
+     * @Given the slide :code has responsive :key set to :value for :breakpoint
+     */
+    public function theSlideHasResponsiveSettingSetTo(string $code, string $key, string $value, string $breakpoint): void
+    {
+        $slide = $this->entityManager->getRepository(\Vanssa\SyliusSliderPlugin\Entity\Slide::class)->findOneBy(['code' => $code]);
+        if (null === $slide) {
+            throw new \RuntimeException(sprintf('Cannot find slide by code "%s".', $code));
+        }
+
+        $settings = $slide->getSlideSettings();
+        $responsive = is_array($settings['responsive'] ?? null) ? $settings['responsive'] : [];
+        $breakpointSettings = is_array($responsive[$breakpoint] ?? null) ? $responsive[$breakpoint] : [];
+        $breakpointSettings[$key] = self::coerceValue($value);
+        $responsive[$breakpoint] = $breakpointSettings;
+        $settings['responsive'] = $responsive;
+        $slide->setSlideSettings($settings);
+
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @Then the slide :code content style should contain :fragment
+     */
+    public function theSlideContentStyleShouldContain(string $code, string $fragment): void
+    {
+        $content = $this->getSession()->getPage()->find('css', sprintf('.vanssa-slide[data-slide-code="%s"] .vanssa-slide__content', $code));
+        if (null === $content) {
+            throw new \RuntimeException(sprintf('Cannot find rendered content for slide "%s".', $code));
+        }
+
+        $style = (string) $content->getAttribute('style');
+        if (!str_contains($style, $fragment)) {
+            throw new \RuntimeException(sprintf('Expected slide "%s" content style to contain "%s", got "%s".', $code, $fragment, $style));
+        }
+    }
+
+    /**
      * @Given slider :code has autoplay enabled
      */
     public function sliderHasAutoplayEnabled(string $code): void

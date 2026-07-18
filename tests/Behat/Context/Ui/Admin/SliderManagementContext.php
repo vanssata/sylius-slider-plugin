@@ -31,7 +31,10 @@ final class SliderManagementContext extends RawMinkContext implements Context
      */
     public function iGoToTheSliderIndexPage(): void
     {
-        $this->visitPath('/admin/sliders');
+        // The test database is shared with the functional suite (whose
+        // fixtures are never purged) — raise the page size so the demo
+        // sliders can't get paginated off the first page.
+        $this->visitPath('/admin/sliders?limit=100');
     }
 
     /**
@@ -129,7 +132,7 @@ final class SliderManagementContext extends RawMinkContext implements Context
      */
     public function iShouldSeeTheSliderPreviewPanel(): void
     {
-        $panel = $this->getSession()->getPage()->find('css', '[data-controller~="vanssa-slider-preview-frame"]');
+        $panel = $this->getSession()->getPage()->find('css', '[data-controller~="vanssa-preview-frame"]');
         if (null === $panel) {
             throw new \RuntimeException('Slider preview panel was not found on the page.');
         }
