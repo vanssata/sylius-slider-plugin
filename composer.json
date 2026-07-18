@@ -15,6 +15,12 @@
         "sylius/sylius": "^2.1",
         "symfony/ux-turbo": "^2.22"
     },
+    "conflict": {
+        "api-platform/metadata": ">=4.3",
+        "api-platform/symfony": ">=4.3",
+        "api-platform/doctrine-common": ">=4.3",
+        "api-platform/doctrine-orm": ">=4.3"
+    },
     "require-dev": {
         "behat/behat": "^3.16",
         "dbrekelmans/bdi": "^1.4",
