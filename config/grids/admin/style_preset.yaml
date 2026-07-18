@@ -1,0 +1,68 @@
+sylius_grid:
+    grids:
+        vanssa_sylius_slider_admin_style_preset:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: Vanssa\SyliusSliderPlugin\Entity\StylePreset
+            sorting:
+                position: asc
+            fields:
+                mockup:
+                    type: twig
+                    label: vanssa_sylius_slider.ui.mockup
+                    path: .
+                    options:
+                        template: '@VanssaSyliusSliderPlugin/admin/grid/field/preset_mockup.html.twig'
+                        vars:
+                            th_class: 'w-1'
+                code:
+                    type: string
+                    label: sylius.ui.code
+                    sortable: ~
+                label:
+                    type: string
+                    label: sylius.ui.label
+                    sortable: ~
+                type:
+                    type: string
+                    label: sylius.ui.type
+                    sortable: ~
+                position:
+                    type: string
+                    label: sylius.ui.position
+                    sortable: ~
+                enabled:
+                    type: twig
+                    label: sylius.ui.enabled
+                    sortable: ~
+                    options:
+                        template: '@SyliusAdmin/shared/grid/field/boolean.html.twig'
+                        vars:
+                            th_class: 'w-1 text-center'
+            filters:
+                code:
+                    type: string
+                    label: sylius.ui.code
+                label:
+                    type: string
+                    label: sylius.ui.label
+                type:
+                    type: select
+                    label: sylius.ui.type
+                    form_options:
+                        choices:
+                            vanssa_sylius_slider.ui.slide_preset: slide
+                            vanssa_sylius_slider.ui.slider_preset: slider
+                enabled:
+                    type: boolean
+                    label: sylius.ui.enabled
+            actions:
+                main:
+                    create:
+                        type: create
+                item:
+                    update:
+                        type: update
+                    delete:
+                        type: delete

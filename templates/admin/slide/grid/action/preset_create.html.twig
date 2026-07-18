@@ -1,0 +1,15 @@
+{# Custom "Create" grid action: instead of jumping straight to the create
+   form, it opens the preset gallery in choose mode — picking Blank or a
+   preset then navigates to the create page (presets add ?preset=<code>,
+   which the create page's gallery auto-applies). #}
+{{ component('vanssa_sylius_slider:admin:preset_gallery', { type: 'slide', mode: 'choose' }) }}
+
+<button
+    type="button"
+    class="btn btn-primary"
+    data-bs-toggle="modal"
+    data-bs-target="#vanssa-preset-gallery-slide"
+>
+    {{ ux_icon('tabler:plus', {'class': 'icon'}) }}
+    {{ 'sylius.ui.create'|trans }}
+</button>

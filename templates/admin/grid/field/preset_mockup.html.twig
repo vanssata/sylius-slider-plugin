@@ -1,0 +1,12 @@
+{% if data.mockupImage %}
+    <img
+        src="{{ data.mockupImage }}"
+        alt="{{ data.label }}"
+        class="rounded"
+        style="width: 72px; height: 42px; object-fit: cover;"
+    >
+{% else %}
+    <div class="rounded bg-secondary-subtle d-inline-flex align-items-center justify-content-center text-secondary" style="width: 72px; height: 42px;">
+        {{ ux_icon('tabler:photo', {'class': 'icon'}) }}
+    </div>
+{% endif %}

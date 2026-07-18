@@ -1,0 +1,77 @@
+{% set presets = this.presets %}
+{% set fields_map = {} %}
+{% for code, preset in presets %}
+    {% set fields_map = fields_map|merge({ (code): { fields: preset.fields } }) %}
+{% endfor %}
+
+<div
+    class="modal fade vanssa-preset-gallery vanssa-slider-admin"
+    id="{{ this.modalId }}"
+    tabindex="-1"
+    aria-hidden="true"
+    data-controller="vanssa-preset-gallery"
+    data-vanssa-preset-gallery-presets-value="{{ fields_map|json_encode|e('html_attr') }}"
+    data-vanssa-preset-gallery-auto-open-value="{{ this.mode == 'apply' ? 'true' : 'false' }}"
+>
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ 'vanssa_sylius_slider.ui.start_from_preset'|trans }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4 col-lg-3">
+                        {% set blank_body %}
+                            <div class="card-body d-flex flex-column align-items-center justify-content-center text-secondary" style="min-height: 9rem;">
+                                {{ ux_icon('tabler:file-plus', {'class': 'icon icon-lg mb-2'}) }}
+                                <strong>{{ 'vanssa_sylius_slider.ui.blank'|trans }}</strong>
+                            </div>
+                        {% endset %}
+                        {% if this.mode == 'choose' %}
+                            <a href="{{ this.blankUrl }}" class="card card-link w-100 h-100 text-start">{{ blank_body }}</a>
+                        {% else %}
+                            <button type="button" class="card card-link w-100 h-100 text-start" data-bs-dismiss="modal">{{ blank_body }}</button>
+                        {% endif %}
+                    </div>
+                    {% for code, preset in presets %}
+                        <div class="col-6 col-md-4 col-lg-3">
+                            {% set card_body %}
+                                <div class="ratio" style="--tblr-aspect-ratio: 56.25%;">
+                                    {% if preset.mockup %}
+                                        <img src="{{ preset.mockup }}" alt="{{ preset.label }}" class="card-img-top object-cover">
+                                    {% else %}
+                                        <div class="card-img-top d-flex align-items-center justify-content-center bg-secondary-subtle text-secondary">
+                                            {{ ux_icon('tabler:photo', {'class': 'icon icon-lg'}) }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body py-2 d-flex align-items-center justify-content-between">
+                                    <strong class="text-truncate me-2">{{ preset.label }}</strong>
+                                    <span class="badge {{ preset.source == 'config' ? 'bg-azure-lt' : 'bg-green-lt' }}">
+                                        {{ preset.source == 'config' ? 'vanssa_sylius_slider.ui.config_preset'|trans : 'vanssa_sylius_slider.ui.custom_preset'|trans }}
+                                    </span>
+                                </div>
+                            {% endset %}
+                            {% if preset.createUrl %}
+                                <a href="{{ preset.createUrl }}" class="card card-link w-100 h-100">
+                                    {{ card_body }}
+                                </a>
+                            {% else %}
+                                <button
+                                    type="button"
+                                    class="card card-link w-100 h-100 text-start p-0"
+                                    data-action="vanssa-preset-gallery#apply"
+                                    data-vanssa-preset-gallery-preset-param="{{ code }}"
+                                    data-bs-dismiss="modal"
+                                >
+                                    {{ card_body }}
+                                </button>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

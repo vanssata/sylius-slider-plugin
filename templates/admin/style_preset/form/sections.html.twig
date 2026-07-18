@@ -1,0 +1,73 @@
+{% set form = hookable_metadata.context.form %}
+{% set current_mockup = form.mockupImage.vars.value|default('') %}
+
+<div class="col-12 vanssa-slider-admin" data-controller="vanssa-mockup-picker">
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2 class="card-title">{{ 'vanssa_sylius_slider.ui.preset'|trans }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-3">{{ form_row(form.code) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.type) }}</div>
+                <div class="col-12 col-md-3">{{ form_row(form.label) }}</div>
+                <div class="col-6 col-md-1">{{ form_row(form.position) }}</div>
+                <div class="col-6 col-md-2">{{ form_row(form.enabled) }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2 class="card-title">{{ 'vanssa_sylius_slider.ui.mockup'|trans }}</h2>
+        </div>
+        <div class="card-body">
+            <p class="text-secondary">{{ 'vanssa_sylius_slider.ui.mockup_help'|trans }}</p>
+            <div class="row g-2 mb-3">
+                {% for mockup in vanssa_slider_preset_mockups() %}
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <label class="form-imagecheck w-100 mb-0">
+                            <input
+                                type="radio"
+                                name="{{ form.vars.id }}-bundled-mockup"
+                                class="form-imagecheck-input"
+                                value="{{ mockup.path }}"
+                                {% if current_mockup == mockup.path %}checked{% endif %}
+                                data-vanssa-mockup-picker-target="option"
+                                data-action="vanssa-mockup-picker#select"
+                            >
+                            <span class="form-imagecheck-figure">
+                                <img src="{{ mockup.path }}" alt="{{ mockup.label }}" class="form-imagecheck-image rounded" style="aspect-ratio: 16 / 9; object-fit: cover;">
+                            </span>
+                            <span class="d-block text-center small mt-1">{{ mockup.label }}</span>
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+            {{ form_row(form.mockupImage) }}
+            {% if current_mockup is not empty and current_mockup starts with '/media/' %}
+                <div class="mb-2">
+                    <img src="{{ current_mockup }}" alt="" class="rounded border" style="max-width: 200px;">
+                    <div class="small text-secondary">{{ 'vanssa_sylius_slider.ui.current_custom_mockup'|trans }}</div>
+                </div>
+            {% endif %}
+            {{ form_row(form.mockupImageFile) }}
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2 class="card-title">{{ 'vanssa_sylius_slider.ui.preset_settings'|trans }}</h2>
+        </div>
+        <div class="card-body">
+            {{ form_row(form.settings) }}
+            <div class="row">
+                <div class="col-12 col-md-6" data-vanssa-mockup-picker-target="slideCapture">{{ form_row(form.captureSlide) }}</div>
+                <div class="col-12 col-md-6" data-vanssa-mockup-picker-target="sliderCapture">{{ form_row(form.captureSlider) }}</div>
+            </div>
+            <div data-vanssa-mockup-picker-target="sliderOnly">
+                {{ form_row(form.slides) }}
+            </div>
+        </div>
+    </div>
+</div>

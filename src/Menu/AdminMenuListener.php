@@ -43,5 +43,27 @@ final class AdminMenuListener implements EventSubscriberInterface
             ->setLabel('vanssa_sylius_slider.ui.slides')
             ->setLabelAttribute('icon', 'bi:images')
         ;
+
+        $configuration
+            ->addChild('vanssa_sylius_slider_slider_presets', [
+                'route' => 'vanssa_sylius_slider_admin_style_preset_index',
+                'routeParameters' => ['criteria' => ['type' => 'slider']],
+            ])
+            ->setLabel('vanssa_sylius_slider.ui.slider_presets')
+            ->setLabelAttribute('icon', 'tabler:wand')
+        ;
+
+        $configuration
+            ->addChild('vanssa_sylius_slider_slide_presets', [
+                'route' => 'vanssa_sylius_slider_admin_style_preset_index',
+                'routeParameters' => ['criteria' => ['type' => 'slide']],
+                'extras' => ['routes' => [
+                    ['route' => 'vanssa_sylius_slider_admin_style_preset_create'],
+                    ['route' => 'vanssa_sylius_slider_admin_style_preset_update'],
+                ]],
+            ])
+            ->setLabel('vanssa_sylius_slider.ui.slide_presets')
+            ->setLabelAttribute('icon', 'tabler:wand')
+        ;
     }
 }
