@@ -24,6 +24,21 @@ final class SlideEditPanelTest extends FunctionalTestCase
         self::assertSelectorExists('[name="slide[settings][responsive][desktop][headlineFontSize]"]');
     }
 
+    public function testPanelRendersStandaloneSubmitWrapperWithButton(): void
+    {
+        $this->ensureChannel();
+        $slider = $this->createSlider('functional-edit-panel-standalone-submit-slider');
+        $slide = $this->firstSlide($slider);
+        $this->logInAsAdmin();
+
+        $crawler = $this->client->request('GET', sprintf('/admin/slides/%d/edit-panel', $slide->getId()));
+
+        self::assertResponseIsSuccessful();
+        $wrapper = $crawler->filter('[data-vanssa-standalone-submit]');
+        self::assertGreaterThan(0, $wrapper->count());
+        self::assertGreaterThan(0, $wrapper->filter('button[type="submit"]')->count());
+    }
+
     public function testPanelSavesWithoutWipingAssociations(): void
     {
         $this->ensureChannel();
@@ -47,7 +62,11 @@ final class SlideEditPanelTest extends FunctionalTestCase
         $this->entityManager()->clear();
         $reloaded = $this->entityManager()->find(Slide::class, $slideId);
         self::assertInstanceOf(Slide::class, $reloaded);
-        self::assertSame('2rem', $reloaded->getSlideSettings()['responsive']['desktop']['headlineFontSize'] ?? null);
+        $settings = $reloaded->getSlideSettings();
+        self::assertIsArray($settings['responsive'] ?? null);
+        $responsive = $settings['responsive'];
+        self::assertIsArray($responsive['desktop'] ?? null);
+        self::assertSame('2rem', $responsive['desktop']['headlineFontSize'] ?? null);
 
         // Guard against the clear-missing wipe: sliders / channels / enabled
         // must survive an edit-panel round-trip untouched.
