@@ -40,3 +40,9 @@ $bp-admin-md: 991px;
         @content;
     }
 }
+
+[data-vanssa-preview-frame-target] {
+    svg.icon{
+        margin: calc(-0 * var(--tblr-btn-padding-x));
+    }
+}
