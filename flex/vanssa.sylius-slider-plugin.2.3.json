@@ -1,0 +1,39 @@
+{
+    "manifests": {
+        "vanssa/sylius-slider-plugin": {
+            "manifest": {
+                "bundles": {
+                    "Vanssa\\SyliusSliderPlugin\\VanssaSyliusSliderPlugin": [
+                        "all"
+                    ]
+                },
+                "copy-from-recipe": {
+                    "config/": "%CONFIG_DIR%/"
+                }
+            },
+            "files": {
+                "config/packages/vanssa_sylius_slider.yaml": {
+                    "contents": [
+                        "imports:",
+                        "    - { resource: \"@VanssaSyliusSliderPlugin/config/config.yaml\" }",
+                        ""
+                    ],
+                    "executable": false
+                },
+                "config/routes/vanssa_sylius_slider.yaml": {
+                    "contents": [
+                        "vanssa_sylius_slider_admin:",
+                        "    resource: \"@VanssaSyliusSliderPlugin/config/routes/admin.yaml\"",
+                        "    prefix: /admin",
+                        "",
+                        "vanssa_sylius_slider_shop:",
+                        "    resource: \"@VanssaSyliusSliderPlugin/config/routes/shop.yaml\"",
+                        ""
+                    ],
+                    "executable": false
+                }
+            },
+            "ref": "5518c642c621d6c05a1698fc060cf487196ea854"
+        }
+    }
+}

@@ -1,0 +1,6 @@
+vanssa_sylius_slider_admin:
+    resource: "@VanssaSyliusSliderPlugin/config/routes/admin.yaml"
+    prefix: /admin
+
+vanssa_sylius_slider_shop:
+    resource: "@VanssaSyliusSliderPlugin/config/routes/shop.yaml"

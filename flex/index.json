@@ -1,12 +1,16 @@
 {
   "recipes": {
     "vanssa/sylius-slider-plugin": [
-      "2.2"
+      "2.2",
+      "2.3"
     ]
   },
-  "branch": "main",
-  "is_contrib": true,
+  "branch": "2.3",
+  "is_contrib": false,
   "_links": {
-    "repository": "https://github.com/vanssa/sylius-slider-plugin"
+    "repository": "github.com/vanssata/sylius-slider-plugin",
+    "origin_template": "{package}:{version}@github.com/vanssata/sylius-slider-plugin:2.3",
+    "recipe_template": "https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/{package_dotted}.{version}.json",
+    "recipe_template_relative": "{package_dotted}.{version}.json"
   }
 }

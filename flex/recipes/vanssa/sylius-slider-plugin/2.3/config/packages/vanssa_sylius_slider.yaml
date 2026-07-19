@@ -1,0 +1,2 @@
+imports:
+    - { resource: "@VanssaSyliusSliderPlugin/config/config.yaml" }
