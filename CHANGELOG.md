@@ -89,6 +89,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tag work unmodified. New `2.3` recipe version added alongside the
   existing `2.2` one. See `docs/FLEX_RECIPE.md` for consumer wiring
   instructions.
+- **Symfony UX package conversion**: `assets/package.json` is now a
+  publishable-format Symfony UX package (`@vanssa/sylius-slider-plugin`,
+  keyword `symfony-ux`, MIT, `files: [admin, shop, styles]`, no longer
+  `private`) declaring all 14 Stimulus controllers under
+  `symfony.controllers` — including the previously-missing
+  `image-upload-preview`, now fully wired. Because `composer.json` also
+  carries the `symfony-ux` keyword, Symfony Flex's `PackageJsonSynchronizer`
+  automatically adds the `file:` dependency, peerDependencies and seeds the
+  consumer's `assets/controllers.json` on `composer require` — no manual
+  `yarn add` or manifest editing needed, just `yarn install && yarn build`.
+  See the README's Frontend setup section and `docs/FLEX_RECIPE.md`.
 
 ### Fixed
 - The storefront CSS loaded for the admin preview no longer bleeds into the
@@ -102,8 +113,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Every admin Stimulus/LiveComponent action fired **twice** in the test
   application (two Stimulus applications both registered the plugin's
   controllers via the merged bridge manifest) — the plugin's
-  `controllers.json` entries are now `enabled: false` and the entrypoints'
-  explicit `register()` calls are the single source of registration.
+  `controllers.json` entries were made `enabled: false` and the entrypoints'
+  explicit `register()` calls became the single source of registration.
+  Superseded later in this release by the Symfony UX package conversion
+  (below), which removes the entrypoints' registration calls entirely and
+  restores `enabled: true` as the correct, permanent setting.
 - Invalid create submissions (e.g. blank slider/slide/preset code) render
   form errors instead of a 500 (`empty_data` guards for strict-typed
   setters).
@@ -258,6 +272,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sizing) is scoped under a `vanssa-slider-admin` wrapper class.
 - The slider settings Margin/Padding sub-headings use the Tabler `hr-text`
   divider style (translated labels) instead of ad-hoc muted `<h4>`s.
+- **Controllers register exclusively through the stimulus-bridge manifest**:
+  `assets/admin/entrypoint.js` and `assets/shop/entrypoint.js` no longer call
+  `startStimulusApp()` or `app.register(...)` — the shop entrypoint is now
+  comment-only, and the admin entrypoint keeps only what must run eagerly
+  outside Stimulus (`Turbo.session.drive = false`, the sidebar-focus
+  behavior, and the admin stylesheets). This repo's own `assets/controllers.json`
+  moves back to `enabled: true` for every controller, and two new
+  per-context manifests — `assets/admin/controllers.json` (all 14 enabled,
+  eager) and `assets/shop/controllers.json` (shop pair enabled+eager, admin
+  controllers listed but disabled) — feed sylius/test-application's admin
+  and shop Encore builds respectively. See CLAUDE.md's "Stimulus Controller
+  Manifests" section for the shallow-merge trap these per-context files
+  guard against.
+- **BC break**: the `slider-settings` Stimulus controller identifier is
+  renamed to `vanssa-slider-settings` (`data-controller`, the
+  `data-vanssa-slider-settings-target` attribute, and
+  `data-action="vanssa-slider-settings#..."`). If your project overrides or
+  targets this controller by identifier, update the reference. The literal
+  gating attributes it reads (`data-slider-settings-*-only`,
+  `data-slider-settings-item-guard`) intentionally kept their original
+  names and are unaffected.
 - Dependabot now also watches the `/assets` npm ecosystem and GitHub
   Actions workflows, and dropped its stale composer version-ignore list;
   `CODEOWNERS` now points at `@vanssata`; `composer.json` gained a

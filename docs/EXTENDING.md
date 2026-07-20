@@ -38,8 +38,12 @@ etc. are built):
 - Render the field in the admin accordion
   (`templates/admin/slider/form/sections/general/settings.html.twig`) and, if
   it depends on another toggle, wrap it in a
-  `data-slider-settings-*-only` container handled by the `slider-settings`
-  Stimulus controller.
+  `data-slider-settings-*-only` container handled by the
+  `vanssa-slider-settings` Stimulus controller (`data-controller`,
+  `data-action="vanssa-slider-settings#..."`; the literal gating attributes
+  like `data-slider-settings-*-only` and `data-slider-settings-item-guard`
+  keep their original names — only the controller identifier itself carries
+  the `vanssa-` prefix).
 
 Recipe for a new one-click style preset (the "Preset" dropdown in the
 admin live-preview panels):
@@ -66,6 +70,19 @@ admin live-preview panels):
 4. Integrate external plugins:
 - CMS: create reusable Twig partials for block rendering.
 - Rich editor: detect class availability and switch form type.
+
+5. Override a Stimulus controller:
+- The plugin registers all 14 controllers through the
+  `@symfony/stimulus-bridge` manifest (`assets/package.json`'s
+  `symfony.controllers`, mirrored by your project's
+  `assets/controllers.json` once Flex seeds it — see
+  [docs/FLEX_RECIPE.md](FLEX_RECIPE.md)); the plugin's own entrypoints never
+  call `startStimulusApp()`/`app.register()`.
+- To replace one, set that entry to `"enabled": false` in **your** project's
+  `assets/controllers.json` and register your own class under the same
+  Stimulus identifier (e.g. `vanssa-slider`) in your own entrypoint —
+  templates and other controllers only ever reference the identifier, so
+  they keep working unchanged against the replacement.
 
 ## Data migration strategy
 

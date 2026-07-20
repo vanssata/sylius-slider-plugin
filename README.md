@@ -142,73 +142,26 @@ vanssa_sylius_slider_shop:
 
 ### Frontend setup (both options)
 
+The plugin's `assets/package.json` is a proper Symfony UX package (declares
+all 14 Stimulus controllers under `"symfony": { "controllers": {...} }`,
+`keywords: ["symfony-ux", ...]`). Because `composer.json` also carries the
+`symfony-ux` keyword, Symfony Flex's built-in `PackageJsonSynchronizer` wires
+the frontend automatically on `composer require` — this runs from core Flex,
+not from this plugin's own recipe endpoint, so it applies whether you used
+Option A or Option B above:
+
 1. Run database migrations:
 
    ```bash
    bin/console doctrine:migrations:migrate -n
    ```
 
-2. Add the plugin's frontend package as a `file:` dependency:
-
-   ```bash
-   yarn add @vanssa/sylius-slider-plugin@file:vendor/vanssa/sylius-slider-plugin/assets
-   ```
-
-3. Register the plugin's Stimulus controllers in your project's
-   `assets/controllers.json`. The manifest ships inside the package
-   (`vendor/vanssa/sylius-slider-plugin/assets/package.json`); in **your**
-   Sylius-Standard project (a single Stimulus application) enable every
-   entry with `"enabled": true`:
-
-   ```json
-   {
-     "controllers": {
-       "@vanssa/sylius-slider-plugin": {
-         "slider": {
-           "enabled": true,
-           "fetch": "eager",
-           "autoimport": {
-             "@vanssa/sylius-slider-plugin/shop/styles/slider.scss": true
-           }
-         },
-         "slider-settings": { "enabled": true, "fetch": "eager" },
-         "slider-slides-preview": { "enabled": true, "fetch": "eager" },
-         "rgba-color-picker": {
-           "enabled": true,
-           "fetch": "eager",
-           "autoimport": {
-             "@simonwep/pickr/dist/themes/classic.min.css": true
-           }
-         },
-         "responsive-copy": { "enabled": true, "fetch": "eager" },
-         "preview-frame": { "enabled": true, "fetch": "eager" },
-         "preset-applier": { "enabled": true, "fetch": "eager" },
-         "preset-gallery": { "enabled": true, "fetch": "eager" },
-         "form-context": { "enabled": true, "fetch": "eager" },
-         "animation-settings": { "enabled": true, "fetch": "eager" },
-         "mockup-picker": { "enabled": true, "fetch": "eager" },
-         "modal-portal": { "enabled": true, "fetch": "eager" },
-         "slide-video": { "enabled": true, "fetch": "eager" }
-       }
-     },
-     "entrypoints": []
-   }
-   ```
-
-   > **Why `enabled: true` here, unlike this repository's own
-   > `assets/controllers.json`:** this plugin's own test application merges
-   > its manifest into **two** Encore entries that both start a Stimulus
-   > application, so its own manifest deliberately ships `enabled: false`
-   > and registers controllers explicitly in code instead. A normal
-   > Sylius-Standard project has a single admin/shop Stimulus application,
-   > so the standard manifest-driven `enabled: true` registration (as above)
-   > is exactly right and each controller runs once.
-
-   Keep your project's existing controller entries (e.g.
-   `@symfony/ux-live-component`, `@symfony/ux-autocomplete`) — only add the
-   `@vanssa/sylius-slider-plugin` block.
-
-4. Build assets:
+2. Nothing to configure by hand: Flex already added
+   `"@vanssa/sylius-slider-plugin": "file:vendor/vanssa/sylius-slider-plugin/assets"`
+   to your project's `package.json`, added the plugin's peerDependencies, and
+   seeded your `assets/controllers.json` with all 14 controllers — the shop
+   `slider`/`slide-video` pair `fetch: "eager"`, the 12 admin controllers
+   `fetch: "lazy"`, all `"enabled": true`. Just build:
 
    ```bash
    yarn install
@@ -217,12 +170,38 @@ vanssa_sylius_slider_shop:
    bin/console cache:clear
    ```
 
-   If you change the plugin's assets or `assets/package.json` later and a
-   rebuild doesn't pick up the change, Yarn Classic copies (rather than
-   symlinks) `file:` dependencies — re-run `yarn install --force` before
-   `yarn build`.
+   If you change the plugin's assets later and a rebuild doesn't pick up the
+   change, Yarn Classic copies (rather than symlinks) `file:` dependencies —
+   re-run `yarn install --force` before `yarn build`.
 
-5. *(Optional)* Load the demo fixtures:
+   This requires an Encore + `@symfony/stimulus-bridge` frontend (the
+   Sylius-Standard default) — **AssetMapper is not supported**, since the
+   plugin ships no AssetMapper importmap entries.
+
+3. Include the plugin's entrypoints in your Encore build so their contract
+   is fulfilled:
+
+   - **Admin** (`vendor/vanssa/sylius-slider-plugin/assets/admin/entrypoint.js`)
+     — carries three things every consumer needs on admin pages: setting
+     `Turbo.session.drive = false` (critical — the admin isn't built for
+     Turbo Drive navigation, and without this line `@hotwired/turbo` would
+     intercept every admin link/form click), the sidebar-focus behavior that
+     keeps the plugin's own sidebar group open on its pages, and the plugin's
+     admin stylesheets. It registers no Stimulus controllers itself — that
+     happens entirely through the bridge manifest above.
+   - **Shop** (`.../assets/shop/entrypoint.js`) — now optional and a no-op:
+     it registers nothing and imports nothing. The shop slider's CSS
+     (`shop/styles/slider.scss`) arrives automatically via the `slider`
+     controller's `autoimport`, and its Stimulus controllers register
+     through the bridge manifest like everything else. Including the file is
+     harmless but not required.
+
+   Keep your project's existing controller entries (e.g.
+   `@symfony/ux-live-component`, `@symfony/ux-autocomplete`) in
+   `assets/controllers.json` — Flex only adds the
+   `@vanssa/sylius-slider-plugin` block.
+
+4. *(Optional)* Load the demo fixtures:
 
    ```bash
    bin/console sylius:fixtures:load --suite=vanssa_sylius_slider_demo -n
@@ -233,7 +212,7 @@ vanssa_sylius_slider_shop:
    bundled under `assets/fixtures/` (`assets/fixtures/LICENSE.md` has
    attribution).
 
-6. *(Optional)* Render a slider on the shop homepage via Twig Hooks:
+5. *(Optional)* Render a slider on the shop homepage via Twig Hooks:
 
    ```yaml
    # config/packages/vanssa_sylius_slider.yaml

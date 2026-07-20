@@ -127,15 +127,69 @@ Database credentials should be configured in:
 
 ## Stimulus Controller Manifests (Important Gotchas)
 
-When adding, renaming, or removing a Stimulus controller in `assets/admin/controllers/` or `assets/shop/controllers/`, **three** places must stay in sync, or the webpack build breaks or runs stale code:
+The plugin is a proper Symfony UX package now: controllers register **only**
+through the `@symfony/stimulus-bridge` manifest, inside the consuming app's own
+`startStimulusApp()`. When adding, renaming, or removing a Stimulus controller
+in `assets/admin/controllers/` or `assets/shop/controllers/`, **four** places
+must stay in sync (identical key sets, all 14 controllers), or the webpack
+build breaks or runs stale code:
 
-- `assets/admin/entrypoint.js` / `assets/shop/entrypoint.js` — the ONLY place plugin controllers are registered (`app.register('vanssa-...', Controller)`).
-- `assets/controllers.json` — top-level project manifest (`controllers["@vanssa/sylius-slider-plugin"][name] = {enabled, fetch}`). **Every plugin controller here is deliberately `"enabled": false`** — see below.
-- `assets/package.json`'s embedded `"symfony": { "controllers": {...} }` section — the source for `@symfony/stimulus-bridge`'s npm-package resolution (it carries the `main` file path and the registered `name`).
+- `assets/package.json`'s embedded `"symfony": { "controllers": {...} }`
+  section — the authoritative source (`main` file path, registered `name`,
+  `fetch`, `enabled`, `autoimport`) that Flex copies into a fresh consumer
+  project and that `@symfony/stimulus-bridge` resolves for npm-package
+  installs.
+- `assets/controllers.json` — this repo's own top-level dev manifest, mirrors
+  the package.json defaults (`enabled: true` throughout).
+- `assets/admin/controllers.json` — per-context manifest for
+  sylius/test-application's admin Encore build (all 14 enabled, all fetched
+  eagerly for admin dev convenience).
+- `assets/shop/controllers.json` — per-context manifest for the shop Encore
+  build (shop `slider`/`slide-video` pair enabled+eager; the 12 admin
+  controllers listed but `enabled: false`).
 
-**Why `enabled: false`:** the test application's webpack merges this plugin's `controllers.json` into the bridge manifest used by BOTH `app-admin-entry` and `plugin-admin-entry` (same Encore config). Each entry calls `startStimulusApp()`, creating TWO Stimulus applications — with `enabled: true` every plugin controller (and every action/event handler) ran **twice** per page. Disabling bridge registration leaves exactly one registration: the explicit `app.register(...)` calls in our entrypoints. The `live` controller (`@symfony/ux-live-component`, registered by the test app's own `controllers.json`) still exists once — do NOT disable it there, and do not "fix" our manifest back to `enabled: true` or live-component actions start double-firing again (symptoms: toggles cancel themselves, LiveComponent lists duplicate rows).
+**Shallow-merge trap:** sylius/test-application's webpack merges each
+`controllers.json` into the bridge manifest with a **shallow spread per
+package key** — a per-context file's `@vanssa/sylius-slider-plugin` object
+*replaces* the whole thing, it does not deep-merge per controller. That means
+`assets/admin/controllers.json` and `assets/shop/controllers.json` must each
+list **all 14** controllers (even the ones a context disables) — omitting one
+silently drops it from that context's build instead of falling back to a
+default. A PostToolUse hook enforces identical key sets across
+`assets/package.json`'s `symfony.controllers`, `assets/controllers.json`,
+`assets/admin/controllers.json` and `assets/shop/controllers.json` for AI
+edits — if it fires, one of the four fell out of sync.
 
-If the manifests disagree, expect "Controller ... does not exist in the package" or "contains a reference to the file ..." build errors, or (worse) two divergent versions of the "same" controller running simultaneously on one page.
+**Entrypoints never start Stimulus:** `assets/admin/entrypoint.js` and
+`assets/shop/entrypoint.js` must **never** import `@symfony/stimulus-bridge`,
+call `startStimulusApp()`, or `app.register(...)` a controller — the bridge
+manifest is the only registrar now. The shop entrypoint is comment-only (kept
+only because sylius/test-application hard-codes it as the `plugin-shop-entry`
+webpack entry); the admin entrypoint keeps only what must run eagerly outside
+Stimulus: `Turbo.session.drive = false` (critical — without it `@hotwired/turbo`
+Drive hijacks every Sylius admin navigation, since the admin isn't built with
+Turbo navigation in mind), the sidebar-focus behavior, and the admin
+stylesheet imports. If a controller class ever creeps back into an
+`app.register(...)` call in either entrypoint, expect every action/event
+handler on that controller to fire **twice** per page — see below for why.
+
+**Why `enabled: true` is correct now (it wasn't before):** an earlier version
+of this plugin's own manifest deliberately shipped `enabled: false` because
+the entrypoints *also* called `startStimulusApp()` and registered controllers
+explicitly — with the bridge manifest also enabled, sylius/test-application's
+merged config for `app-admin-entry` + `plugin-admin-entry` created TWO
+Stimulus applications, double-firing everything. Now that the entrypoints
+never start a Stimulus app or register anything themselves, the bridge
+manifest is the *only* registrar, so `enabled: true` is required, not
+optional — this mirrors what Symfony Flex seeds into a fresh consumer
+project's `assets/controllers.json` on `composer require` (see README). The
+`live` controller (`@symfony/ux-live-component`, registered by the test app's
+own `controllers.json`) is unaffected by any of this.
+
+If the manifests disagree, expect "Controller ... does not exist in the
+package" or "contains a reference to the file ..." build errors, or (worse) a
+controller silently missing from one context's build because the shallow
+merge dropped it.
 
 **LiveComponent morphing:** ux-live-component 2.31 morphs with idiomorph, which matches nodes by real `id` attributes only — `data-live-id` does nothing. Any list a LiveComponent re-renders while outside code mutates its DOM (drag reorder, modals re-parented to `<body>`) needs a unique `id` on every row (and stable ids on sibling anchors), or re-renders duplicate rows. `data-model` selects also need explicit `selected` attributes rendered from the server prop.
 

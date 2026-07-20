@@ -34,8 +34,25 @@ On `composer require vanssa/sylius-slider-plugin`:
 - Plugin config import (`config/packages/vanssa_sylius_slider.yaml`)
 - Admin (`/admin`-prefixed) + shop route imports (`config/routes/vanssa_sylius_slider.yaml`)
 
-The frontend steps (yarn package, `assets/controllers.json`, build) remain
-manual — see the README installation guide.
+These three are what *this* endpoint/recipe adds. Separately — and
+independently of this endpoint — `composer.json` also carries the
+`symfony-ux` keyword, which Symfony Flex recognizes natively (this is core
+Flex's `PackageJsonSynchronizer`, not something the recipe defines). On any
+`composer require vanssa/sylius-slider-plugin`, whether or not the endpoint
+above is configured, Flex reads `assets/package.json`'s `symfony.controllers`
+section and:
+
+- adds `"@vanssa/sylius-slider-plugin": "file:vendor/vanssa/sylius-slider-plugin/assets"`
+  plus the plugin's peerDependencies to the consumer's root `package.json`
+- seeds the consumer's `assets/controllers.json` with all 14 controllers
+  (shop `slider`/`slide-video` eager, the 12 admin controllers lazy, all
+  `enabled: true`)
+
+The remaining manual steps are building the assets (`yarn install`,
+`yarn build`, `bin/console assets:install`) and including the plugin's
+`assets/admin/entrypoint.js` / `assets/shop/entrypoint.js` in your Encore
+entries — see the README's Frontend setup section for the full contract
+(Turbo drive opt-out, admin styles, sidebar behavior).
 
 ## Consumer wiring
 
