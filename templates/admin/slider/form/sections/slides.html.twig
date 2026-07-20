@@ -13,13 +13,16 @@
             {% if slider.id is null %}
                 <div class="alert alert-info mb-0">Save slider first to preview related slides.</div>
             {% else %}
+                {# <a>, not <button>: Sylius's compound-form-errors controller
+                   crashes on in-form buttons whose data-bs-target modal is
+                   hoisted to <body> (vanssa-modal-portal). #}
                 <div class="d-flex justify-content-end gap-2 mb-2">
-                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#vanssa-slide-browser-modal-{{ slider.id }}">
+                    <a href="#vanssa-slide-browser-modal-{{ slider.id }}" role="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#vanssa-slide-browser-modal-{{ slider.id }}">
                         {{ ux_icon('tabler:link', {'class': 'icon me-1'}) }} Add
-                    </button>
-                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#vanssa-slide-create-modal-{{ slider.id }}">
+                    </a>
+                    <a href="#vanssa-slide-create-modal-{{ slider.id }}" role="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#vanssa-slide-create-modal-{{ slider.id }}">
                         {{ ux_icon('tabler:plus', {'class': 'icon me-1'}) }} {{ 'sylius.ui.create'|trans }}
-                    </button>
+                    </a>
                 </div>
                 {{ component('vanssa_sylius_slider:admin:slider_slides_preview', { sliderId: slider.id }) }}
 

@@ -10,13 +10,17 @@
 {% set button_class = button_class|default('btn btn-outline-primary btn-sm') %}
 
 {% if slider is not null and slider.id is not null %}
-    <button
-        type="button"
+    {# <a>, not <button>: Sylius's compound-form-errors controller crashes on
+       in-form buttons whose data-bs-target modal is hoisted to <body>
+       (vanssa-preview-frame), and this trigger is embedded in forms. #}
+    <a
+        href="#vanssa-slider-preview-modal-{{ slider.id }}"
+        role="button"
         class="{{ button_class }}"
         data-bs-toggle="modal"
         data-bs-target="#vanssa-slider-preview-modal-{{ slider.id }}"
     >
         {{ ux_icon('tabler:eye', {'class': 'icon me-1'}) }} {{ label }}
-    </button>
+    </a>
     {% include '@VanssaSyliusSliderPlugin/admin/slider/preview/_modal.html.twig' with { slider: slider } only %}
 {% endif %}

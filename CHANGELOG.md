@@ -110,6 +110,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `[top, top_1_5, top_2_5, top_3_5, top_4_5, center, bottom]`. Consumers who
   imported the recipe's `config.yaml` into their own project should widen
   their copy the same way.
+- **Sylius admin's `CompoundFormErrorsController` crashed** ("Cannot read
+  properties of null") on the slider/slide edit and create pages, and the
+  crash aborted the controller entirely so form-error badges never rendered
+  on those pages at all. Root cause: it iterates every in-form
+  `button[type="button"][data-bs-toggle]` and does a form-scoped lookup of
+  the element referenced by `data-bs-target`, with no null guard — but this
+  plugin's modal-portal/preview-frame/preset-gallery controllers hoist those
+  modals out to `<body>`, so the lookup returns null. Fix: all in-form modal
+  triggers (slide browser "Add", slide "Create", slide/slider preview
+  triggers, preset-gallery buttons) are now `<a href="#modal-id" role="button"
+  data-bs-toggle="modal">` anchors instead of buttons — a Bootstrap-supported
+  trigger form the admin's button selector skips entirely. Grid-row modal
+  triggers were unaffected and are unchanged. Custom templates that embed
+  modal triggers inside admin forms should follow the same anchor pattern.
 - The storefront CSS loaded for the admin preview no longer bleeds into the
   admin chrome: it is imported into a CSS cascade layer, with a targeted
   shield for Bootstrap's `.dropdown-toggle::after` caret that was breaking

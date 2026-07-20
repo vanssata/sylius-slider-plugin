@@ -1,8 +1,10 @@
 {# Preset gallery on the slider create page: auto-opens once, re-openable
    from this toolbar button. The modal re-parents itself to <body>. #}
 <div class="container-xl mb-2 d-flex justify-content-end vanssa-slider-admin">
-    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#vanssa-preset-gallery-slider">
+    {# <a>, not <button>: Sylius's compound-form-errors controller crashes on
+       in-form buttons whose data-bs-target modal is hoisted to <body>. #}
+    <a href="#vanssa-preset-gallery-slider" role="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#vanssa-preset-gallery-slider">
         {{ ux_icon('tabler:wand', {'class': 'icon me-1'}) }} {{ 'vanssa_sylius_slider.ui.choose_preset'|trans }}
-    </button>
+    </a>
 </div>
 {{ component('vanssa_sylius_slider:admin:preset_gallery', { type: 'slider' }) }}
