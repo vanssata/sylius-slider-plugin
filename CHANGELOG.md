@@ -102,6 +102,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   See the README's Frontend setup section and `docs/FLEX_RECIPE.md`.
 
 ### Fixed
+- **Recipe `config.yaml` narrowed the vertical-position preset values** to
+  `[top, center, bottom]`, silently hiding the fractional `top_1_5`–`top_4_5`
+  options from the admin form even though the shop template fully supports
+  them and the shipped `promo_badge_right` preset itself uses `top_1_5` (an
+  out-of-list value). The values list is restored to the bundle defaults:
+  `[top, top_1_5, top_2_5, top_3_5, top_4_5, center, bottom]`. Consumers who
+  imported the recipe's `config.yaml` into their own project should widen
+  their copy the same way.
 - The storefront CSS loaded for the admin preview no longer bleeds into the
   admin chrome: it is imported into a CSS cascade layer, with a targeted
   shield for Bootstrap's `.dropdown-toggle::after` caret that was breaking

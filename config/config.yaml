@@ -53,7 +53,7 @@ vanssa_sylius_slider:
                 values: [start, left_2_12, left_3_12, left_4_12, center, right_2_12, right_3_12, right_4_12, end]
                 default: start
             content_vertical_position:
-                values: [top, center, bottom]
+                values: [top, top_1_5, top_2_5, top_3_5, top_4_5, center, bottom]
                 default: center
             content_text_align:
                 values: [left, center, right]
