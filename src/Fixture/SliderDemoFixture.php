@@ -9,17 +9,27 @@ use Sylius\Bundle\FixturesBundle\Fixture\AbstractFixture;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Vanssa\SyliusSliderPlugin\Entity\Slide;
 use Vanssa\SyliusSliderPlugin\Entity\Slider;
+use Vanssa\SyliusSliderPlugin\Entity\StylePreset;
 use Vanssa\SyliusSliderPlugin\Repository\SlideRepository;
 use Vanssa\SyliusSliderPlugin\Repository\SliderRepository;
 use Vanssa\SyliusSliderPlugin\Service\UploadedMediaStorage;
 
+/**
+ * Seeds a fashion-themed demo matching the sylius/test-application store: a
+ * shared pool of slides (photos sourced from the Sylius core fixtures) and one
+ * slider per configured slider style preset, so every preset can be seen live.
+ */
 final class SliderDemoFixture extends AbstractFixture
 {
+    /**
+     * @param array<string, array<string, array{label?: string, settings?: array<string, mixed>}>> $stylePresets
+     */
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly SliderRepository $sliderRepository,
         private readonly SlideRepository $slideRepository,
         private readonly UploadedMediaStorage $uploadedMediaStorage,
+        private readonly array $stylePresets,
     ) {
     }
 
@@ -30,89 +40,112 @@ final class SliderDemoFixture extends AbstractFixture
 
     public function load(array $options): void
     {
-        $shared = [
-            'platform-overview' => $this->createOrUpdateSlide(
-                'platform-overview',
-                'Platform Overview',
-                'Unified cockpit software for EV and connected fleets.',
-                1,
-                null,
-            ),
-            'predictive-service' => $this->createOrUpdateSlide(
-                'predictive-service',
-                'Predictive Service',
-                'AI diagnostics helps prevent workshop downtime.',
-                2,
-                null,
-            ),
-            'fleet-control' => $this->createOrUpdateSlide(
-                'fleet-control',
-                'Fleet Control',
-                'Live route orchestration for mixed vehicle fleets.',
-                3,
-                null,
-            ),
-        ];
-
-        $videoSlides = [
-            'autonomous-loop' => $this->createOrUpdateSlide(
-                'autonomous-loop',
-                'Autonomous Drive Loop',
-                'Synthetic video loop for ADAS showcase.',
-                1,
-                'autonomous-loop',
-            ),
-            'charging-network' => $this->createOrUpdateSlide(
-                'charging-network',
-                'Charging Network',
-                'Synthetic video loop for charging analytics.',
-                2,
-                'charging-network',
-            ),
-        ];
-
-        $s1 = $this->createOrUpdateSlide('ev-cockpit', 'EV Cockpit', 'Driver-focused EV cockpit UX blocks.', 3);
-        $s2 = $this->createOrUpdateSlide('battery-lab', 'Battery Lab', 'Battery analytics and thermal charts.', 1);
-        $s3 = $this->createOrUpdateSlide('assistant', 'In-Car Assistant', 'Voice assistant with contextual commands.', 2);
-        $bigBuckBunny = $this->createOrUpdateSlide(
-            'big-buck-bunny',
-            'Big Buck Bunny',
-            'Sample video slide for playback testing (CC BY 3.0, Blender Foundation).',
+        $newCollection = $this->createOrUpdateSlide(
+            'new-collection',
+            'New Collection',
+            'Fresh looks for the season — dresses, denim and everyday essentials.',
+            1,
+            null,
+            'gradient_overlay',
+        );
+        $summerDresses = $this->createOrUpdateSlide(
+            'summer-dresses',
+            'Summer Dresses',
+            'Light fabrics and pastel prints, ready for the beach.',
+            2,
+            null,
+            'clean_light',
+        );
+        $denimEssentials = $this->createOrUpdateSlide(
+            'denim-essentials',
+            'Denim Essentials',
+            'Jeans and shorts that go with everything you own.',
             3,
+            null,
+            'split_left_light',
+        );
+        $graphicTees = $this->createOrUpdateSlide(
+            'graphic-tees',
+            'Graphic Tees',
+            'Oversized tees in this month\'s colour drop.',
+            4,
+            null,
+            'bold_center',
+        );
+        $streetCaps = $this->createOrUpdateSlide(
+            'street-caps',
+            'Caps & Beanies',
+            'Knitted beanies and street caps for colder days.',
+            5,
+            null,
+            'bottom_banner',
+        );
+        $seasonSale = $this->createOrUpdateSlide(
+            'season-sale',
+            'Season Sale',
+            'Up to 50% off selected knitwear and accessories.',
+            6,
+            null,
+            'glass_card',
+        );
+        $runwayVideo = $this->createOrUpdateSlide(
+            'runway-video',
+            'Backstage Reel',
+            'Sample video slide for playback testing (Big Buck Bunny, CC BY 3.0, Blender Foundation).',
+            1,
             'big-buck-bunny',
+            'hero_dark',
         );
 
         $this->entityManager->flush();
 
-        $homepage = $this->createOrUpdateSlider('homepage-main', 'Homepage Main Slider', [
-            $shared['platform-overview'],
-            $s1,
-            $videoSlides['autonomous-loop'],
-            $shared['predictive-service'],
-        ]);
+        $sliders = [
+            $this->createOrUpdateSlider('fashion-classic-arrows', 'Fashion Classic Arrows', 'classic_arrows', [
+                $newCollection,
+                $summerDresses,
+                $denimEssentials,
+                $graphicTees,
+            ]),
+            $this->createOrUpdateSlider('fashion-minimal-fade', 'Fashion Minimal Fade', 'minimal_fade', [
+                $summerDresses,
+                $seasonSale,
+                $newCollection,
+            ]),
+            $this->createOrUpdateSlider('fashion-autoplay-showcase', 'Fashion Autoplay Showcase', 'autoplay_showcase', [
+                $graphicTees,
+                $streetCaps,
+                $denimEssentials,
+                $seasonSale,
+            ]),
+            $this->createOrUpdateSlider('fashion-fullscreen-hero', 'Fashion Fullscreen Hero', 'fullscreen_hero', [
+                $newCollection,
+                $runwayVideo,
+                $summerDresses,
+            ]),
+            $this->createOrUpdateSlider('fashion-compact-banner', 'Fashion Compact Banner', 'compact_banner', [
+                $seasonSale,
+                $streetCaps,
+                $graphicTees,
+            ]),
+            $this->createOrUpdateSlider('fashion-parallax-showcase', 'Fashion Parallax Showcase', 'parallax_showcase', [
+                $denimEssentials,
+                $newCollection,
+                $graphicTees,
+                $summerDresses,
+            ]),
+        ];
 
-        $fleet = $this->createOrUpdateSlider('fleet-suite', 'Fleet Suite Slider', [
-            $shared['fleet-control'],
-            $shared['platform-overview'],
-            $videoSlides['charging-network'],
-            $s2,
-        ]);
-
-        $service = $this->createOrUpdateSlider('service-ops', 'Service Operations Slider', [
-            $shared['predictive-service'],
-            $s3,
-            $bigBuckBunny,
-            $shared['fleet-control'],
-        ]);
-
-        $homepage->setEnabled(true);
-        $fleet->setEnabled(true);
-        $service->setEnabled(true);
+        foreach ($sliders as $slider) {
+            $slider->setEnabled(true);
+        }
 
         $this->entityManager->flush();
     }
 
-    private function createOrUpdateSlider(string $code, string $name, array $slides): Slider
+    /**
+     * @param list<Slide> $slides
+     */
+    private function createOrUpdateSlider(string $code, string $name, string $stylePreset, array $slides): Slider
     {
         $slider = $this->sliderRepository->findOneBy(['code' => $code]);
         if (!$slider instanceof Slider) {
@@ -122,15 +155,18 @@ final class SliderDemoFixture extends AbstractFixture
         }
 
         $slider->setName($name);
-        $slider->setSettings(array_merge($slider->getSettings(), [
-            'showTitle' => true,
+
+        // Demo sliders never render a heading above the slides.
+        $settings = array_merge($slider->getSettings(), [
+            'showTitle' => false,
             'overlay' => false,
             'showNavigation' => true,
             'showArrows' => true,
             'slideEffect' => 'slide',
             'speed' => 500,
             'paginationShape' => 'square',
-        ]));
+        ]);
+        $slider->setSettings($this->applyStylePreset($settings, StylePreset::TYPE_SLIDER, $stylePreset));
 
         foreach ($slider->getSlides()->toArray() as $existing) {
             $slider->removeSlide($existing);
@@ -143,7 +179,7 @@ final class SliderDemoFixture extends AbstractFixture
         $slider->setSlideOrder(array_map(static fn (Slide $slide): int => (int) $slide->getId(), array_filter($slides, static fn (Slide $slide): bool => null !== $slide->getId())));
 
         $translation = $slider->getOrCreateTranslation('en_US');
-        $translation->setName(ucwords(str_replace('-', ' ', $code)));
+        $translation->setName($name);
 
         return $slider;
     }
@@ -154,6 +190,7 @@ final class SliderDemoFixture extends AbstractFixture
         string $description,
         int $imageSet = 1,
         ?string $video = null,
+        ?string $stylePreset = null,
     ): Slide {
         $slide = $this->slideRepository->findOneBy(['code' => $code]);
         if (!$slide instanceof Slide) {
@@ -167,7 +204,8 @@ final class SliderDemoFixture extends AbstractFixture
         $slide->setSlideCover($this->uploadFixtureImage('desktop', $imageSet));
         $slide->setSlideCoverMobile($this->uploadFixtureImage('mobile', $imageSet));
         $slide->setSlideCoverVideo(null !== $video ? $this->uploadFixtureVideo($video) : null);
-        $slide->setSlideSettings(array_merge($slide->getSlideSettings(), [
+
+        $settings = array_merge($slide->getSlideSettings(), [
             'responsive' => [
                 'desktop' => [
                     'headlineElement' => 'h3',
@@ -181,7 +219,12 @@ final class SliderDemoFixture extends AbstractFixture
                 'tablet' => [],
                 'mobile' => [],
             ],
-        ]));
+        ]);
+        if (null !== $stylePreset) {
+            $settings = $this->applyStylePreset($settings, StylePreset::TYPE_SLIDE, $stylePreset);
+        }
+        $slide->setSlideSettings($settings);
+
         $slide->setContentSettings(array_merge($slide->getContentSettings(), [
             'slideCover' => ['alt' => $title, 'title' => $title],
         ]));
@@ -190,6 +233,49 @@ final class SliderDemoFixture extends AbstractFixture
         $translation->setName($title);
 
         return $slide;
+    }
+
+    /**
+     * Expands a configured style preset's dot-path settings
+     * ("settings.autoplay.enabled") into the given settings array, so demo
+     * entities carry exactly what the one-click preset applier would fill in
+     * the admin form.
+     *
+     * @param array<string, mixed> $settings
+     *
+     * @return array<string, mixed>
+     */
+    private function applyStylePreset(array $settings, string $type, string $code): array
+    {
+        $preset = $this->stylePresets[$type][$code] ?? [];
+        $presetSettings = \is_array($preset['settings'] ?? null) ? $preset['settings'] : [];
+
+        foreach ($presetSettings as $dotPath => $value) {
+            if (!\is_scalar($value)) {
+                continue;
+            }
+
+            $segments = explode('.', (string) $dotPath);
+            if ('settings' === ($segments[0] ?? null)) {
+                array_shift($segments);
+            }
+            if ([] === $segments) {
+                continue;
+            }
+
+            $leaf = array_pop($segments);
+            $cursor = &$settings;
+            foreach ($segments as $segment) {
+                if (!isset($cursor[$segment]) || !\is_array($cursor[$segment])) {
+                    $cursor[$segment] = [];
+                }
+                $cursor = &$cursor[$segment];
+            }
+            $cursor[$leaf] = $value;
+            unset($cursor);
+        }
+
+        return $settings;
     }
 
     private function uploadFixtureImage(string $device, int $set): ?string

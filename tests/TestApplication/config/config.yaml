@@ -38,5 +38,5 @@ sylius_twig_hooks:
             vanssa_sylius_slider_homepage:
                 component: 'vanssa_sylius_slider:shop:homepage_slider'
                 props:
-                    code: 'homepage-main'
+                    code: 'fashion-classic-arrows'
                 priority: 400

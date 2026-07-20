@@ -6,10 +6,10 @@ Feature: Configuring slider navigation presentation
 
     Scenario: Rendering numbered pagination and outside arrows
         Given slider demo fixtures are loaded
-        And slider "homepage-main" has setting "paginationStyle" set to "numbers"
-        And slider "homepage-main" has setting "paginationPosition" set to "bottom-outside"
-        And slider "homepage-main" has setting "arrowsPosition" set to "outside"
-        When I visit the slider page for code "homepage-main"
+        And slider "fashion-classic-arrows" has setting "paginationStyle" set to "numbers"
+        And slider "fashion-classic-arrows" has setting "paginationPosition" set to "bottom-outside"
+        And slider "fashion-classic-arrows" has setting "arrowsPosition" set to "outside"
+        When I visit the slider page for code "fashion-classic-arrows"
         Then I should see the storefront slider component
         And I should see slider with css class "vanssa-slider--arrows-outside"
         And I should see slider with css class "vanssa-slider--pagination-bottom-outside"
@@ -17,24 +17,24 @@ Feature: Configuring slider navigation presentation
 
     Scenario: Exposing keyboard and swipe navigation to the storefront controller
         Given slider demo fixtures are loaded
-        And slider "homepage-main" has setting "keyboardNavigation" set to "true"
-        And slider "homepage-main" has setting "touchSwipe" set to "true"
-        And slider "homepage-main" has setting "lazyLoadMedia" set to "true"
-        When I visit the slider page for code "homepage-main"
+        And slider "fashion-classic-arrows" has setting "keyboardNavigation" set to "true"
+        And slider "fashion-classic-arrows" has setting "touchSwipe" set to "true"
+        And slider "fashion-classic-arrows" has setting "lazyLoadMedia" set to "true"
+        When I visit the slider page for code "fashion-classic-arrows"
         Then slider stimulus options should include "keyboardNavigation" with value "true"
         And slider stimulus options should include "touchSwipe" with value "true"
         And I should see a lazy loaded slide image
 
     Scenario: Disabling keyboard navigation
         Given slider demo fixtures are loaded
-        And slider "homepage-main" has setting "keyboardNavigation" set to "false"
-        When I visit the slider page for code "homepage-main"
+        And slider "fashion-classic-arrows" has setting "keyboardNavigation" set to "false"
+        When I visit the slider page for code "fashion-classic-arrows"
         Then slider stimulus options should include "keyboardNavigation" with value "false"
 
     Scenario: Showing the autoplay progress bar
         Given slider demo fixtures are loaded
-        And slider "homepage-main" has setting "showProgressBar" set to "true"
-        And slider "homepage-main" has autoplay enabled
-        When I visit the slider page for code "homepage-main"
+        And slider "fashion-classic-arrows" has setting "showProgressBar" set to "true"
+        And slider "fashion-classic-arrows" has autoplay enabled
+        When I visit the slider page for code "fashion-classic-arrows"
         Then I should see the storefront slider component
         And I should see the autoplay progress bar

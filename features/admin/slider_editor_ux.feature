@@ -8,7 +8,7 @@ Feature: Editing slides in the two-column workspace
         Given slide demo fixtures are loaded
         And there is an administrator "behat-admin" identified by "behat-password"
         And I sign in to the administration as "behat-admin" with password "behat-password"
-        And I go to the slide update page for code "platform-overview"
+        And I go to the slide update page for code "new-collection"
 
     Scenario: Opening the settings drawer with always-visible controls
         Then the settings drawer should be closed
