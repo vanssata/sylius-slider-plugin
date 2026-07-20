@@ -207,10 +207,16 @@ Option A or Option B above:
    bin/console sylius:fixtures:load --suite=vanssa_sylius_slider_demo -n
    ```
 
-   This creates three sliders (shared and non-shared slides) with real
-   photo covers (desktop + mobile variants) and video slides, using media
-   bundled under `assets/fixtures/` (`assets/fixtures/LICENSE.md` has
-   attribution).
+   This creates a fashion-themed demo matching the sylius/test-application
+   store: six sliders — `fashion-classic-arrows`, `fashion-minimal-fade`,
+   `fashion-autoplay-showcase`, `fashion-fullscreen-hero`,
+   `fashion-compact-banner` and `fashion-parallax-showcase` — one per
+   configured slider style preset, each seeded from that preset's settings
+   with its heading hidden (`showTitle: false`). They share a pool of seven
+   slides (one per slide style preset), photos composited from the fashion
+   fixture images bundled with `sylius/sylius` and one Big Buck Bunny video
+   clip, using media bundled under `assets/fixtures/`
+   (`assets/fixtures/LICENSE.md` has attribution).
 
 5. *(Optional)* Render a slider on the shop homepage via Twig Hooks:
 
@@ -224,7 +230,7 @@ Option A or Option B above:
                vanssa_sylius_slider_homepage:
                    component: 'vanssa_sylius_slider:shop:homepage_slider'
                    props:
-                       code: 'homepage-main'
+                       code: 'fashion-classic-arrows'
                    priority: 400
    ```
 
@@ -405,7 +411,7 @@ Shop rendering:
 or, for the homepage LiveComponent variant:
 
 ```twig
-{{ component('vanssa_sylius_slider:shop:homepage_slider', { code: 'homepage-main' }) }}
+{{ component('vanssa_sylius_slider:shop:homepage_slider', { code: 'fashion-classic-arrows' }) }}
 ```
 
 The admin CRUD pages (create/update, for `slider`, `slide` and
@@ -542,7 +548,7 @@ breakpoint renders its own media (video wins over image, desktop fallback).
   `@VanssaSyliusSliderPlugin/shop/integration/cms/slider_block.html.twig`:
 
   ```twig
-  {{ sylius_cms_render_block('homepage_slider', '@VanssaSyliusSliderPlugin/shop/integration/cms/slider_block.html.twig', {'slider_code': 'homepage-main'}) }}
+  {{ sylius_cms_render_block('homepage_slider', '@VanssaSyliusSliderPlugin/shop/integration/cms/slider_block.html.twig', {'slider_code': 'fashion-classic-arrows'}) }}
   ```
 
 - **Monsieur Biz Rich Editor Plugin** — when installed, slide description

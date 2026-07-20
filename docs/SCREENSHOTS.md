@@ -29,7 +29,7 @@ Path: `/admin/slides`
 
 ## Admin: Slider editing workspace
 
-Path: `/admin/sliders/{id}/edit` (fixture slider: `homepage-main`) — the
+Path: `/admin/sliders/{id}/edit` (fixture slider: `fashion-classic-arrows`) — the
 live preview is the main surface; the settings drawer (one flat accordion:
 General, Layout & Spacing, Behavior, Arrows, Pagination, Autoplay,
 Translations, Slides) opens fullscreen with Save/language/breakpoint always
@@ -91,7 +91,7 @@ The creation pages open a preset gallery first (Blank or a preset):
 
 ## Frontend: Slider usage
 
-Path: `/slider/homepage-main`
+Path: `/slider/fashion-classic-arrows`
 
 ![Frontend slider](./screenshots/frontend-slider-homepage-main.png)
 

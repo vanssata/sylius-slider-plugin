@@ -100,6 +100,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   consumer's `assets/controllers.json` on `composer require` — no manual
   `yarn add` or manifest editing needed, just `yarn install && yarn build`.
   See the README's Frontend setup section and `docs/FLEX_RECIPE.md`.
+- **Fashion-themed demo fixtures**: `SliderDemoFixture` now seeds one demo
+  slider per configured slider style preset (`fashion-classic-arrows`,
+  `fashion-minimal-fade`, `fashion-autoplay-showcase`,
+  `fashion-fullscreen-hero`, `fashion-compact-banner`,
+  `fashion-parallax-showcase`), each slider's settings applied from its
+  preset, sharing a pool of seven slides — one per slide style preset —
+  matching the sylius/test-application fashion store. Photos are
+  copied/composited from the fashion fixture images bundled with
+  `sylius/sylius` (attribution in `assets/fixtures/LICENSE.md`); all demo
+  sliders have `showTitle: false` (no slider heading renders — slide-level
+  titles/descriptions are unaffected). The test application's homepage Twig
+  Hook now points at `fashion-classic-arrows` instead of `homepage-main`.
 
 ### Fixed
 - **Recipe `config.yaml` narrowed the vertical-position preset values** to
@@ -325,6 +337,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   per-slider).
 - Dead `general/name.html.twig` templates and the redundant slide list
   inside the slider preview modal.
+- Bundled automotive demo media (the old `homepage-main` / `fleet-suite` /
+  `service-ops` sliders and their cover images/videos), replaced by the
+  fashion-themed demo fixtures above.
 
 ## [2.2.9] - 2026-07-16
 
