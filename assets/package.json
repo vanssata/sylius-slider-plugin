@@ -109,6 +109,12 @@
                 "name": "vanssa-modal-portal",
                 "fetch": "lazy",
                 "enabled": true
+            },
+            "textarea-autosize": {
+                "main": "admin/controllers/textarea_autosize_controller.js",
+                "name": "vanssa-textarea-autosize",
+                "fetch": "lazy",
+                "enabled": true
             }
         }
     },

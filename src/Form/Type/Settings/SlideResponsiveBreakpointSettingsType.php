@@ -61,10 +61,18 @@ final class SlideResponsiveBreakpointSettingsType extends AbstractType
 
         if (true === $options['include_texts']) {
             $builder
-                ->add('title', TextType::class, [
+                // Textarea (starting at one row, grown by the textarea-autosize
+                // Stimulus controller) so an editor can type a line break in the
+                // title; the storefront renders it via `white-space: pre-line`.
+                ->add('title', TextareaType::class, [
                     'required' => false,
-                    'help' => 'Responsive title override for this breakpoint.',
+                    'help' => 'Responsive title override for this breakpoint. Press Enter for a line break.',
                     'constraints' => [new Assert\Length(['max' => 255])],
+                    'attr' => [
+                        'rows' => 1,
+                        'data-controller' => 'vanssa-textarea-autosize',
+                        'data-action' => 'input->vanssa-textarea-autosize#resize',
+                    ],
                 ])
                 ->add('description', TextareaType::class, [
                     'required' => false,

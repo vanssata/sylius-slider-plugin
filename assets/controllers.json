@@ -62,6 +62,10 @@
             "modal-portal": {
                 "enabled": true,
                 "fetch": "lazy"
+            },
+            "textarea-autosize": {
+                "enabled": true,
+                "fetch": "lazy"
             }
         }
     },
