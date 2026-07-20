@@ -44,8 +44,8 @@ section and:
 
 - adds `"@vanssa/sylius-slider-plugin": "file:vendor/vanssa/sylius-slider-plugin/assets"`
   plus the plugin's peerDependencies to the consumer's root `package.json`
-- seeds the consumer's `assets/controllers.json` with all 14 controllers
-  (shop `slider`/`slide-video` eager, the 12 admin controllers lazy, all
+- seeds the consumer's `assets/controllers.json` with all 15 controllers
+  (shop `slider`/`slide-video` eager, the 13 admin controllers lazy, all
   `enabled: true`)
 
 The remaining manual steps are building the assets (`yarn install`,

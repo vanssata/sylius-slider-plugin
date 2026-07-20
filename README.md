@@ -40,7 +40,9 @@ Storefront slider:
 - **Per-breakpoint everything** — Desktop / Mobile / Tablet each get their
   own image, optional video and layout settings; anything left empty falls
   back to Desktop, so nothing needs duplicating.
-- **Per-locale overrides** — translations always override texts and can
+- **Per-locale overrides** — translations always override texts (title and
+  description are authored per locale *and* per breakpoint; pressing Enter
+  in either field renders as a line break on the storefront) and can
   optionally override media and display settings via explicit checkboxes,
   in the same Desktop/Mobile/Tablet structure.
 - **Slide edit modal from the grid** — the slides grid's row action opens a
@@ -143,7 +145,7 @@ vanssa_sylius_slider_shop:
 ### Frontend setup (both options)
 
 The plugin's `assets/package.json` is a proper Symfony UX package (declares
-all 14 Stimulus controllers under `"symfony": { "controllers": {...} }`,
+all 15 Stimulus controllers under `"symfony": { "controllers": {...} }`,
 `keywords: ["symfony-ux", ...]`). Because `composer.json` also carries the
 `symfony-ux` keyword, Symfony Flex's built-in `PackageJsonSynchronizer` wires
 the frontend automatically on `composer require` — this runs from core Flex,
@@ -159,8 +161,8 @@ Option A or Option B above:
 2. Nothing to configure by hand: Flex already added
    `"@vanssa/sylius-slider-plugin": "file:vendor/vanssa/sylius-slider-plugin/assets"`
    to your project's `package.json`, added the plugin's peerDependencies, and
-   seeded your `assets/controllers.json` with all 14 controllers — the shop
-   `slider`/`slide-video` pair `fetch: "eager"`, the 12 admin controllers
+   seeded your `assets/controllers.json` with all 15 controllers — the shop
+   `slider`/`slide-video` pair `fetch: "eager"`, the 13 admin controllers
    `fetch: "lazy"`, all `"enabled": true`. Just build:
 
    ```bash
@@ -509,9 +511,13 @@ a modal, without leaving the grid:
 
 ### Slide translations
 
-Each locale follows the same Desktop/Mobile/Tablet structure — texts are
-always applied for the locale, while media and display settings are only
-overridden after enabling the corresponding checkbox:
+Each locale follows the same Desktop/Mobile/Tablet structure — title and
+description are authored per locale and per breakpoint and are always
+applied for the locale (no override checkbox needed), while media and
+display settings are only overridden after enabling the corresponding
+checkbox. Pressing Enter inside the title or description field inserts a
+line break; the storefront renders it as one (`white-space: pre-line`),
+so a headline can span multiple lines without extra markup.
 
 ![Slide translations](docs/screenshots/admin-slide-translations.png)
 

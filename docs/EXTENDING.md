@@ -72,7 +72,7 @@ admin live-preview panels):
 - Rich editor: detect class availability and switch form type.
 
 5. Override a Stimulus controller:
-- The plugin registers all 14 controllers through the
+- The plugin registers all 15 controllers through the
   `@symfony/stimulus-bridge` manifest (`assets/package.json`'s
   `symfony.controllers`, mirrored by your project's
   `assets/controllers.json` once Flex seeds it — see

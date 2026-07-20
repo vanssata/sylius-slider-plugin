@@ -114,6 +114,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Hook now points at `fashion-classic-arrows` instead of `homepage-main`.
 
 ### Fixed
+- **A blank translated title or description wiped the inherited value**
+  instead of falling back to the base slide (or fallback locale): leaving a
+  breakpoint's title/description empty in a translation stores it as `null`,
+  but `Slide::buildGranularSettingsOverride()` previously let `null` values
+  through into the override, and `Slide::mergeLocalizedSettings()` only
+  skipped empty arrays, not `null` — so the `null` merged in and cleared the
+  otherwise-inherited text. Both now drop `null`/empty-string values before
+  merging, so an admin who leaves a translation's title/description blank
+  correctly inherits the base or fallback-locale text instead of blanking
+  the slide.
 - **Per-slide tablet/mobile style overrides were silently ignored on the
   storefront**: the per-breakpoint block in
   `templates/components/vanssa_sylius_slider/shop/slide.html.twig` looped
@@ -320,6 +330,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   helper on the shop slider controller.
 
 ### Changed
+- **Slide title is now a single, auto-growing textarea** instead of a
+  single-line text input (`rows="1"`, grown as the user types by the new
+  `textarea-autosize` Stimulus controller — the plugin's 15th, wired into
+  `assets/package.json`, `assets/controllers.json`,
+  `assets/admin/controllers.json` and `assets/shop/controllers.json`), so
+  pressing Enter inside the title (or the already-multi-line description
+  field) can express a line break. The storefront now renders those breaks:
+  `.vanssa-slide__headline` and `.vanssa-slide__description` in
+  `assets/shop/styles/slider.scss` use `white-space: pre-line`.
+- Slide title/description text is authored exclusively on the slide's
+  language versions (`SlideTranslation`), per breakpoint — the base `Slide`
+  entity holds only display/config settings. This was already the admin
+  form's behavior; migration `Version20260721120000` moves any leftover
+  title/description text still sitting on the base slide's responsive
+  settings into its existing translations (first non-empty value wins per
+  breakpoint/field) and strips it from the base, so stored data matches what
+  the form and storefront already assumed. Slides with no translation row at
+  all are left untouched, so they keep rendering their base text.
 - The admin preview surfaces migrated from `<iframe>` to `<turbo-frame>`
   (`symfony/ux-turbo` + `@hotwired/turbo` are new dependencies; Turbo
   Drive stays disabled in the admin).
