@@ -12,7 +12,7 @@
     { key: 'tablet', icon: 'tabler:device-tablet', image_field: form.slideCoverTabletFile, image_path: translation ? translation.slideCoverTablet : null, video_field: form.slideCoverVideoTabletFile, video_url_field: form.slideCoverVideoTabletUrl, video_path: translation ? translation.slideCoverVideoTablet : null },
 ] %}
 
-<div class="col-12 vanssa-slider-admin" data-controller="slider-settings vanssa-responsive-copy">
+<div class="col-12 vanssa-slider-admin" data-controller="vanssa-slider-settings vanssa-responsive-copy">
     {% if toolbar_driven %}
         {# The overwrite flags apply to the whole locale (not per breakpoint);
            they must stay reachable whatever breakpoint the toolbar shows, so

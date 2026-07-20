@@ -32,8 +32,8 @@ final class SlideLinkingSettingsType extends AbstractType
                 'required' => false,
                 'help' => 'Select what this slide should link to when clicked.',
                 'attr' => [
-                    'data-slider-settings-target' => 'linkingType',
-                    'data-action' => 'change->slider-settings#linkingTypeChanged',
+                    'data-vanssa-slider-settings-target' => 'linkingType',
+                    'data-action' => 'change->vanssa-slider-settings#linkingTypeChanged',
                 ],
                 'constraints' => [
                     new Assert\Choice(['choices' => $typeValues]),

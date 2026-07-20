@@ -45,8 +45,8 @@ final class SlideTranslationType extends AbstractType
                 'label' => 'Overwrite',
                 'help' => 'Override the button label and link for this locale.',
                 'attr' => [
-                    'data-slider-settings-target' => 'addButton',
-                    'data-action' => 'slider-settings#refresh',
+                    'data-vanssa-slider-settings-target' => 'addButton',
+                    'data-action' => 'vanssa-slider-settings#refresh',
                 ],
             ])
             ->add('buttonLabel', TextType::class, [
@@ -68,8 +68,8 @@ final class SlideTranslationType extends AbstractType
                 'label' => 'Overwrite',
                 'help' => 'Use locale-specific images instead of the main slide media.',
                 'attr' => [
-                    'data-slider-settings-target' => 'overrideMedia',
-                    'data-action' => 'slider-settings#refresh',
+                    'data-vanssa-slider-settings-target' => 'overrideMedia',
+                    'data-action' => 'vanssa-slider-settings#refresh',
                 ],
             ])
             ->add('slideCoverFile', FileType::class, ['required' => false, 'mapped' => false])
@@ -87,8 +87,8 @@ final class SlideTranslationType extends AbstractType
                 'label' => 'Overwrite',
                 'help' => 'Override the layout for this locale.',
                 'attr' => [
-                    'data-slider-settings-target' => 'overrideLayout',
-                    'data-action' => 'slider-settings#refresh',
+                    'data-vanssa-slider-settings-target' => 'overrideLayout',
+                    'data-action' => 'vanssa-slider-settings#refresh',
                 ],
             ])
             ->add('overrideColors', CheckboxType::class, [
@@ -97,8 +97,8 @@ final class SlideTranslationType extends AbstractType
                 'label' => 'Overwrite',
                 'help' => 'Override colors and surface for this locale.',
                 'attr' => [
-                    'data-slider-settings-target' => 'overrideColors',
-                    'data-action' => 'slider-settings#refresh',
+                    'data-vanssa-slider-settings-target' => 'overrideColors',
+                    'data-action' => 'vanssa-slider-settings#refresh',
                 ],
             ])
             ->add('overrideEffects', CheckboxType::class, [
@@ -107,8 +107,8 @@ final class SlideTranslationType extends AbstractType
                 'label' => 'Overwrite',
                 'help' => 'Override animation and blur effects for this locale.',
                 'attr' => [
-                    'data-slider-settings-target' => 'overrideEffects',
-                    'data-action' => 'slider-settings#refresh',
+                    'data-vanssa-slider-settings-target' => 'overrideEffects',
+                    'data-action' => 'vanssa-slider-settings#refresh',
                 ],
             ])
             ->add('overrideVisibility', CheckboxType::class, [
@@ -117,8 +117,8 @@ final class SlideTranslationType extends AbstractType
                 'label' => 'Overwrite',
                 'help' => 'Override title/description/button visibility for this locale.',
                 'attr' => [
-                    'data-slider-settings-target' => 'overrideVisibility',
-                    'data-action' => 'slider-settings#refresh',
+                    'data-vanssa-slider-settings-target' => 'overrideVisibility',
+                    'data-action' => 'vanssa-slider-settings#refresh',
                 ],
             ])
             ->add('settings', SlideSettingsType::class, [
@@ -260,7 +260,7 @@ final class SlideTranslationType extends AbstractType
             'label' => false,
             'allow_extra_fields' => true,
             'attr' => [
-                'data-controller' => 'slider-settings',
+                'data-controller' => 'vanssa-slider-settings',
             ],
         ]);
     }

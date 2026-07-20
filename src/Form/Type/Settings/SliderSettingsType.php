@@ -54,8 +54,8 @@ final class SliderSettingsType extends AbstractType
                 'label' => 'Use custom options for this locale',
                 'help' => 'Enable locale-specific slider settings override.',
                 'attr' => [
-                    'data-slider-settings-target' => 'translationEnabled',
-                    'data-action' => 'change->slider-settings#translationEnabledChanged',
+                    'data-vanssa-slider-settings-target' => 'translationEnabled',
+                    'data-action' => 'change->vanssa-slider-settings#translationEnabledChanged',
                 ],
             ]);
         }
@@ -407,7 +407,7 @@ final class SliderSettingsType extends AbstractType
             ],
             'allow_extra_fields' => true,
             'attr' => [
-                'data-controller' => 'slider-settings',
+                'data-controller' => 'vanssa-slider-settings',
             ],
         ]);
 

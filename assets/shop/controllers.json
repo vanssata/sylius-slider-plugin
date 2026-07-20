@@ -13,54 +13,51 @@
                 "fetch": "eager"
             },
             "slider-settings": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "slider-slides-preview": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "rgba-color-picker": {
-                "enabled": true,
-                "fetch": "lazy",
-                "autoimport": {
-                    "@simonwep/pickr/dist/themes/classic.min.css": true
-                }
+                "enabled": false,
+                "fetch": "lazy"
             },
             "responsive-copy": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "preview-frame": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "preset-applier": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "preset-gallery": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "form-context": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "animation-settings": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "image-upload-preview": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "mockup-picker": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             },
             "modal-portal": {
-                "enabled": true,
+                "enabled": false,
                 "fetch": "lazy"
             }
         }

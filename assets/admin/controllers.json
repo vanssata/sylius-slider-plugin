@@ -14,54 +14,54 @@
             },
             "slider-settings": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "slider-slides-preview": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "rgba-color-picker": {
                 "enabled": true,
-                "fetch": "lazy",
+                "fetch": "eager",
                 "autoimport": {
                     "@simonwep/pickr/dist/themes/classic.min.css": true
                 }
             },
             "responsive-copy": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "preview-frame": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "preset-applier": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "preset-gallery": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "form-context": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "animation-settings": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "image-upload-preview": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "mockup-picker": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             },
             "modal-portal": {
                 "enabled": true,
-                "fetch": "lazy"
+                "fetch": "eager"
             }
         }
     },

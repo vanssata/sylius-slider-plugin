@@ -95,11 +95,11 @@ export default class extends Controller {
     }
 
     // Like querySelectorAll on the controller element, but ignores elements
-    // that belong to a nested slider-settings controller (e.g. per-locale
+    // that belong to a nested vanssa-slider-settings controller (e.g. per-locale
     // translation groups inside the main slide form).
     scopedAll(selector) {
         return [...this.element.querySelectorAll(selector)].filter((element) => {
-            const owner = element.closest('[data-controller~="slider-settings"]');
+            const owner = element.closest('[data-controller~="vanssa-slider-settings"]');
 
             return owner === this.element || owner === null;
         });

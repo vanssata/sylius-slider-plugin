@@ -1,6 +1,6 @@
 {% set form = hookable_metadata.context.form.settings %}
 {# Items of the flat slider settings accordion (form/sections.html.twig owns
-   the container and the slider-settings controller). #}
+   the container and the vanssa-slider-settings controller). #}
 {% set accordion_id = 'vanssa-slider-sections' %}
         <div class="accordion-item">
             <h3 class="accordion-header">
@@ -88,12 +88,12 @@
                     <div data-vanssa-context-breakpoint="desktop">
                         <div class="row">
                             <div class="col-12 col-md-6">{{ form_row(form.showNavigation, { attr: {
-                                    'data-slider-settings-target': 'showNavigation',
-                                    'data-action': 'slider-settings#refresh',
+                                    'data-vanssa-slider-settings-target': 'showNavigation',
+                                    'data-action': 'vanssa-slider-settings#refresh',
                                 } }) }}</div>
                             <div class="col-12 col-md-6" data-slider-settings-navigation-only>{{ form_row(form.showArrows, { attr: {
-                                    'data-slider-settings-target': 'showArrows',
-                                    'data-action': 'slider-settings#refresh',
+                                    'data-vanssa-slider-settings-target': 'showArrows',
+                                    'data-action': 'vanssa-slider-settings#refresh',
                                 } }) }}</div>
                         </div>
                         <div class="row" data-slider-settings-arrows-only>
@@ -161,8 +161,8 @@
                 <div class="accordion-body">
                     <div class="row">
                         <div class="col-12 col-md-3">{{ form_row(form.autoplay.enabled, { attr: {
-                                'data-slider-settings-target': 'autoplayEnabled',
-                                'data-action': 'slider-settings#refresh',
+                                'data-vanssa-slider-settings-target': 'autoplayEnabled',
+                                'data-action': 'vanssa-slider-settings#refresh',
                             } }) }}</div>
                         <div class="col-12 col-md-3" data-slider-settings-autoplay-only>{{ form_row(form.autoplay.interval) }}</div>
                         <div class="col-12 col-md-3" data-slider-settings-autoplay-only>{{ form_row(form.autoplay.pauseOnHover) }}</div>

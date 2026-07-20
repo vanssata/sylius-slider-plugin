@@ -1,24 +1,15 @@
-import { startStimulusApp } from '@symfony/stimulus-bridge';
+// Admin entry of the @vanssa/sylius-slider-plugin UX package.
+//
+// The plugin's Stimulus controllers (admin AND the shop slider/slide-video pair
+// used by the turbo-frame previews) register through the stimulus-bridge
+// manifest (package.json "symfony.controllers" + controllers.json) inside the
+// APP's own startStimulusApp() — never here. Starting a second Stimulus
+// application from this file makes every controller double-fire (see CLAUDE.md
+// "Stimulus Controller Manifests").
+//
+// This entry only carries what must run eagerly outside Stimulus: the Turbo
+// drive opt-out, the sidebar focus behavior, and the admin stylesheets.
 import * as Turbo from '@hotwired/turbo';
-import AnimationSettingsController from './controllers/animation_settings_controller.js';
-import FormContextController from './controllers/form_context_controller.js';
-import ImageUploadPreviewController from './controllers/image_upload_preview_controller.js';
-import MockupPickerController from './controllers/mockup_picker_controller.js';
-import ModalPortalController from './controllers/modal_portal_controller.js';
-import PresetApplierController from './controllers/preset_applier_controller.js';
-import PresetGalleryController from './controllers/preset_gallery_controller.js';
-import PreviewFrameController from './controllers/preview_frame_controller.js';
-import ResponsiveCopyController from './controllers/responsive_copy_controller.js';
-import RgbaColorPickerController from './controllers/rgba_color_picker_controller.js';
-import SliderSettingsController from './controllers/slider_settings_controller.js';
-import SliderSlidesPreviewController from './controllers/slider_slides_preview_controller.js';
-// Shop-side slider behavior, registered into the ADMIN Stimulus app so the
-// turbo-frame previews animate like the storefront (transitions, autoplay,
-// arrows/dots, is-in-view entrance animations). Loading the shop JS BUNDLE
-// instead is not an option: it starts a second Stimulus application that
-// tries to connect every admin controller too (see preview/_assets.html.twig).
-import ShopSliderController from '../shop/controllers/slider_controller.js';
-import ShopSlideVideoController from '../shop/controllers/slide_video_controller.js';
 import './styles/rgba_color_picker.scss';
 import './styles/accordion.scss';
 import './styles/preview_modal.scss';
@@ -61,19 +52,3 @@ if (document.readyState === 'loading') {
 } else {
     focusSidebarOnSliderSection();
 }
-
-const app = startStimulusApp();
-app.register('vanssa-animation-settings', AnimationSettingsController);
-app.register('vanssa-form-context', FormContextController);
-app.register('vanssa-image-upload-preview', ImageUploadPreviewController);
-app.register('vanssa-mockup-picker', MockupPickerController);
-app.register('vanssa-modal-portal', ModalPortalController);
-app.register('vanssa-preset-applier', PresetApplierController);
-app.register('vanssa-preset-gallery', PresetGalleryController);
-app.register('vanssa-responsive-copy', ResponsiveCopyController);
-app.register('vanssa-preview-frame', PreviewFrameController);
-app.register('vanssa-rgba-color-picker', RgbaColorPickerController);
-app.register('slider-settings', SliderSettingsController);
-app.register('vanssa-slider-slides-preview', SliderSlidesPreviewController);
-app.register('vanssa-slider', ShopSliderController);
-app.register('vanssa-slide-video', ShopSlideVideoController);

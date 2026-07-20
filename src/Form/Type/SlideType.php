@@ -100,8 +100,8 @@ final class SlideType extends AbstractType
                 'label' => 'Add button/link',
                 'help' => 'Show a button or link on this slide.',
                 'attr' => [
-                    'data-slider-settings-target' => 'addButton',
-                    'data-action' => 'slider-settings#refresh',
+                    'data-vanssa-slider-settings-target' => 'addButton',
+                    'data-action' => 'vanssa-slider-settings#refresh',
                 ],
             ])
             ->add('buttonLabel', TextType::class, [
@@ -288,7 +288,7 @@ final class SlideType extends AbstractType
             'data_class' => Slide::class,
             'allow_extra_fields' => true,
             'attr' => [
-                'data-controller' => 'slider-settings',
+                'data-controller' => 'vanssa-slider-settings',
             ],
         ]);
     }

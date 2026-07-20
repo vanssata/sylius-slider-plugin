@@ -30,6 +30,6 @@ final class SlideTypeTest extends TestCase
 
         self::assertSame(Slide::class, $options['data_class']);
         self::assertTrue($options['allow_extra_fields']);
-        self::assertSame(['data-controller' => 'slider-settings'], $options['attr']);
+        self::assertSame(['data-controller' => 'vanssa-slider-settings'], $options['attr']);
     }
 }

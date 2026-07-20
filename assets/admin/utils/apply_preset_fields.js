@@ -1,6 +1,6 @@
 // Fills form fields from a style preset's {fieldName: value} map (exact-name
 // lookup) and dispatches bubbling input/change events so the rgba pickers,
-// the slider-settings gating, and the live preview draft all react instantly.
+// the vanssa-slider-settings gating, and the live preview draft all react instantly.
 // Non-destructive: nothing persists until the form is saved.
 // Shared by preset_applier_controller (edit pages) and
 // preset_gallery_controller (create pages).
