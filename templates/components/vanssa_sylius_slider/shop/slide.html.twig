@@ -124,10 +124,23 @@
 {% if desktopResolved.contentMaxHeight|default('none') != 'none' %}
     {% set styleVars = styleVars|merge(['--vanssa-slide-content-max-height: ' ~ desktopResolved.contentMaxHeight]) %}
 {% endif %}
+{# Overlay background is driven by this var (SCSS falls back to the default
+   gradient). A breakpoint-only color needs an explicit transparent desktop
+   value so the gradient fallback doesn't surface on desktop. #}
+{% set hasBreakpointOverlayColor = tabletResolved.mediaOverlayColor|default(null) is not empty or mobileResolved.mediaOverlayColor|default(null) is not empty %}
+{% if mediaOverlayColor %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-overlay-color: ' ~ mediaOverlayColor]) %}
+{% elseif hasBreakpointOverlayColor and not this.sliderSettings.overlay|default(false) %}
+    {% set styleVars = styleVars|merge(['--vanssa-slide-overlay-color: transparent']) %}
+{% endif %}
 
 {% set tabletVars = [] %}
 {% set mobileVars = [] %}
-{% for settings, target in [[tabletResolved, 'tablet'], [mobileResolved, 'mobile']] %}
+{# Two-variable for over an array of pairs is key/value iteration in Twig
+   (index + inner array), NOT destructuring — iterate single pairs instead. #}
+{% for pair in [[tabletResolved, 'tablet'], [mobileResolved, 'mobile']] %}
+    {% set settings = pair[0] %}
+    {% set target = pair[1] %}
     {% set vars = [] %}
     {% set rawPosX = settings.contentHorizontalPosition|default('') %}
     {% if rawPosX is not empty %}
@@ -245,11 +258,11 @@
         </button>
     {% endif %}
 
-    {% if mediaOverlayColor or this.sliderSettings.overlay|default(false) %}
-        <div class="vanssa-slide__overlay" {% if mediaOverlayColor %}style="background: {{ mediaOverlayColor }};"{% endif %}></div>
+    {% if mediaOverlayColor or hasBreakpointOverlayColor or this.sliderSettings.overlay|default(false) %}
+        <div class="vanssa-slide__overlay"></div>
     {% endif %}
 
-    <div class="vanssa-slide__content" style="{{ styleVars|join('; ') }};">
+    <div class="vanssa-slide__content">
         <div class="vanssa-slide__content-box {{ animationClass }} {{ desktopResolved.enableTextBlur|default(false) ? 'is-blurred' : '' }}">
             {% if hasAnyTitle %}
                 <{{ headlineTag }} class="vanssa-slide__headline">
@@ -281,19 +294,20 @@
         </div>
     {% endif %}
 </article>
-{% if tabletVars is not empty or mobileVars is not empty %}
-    <style>
-        {% if tabletVars is not empty %}
-            @media (max-width: 1024px) {
-                .vanssa-slide[data-slide-code="{{ this.slide.code }}"] .vanssa-slide__content { {{ tabletVars|join('; ') }}; }
-                .vanssa-slide[data-slide-code="{{ this.slide.code }}"] .vanssa-slide__overlay { background: var(--vanssa-slide-overlay-color, {{ mediaOverlayColor|default('transparent') }}); }
-            }
-        {% endif %}
-        {% if mobileVars is not empty %}
-            @media (max-width: 767px) {
-                .vanssa-slide[data-slide-code="{{ this.slide.code }}"] .vanssa-slide__content { {{ mobileVars|join('; ') }}; }
-                .vanssa-slide[data-slide-code="{{ this.slide.code }}"] .vanssa-slide__overlay { background: var(--vanssa-slide-overlay-color, {{ mediaOverlayColor|default('transparent') }}); }
-            }
-        {% endif %}
-    </style>
-{% endif %}
+{# Per-slide CSS vars, scoped on the article root so the content subtree AND
+   its siblings (__overlay, __button-slot) inherit them. A stylesheet rule —
+   not an inline style attribute — so the breakpoint media rules below (same
+   selector, later in source order) win the cascade. #}
+<style>
+    .vanssa-slide[data-slide-code="{{ this.slide.code }}"] { {{ styleVars|join('; ') }}; }
+    {% if tabletVars is not empty %}
+        @media (max-width: 1024px) {
+            .vanssa-slide[data-slide-code="{{ this.slide.code }}"] { {{ tabletVars|join('; ') }}; }
+        }
+    {% endif %}
+    {% if mobileVars is not empty %}
+        @media (max-width: 767px) {
+            .vanssa-slide[data-slide-code="{{ this.slide.code }}"] { {{ mobileVars|join('; ') }}; }
+        }
+    {% endif %}
+</style>

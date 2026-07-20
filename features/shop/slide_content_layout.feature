@@ -21,3 +21,11 @@ Feature: Rendering edge-to-edge slide content
     Scenario: Boxed content keeps the default reading width
         When I visit the slider page for code "fashion-classic-arrows"
         Then I should see the storefront slider component
+
+    @javascript
+    Scenario: Tablet overrides apply at tablet viewport and cascade to mobile
+        Given the slide "new-collection" has responsive "headlineColor" set to "rgb(255, 34, 0)" for "tablet"
+        When I visit the slider page for code "fashion-classic-arrows"
+        Then the slide "new-collection" headline color should not be "rgb(255, 34, 0)" at viewport 1400x900
+        And the slide "new-collection" headline color should be "rgb(255, 34, 0)" at viewport 820x1180
+        And the slide "new-collection" headline color should be "rgb(255, 34, 0)" at viewport 390x844

@@ -8,6 +8,7 @@ use Behat\Behat\Context\Context;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Doctrine\ORM\EntityManagerInterface;
 use Sylius\Bundle\FixturesBundle\Fixture\FixtureInterface;
+use Sylius\Component\Core\Model\Channel;
 use Vanssa\SyliusSliderPlugin\Entity\Slider;
 
 final class SliderFrontendContext extends RawMinkContext implements Context
@@ -24,6 +25,26 @@ final class SliderFrontendContext extends RawMinkContext implements Context
     public function sliderDemoFixturesAreLoaded(): void
     {
         $this->sliderDemoFixture->load([]);
+
+        // Shop channel resolution is host-based. The @javascript session
+        // browses a throwaway test server by its container hostname, so align
+        // the channel hostnames with that session's base URL. Non-JS sessions
+        // need the canonical fixture hostname back (the shared test DB is
+        // never purged, so a previous @javascript run's hostname would stick).
+        $host = null;
+        if ($this->getSession()->getDriver() instanceof \DMore\ChromeDriver\ChromeDriver) {
+            $baseUrl = $this->getMinkParameter('base_url');
+            $parsedHost = is_string($baseUrl) ? parse_url($baseUrl, \PHP_URL_HOST) : null;
+            $host = is_string($parsedHost) && '' !== $parsedHost ? $parsedHost : null;
+        }
+        $host ??= 'localhost';
+
+        foreach ($this->entityManager->getRepository(Channel::class)->findAll() as $channel) {
+            if ($channel->getHostname() !== $host) {
+                $channel->setHostname($host);
+            }
+        }
+        $this->entityManager->flush();
     }
 
     /**
@@ -102,14 +123,52 @@ final class SliderFrontendContext extends RawMinkContext implements Context
      */
     public function theSlideContentStyleShouldContain(string $code, string $fragment): void
     {
-        $content = $this->getSession()->getPage()->find('css', sprintf('.vanssa-slide[data-slide-code="%s"] .vanssa-slide__content', $code));
-        if (null === $content) {
-            throw new \RuntimeException(sprintf('Cannot find rendered content for slide "%s".', $code));
+        // Slide vars are emitted as a per-slide <style> base rule scoped on the
+        // article root (an inline style attribute would beat the breakpoint
+        // media rules in the cascade), so assert against that rule's body.
+        $html = $this->getSession()->getPage()->getContent();
+        $pattern = sprintf('/\.vanssa-slide\[data-slide-code="%s"\]\s*\{([^}]*)\}/s', preg_quote($code, '/'));
+        if (1 !== preg_match($pattern, $html, $matches)) {
+            throw new \RuntimeException(sprintf('Cannot find the per-slide style rule for slide "%s".', $code));
         }
 
-        $style = (string) $content->getAttribute('style');
-        if (!str_contains($style, $fragment)) {
-            throw new \RuntimeException(sprintf('Expected slide "%s" content style to contain "%s", got "%s".', $code, $fragment, $style));
+        if (!str_contains($matches[1], $fragment)) {
+            throw new \RuntimeException(sprintf('Expected slide "%s" style rule to contain "%s", got "%s".', $code, $fragment, trim($matches[1])));
+        }
+    }
+
+    /**
+     * @Then /^the slide "([^"]+)" headline color should( not)? be "([^"]+)" at viewport (\d+)x(\d+)$/
+     */
+    public function theSlideHeadlineColorAtViewportShouldBe(string $code, string $not, string $color, string $width, string $height): void
+    {
+        $this->getSession()->resizeWindow((int) $width, (int) $height, 'current');
+
+        $selector = sprintf('.vanssa-slide[data-slide-code="%s"] .vanssa-slide__headline', $code);
+        $found = $this->getSession()->wait(5000, sprintf(
+            'null !== document.querySelector(%s)',
+            json_encode($selector, \JSON_THROW_ON_ERROR),
+        ));
+        if (!$found) {
+            throw new \RuntimeException(sprintf('Headline of slide "%s" never appeared on the page.', $code));
+        }
+
+        $actual = (string) $this->getSession()->evaluateScript(sprintf(
+            'return getComputedStyle(document.querySelector(%s)).color;',
+            json_encode($selector, \JSON_THROW_ON_ERROR),
+        ));
+
+        $matches = $actual === $color;
+        if ($matches === ('' !== $not)) {
+            throw new \RuntimeException(sprintf(
+                'Expected slide "%s" headline color%s to be "%s" at %sx%s, got "%s".',
+                $code,
+                $not,
+                $color,
+                $width,
+                $height,
+                $actual,
+            ));
         }
     }
 

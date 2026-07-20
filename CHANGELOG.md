@@ -114,6 +114,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Hook now points at `fashion-classic-arrows` instead of `homepage-main`.
 
 ### Fixed
+- **Per-slide tablet/mobile style overrides were silently ignored on the
+  storefront**: the per-breakpoint block in
+  `templates/components/vanssa_sylius_slider/shop/slide.html.twig` looped
+  `for settings, target in [[tabletResolved, 'tablet'], [mobileResolved,
+  'mobile']]` — a two-variable `for` over a plain array is Twig's key/value
+  iteration (index + inner array), not tuple destructuring, so the
+  breakpoint `<style>` block never rendered. Colors, content position,
+  padding, blur, font sizes and overlay color set per breakpoint have been
+  dead settings since the template was introduced (not a 2.2 regression).
+  Fixed by iterating single pairs and unpacking them manually. As part of
+  the fix, per-slide CSS custom properties moved from an inline `style`
+  attribute on `.vanssa-slide__content` to a `<style>` block scoped on
+  `.vanssa-slide[data-slide-code=…]` (the article root) — inline
+  declarations would otherwise beat the breakpoint media rules, and
+  siblings (`.vanssa-slide__overlay`, `.vanssa-slide__button-slot`)
+  couldn't inherit the vars at all — and the overlay background is now
+  driven by a `--vanssa-slide-overlay-color` custom property (default
+  gradient as fallback) instead of a hard-coded inline background. Custom
+  CSS targeting the old inline style (e.g. `.vanssa-slide__content[style]`)
+  or relying on beating it should be adjusted.
 - **Recipe `config.yaml` narrowed the vertical-position preset values** to
   `[top, center, bottom]`, silently hiding the fractional `top_1_5`–`top_4_5`
   options from the admin form even though the shop template fully supports

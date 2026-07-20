@@ -8,6 +8,7 @@ use Behat\Behat\Context\Context;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Doctrine\ORM\EntityManagerInterface;
 use Sylius\Bundle\FixturesBundle\Fixture\FixtureInterface;
+use Sylius\Component\Core\Model\Channel;
 use Vanssa\SyliusSliderPlugin\Entity\Slider;
 
 final class SliderManagementContext extends RawMinkContext implements Context
@@ -24,6 +25,17 @@ final class SliderManagementContext extends RawMinkContext implements Context
     public function sliderDemoFixturesAreLoaded(): void
     {
         $this->sliderDemoFixture->load([]);
+
+        // The shared test DB is never purged and shop @javascript scenarios
+        // re-point channel hostnames at their throwaway test server (channel
+        // resolution is host-based); restore the canonical hostname so the
+        // admin legs stay order-independent.
+        foreach ($this->entityManager->getRepository(Channel::class)->findAll() as $channel) {
+            if ('localhost' !== $channel->getHostname()) {
+                $channel->setHostname('localhost');
+            }
+        }
+        $this->entityManager->flush();
     }
 
     /**
