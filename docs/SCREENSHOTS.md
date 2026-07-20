@@ -1,3 +1,4 @@
+
 # Screenshots
 
 This document shows plugin setup and usage screens from:
@@ -45,6 +46,18 @@ pagination; checking marks pending changes, **Save changes** commits them,
 Close discards):
 
 ![Add slides browser modal](./screenshots/admin-slider-add-slides-modal.png)
+
+## Admin: Slide edit modal (grid row action)
+
+The slides grid's pencil action opens the same live preview + real slide
+form used on the full edit page, in a modal, without leaving the grid:
+
+![Slide edit modal](./screenshots/admin-slide-edit-modal.png)
+
+> **Pending capture** — `admin-slide-edit-modal.png` does not exist yet in
+> `docs/screenshots/`; this section is wired up ahead of the capture. Follow
+> the debug-off flow above, open a slide row's pencil action from
+> `/admin/slides`, and save the screenshot under that filename.
 
 ## Admin: Slide edit (per-breakpoint media & settings)
 
