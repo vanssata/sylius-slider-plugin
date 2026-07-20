@@ -34,7 +34,7 @@
         "phpunit/phpunit": "^10.5",
         "sylius-labs/coding-standard": "^4.4",
         "sylius-labs/suite-tags-extension": "~0.2",
-        "sylius/sylius-ai-dev-tools": "^0.1.0",
+        "sylius/sylius-ai-dev-tools": "^0.2.0",
         "sylius/sylius-rector": "^2.0",
         "sylius/test-application": "^2.0.0@alpha",
         "symfony/browser-kit": "^7.4",
