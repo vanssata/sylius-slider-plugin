@@ -410,15 +410,11 @@
         margin: 0 0 0.5rem;
         color: var(--vanssa-slide-headline-color, inherit);
         font-size: var(--vanssa-slide-headline-size, inherit);
-        // Honour line breaks typed into the title/description (stored as \n)
-        // while still collapsing incidental whitespace and wrapping normally.
-        white-space: pre-line;
     }
 
     &__description {
         color: var(--vanssa-slide-description-color, inherit);
         font-size: var(--vanssa-slide-description-size, inherit);
-        white-space: pre-line;
 
         > :last-child {
             margin-bottom: 0;
@@ -590,6 +586,15 @@
 .vanssa-breakpoint-text--tablet,
 .vanssa-breakpoint-text--mobile {
     display: none;
+}
+
+// Render line breaks typed into the title/text (stored as \n) — scoped to the
+// text span itself, NOT the headline/description wrapper, so the whitespace
+// between the per-breakpoint spans in the markup keeps collapsing normally
+// (otherwise the source newlines between the desktop/tablet/mobile spans would
+// render as blank lines and inflate the gap after the headline).
+.vanssa-breakpoint-text {
+    white-space: pre-line;
 }
 
 @keyframes vanssa-fade-up {
