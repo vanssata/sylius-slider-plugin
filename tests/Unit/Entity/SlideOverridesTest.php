@@ -101,6 +101,82 @@ final class SlideOverridesTest extends TestCase
         self::assertSame('left', $settings['responsive']['desktop']['contentTextAlign'], 'Layout must still fall back to the base slide without the layout override.');
     }
 
+    public function testNullTranslatedTitleFallsBackToBaseTitle(): void
+    {
+        $slide = $this->createSlide();
+        $translation = $this->addTranslation($slide, 'de_DE');
+        $translation->setSlideSettings([
+            'responsive' => [
+                'desktop' => [
+                    'title' => null,
+                ],
+                'tablet' => [],
+                'mobile' => [],
+            ],
+        ]);
+
+        $settings = $slide->getLocalizedSlideSettings('de_DE');
+
+        self::assertSame('Base title', $settings['responsive']['desktop']['title'], 'A blank/null translated title must not wipe the inherited base title.');
+    }
+
+    public function testBlankStringTranslatedTitleFallsBackToBaseTitle(): void
+    {
+        $slide = $this->createSlide();
+        $translation = $this->addTranslation($slide, 'de_DE');
+        $translation->setSlideSettings([
+            'responsive' => [
+                'desktop' => [
+                    'title' => '',
+                ],
+                'tablet' => [],
+                'mobile' => [],
+            ],
+        ]);
+
+        $settings = $slide->getLocalizedSlideSettings('de_DE');
+
+        self::assertSame('Base title', $settings['responsive']['desktop']['title'], 'An empty-string translated title must not wipe the inherited base title.');
+    }
+
+    public function testNonEmptyTranslatedTitleStillOverridesBaseTitle(): void
+    {
+        $slide = $this->createSlide();
+        $translation = $this->addTranslation($slide, 'de_DE');
+        $translation->setSlideSettings([
+            'responsive' => [
+                'desktop' => [
+                    'title' => 'DE Titel',
+                ],
+                'tablet' => [],
+                'mobile' => [],
+            ],
+        ]);
+
+        $settings = $slide->getLocalizedSlideSettings('de_DE');
+
+        self::assertSame('DE Titel', $settings['responsive']['desktop']['title'], 'A genuinely translated title must still override the base title.');
+    }
+
+    public function testTranslatedTitleWithNewlinePreservesLineBreak(): void
+    {
+        $slide = $this->createSlide();
+        $translation = $this->addTranslation($slide, 'de_DE');
+        $translation->setSlideSettings([
+            'responsive' => [
+                'desktop' => [
+                    'title' => "New\nCollection",
+                ],
+                'tablet' => [],
+                'mobile' => [],
+            ],
+        ]);
+
+        $settings = $slide->getLocalizedSlideSettings('de_DE');
+
+        self::assertSame("New\nCollection", $settings['responsive']['desktop']['title'], 'The literal newline character must survive resolution.');
+    }
+
     public function testLayoutOverrideAppliesIndependentlyOfColors(): void
     {
         $slide = $this->createSlide();

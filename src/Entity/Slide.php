@@ -723,7 +723,11 @@ class Slide implements ResourceInterface, TranslatableInterface
         $merged = $baseSettings;
 
         foreach ($localizedSettings as $key => $value) {
-            if (is_array($value) && [] === $value) {
+            // A null or empty-array localized value means "no override for this
+            // key" — fall back to the base/fallback-locale value instead of
+            // wiping it (a translated field the admin left blank is stored as
+            // null; without this it would clear the inherited title/text).
+            if (null === $value || (is_array($value) && [] === $value)) {
                 continue;
             }
 
@@ -806,7 +810,9 @@ class Slide implements ResourceInterface, TranslatableInterface
 
                 $fields = array_filter(
                     array_intersect_key($breakpointSettings, array_flip(self::ALWAYS_APPLIED_RESPONSIVE_FIELDS)),
-                    static fn (mixed $value): bool => !is_string($value) || '' !== $value,
+                    // Drop null and empty-string values so a blank translated
+                    // field never overrides (and wipes) the inherited value.
+                    static fn (mixed $value): bool => null !== $value && '' !== $value,
                 );
 
                 if ($translation->isLayoutOverrideEnabled()) {
