@@ -40,14 +40,18 @@ final class SliderDemoFixture extends AbstractFixture
 
     public function load(array $options): void
     {
+        // The line break in the title demonstrates multi-line headlines: the
+        // storefront renders it as two lines (white-space: pre-line).
         $newCollection = $this->createOrUpdateSlide(
             'new-collection',
-            'New Collection',
+            "New\nCollection",
             'Fresh looks for the season — dresses, denim and everyday essentials.',
             1,
             null,
             'gradient_overlay',
         );
+        // A distinct mobile title demonstrates per-breakpoint text (the phone
+        // shows "Beach Ready", desktop/tablet show "Summer Dresses").
         $summerDresses = $this->createOrUpdateSlide(
             'summer-dresses',
             'Summer Dresses',
@@ -55,6 +59,7 @@ final class SliderDemoFixture extends AbstractFixture
             2,
             null,
             'clean_light',
+            'Beach Ready',
         );
         $denimEssentials = $this->createOrUpdateSlide(
             'denim-essentials',
@@ -191,6 +196,7 @@ final class SliderDemoFixture extends AbstractFixture
         int $imageSet = 1,
         ?string $video = null,
         ?string $stylePreset = null,
+        ?string $mobileTitle = null,
     ): Slide {
         $slide = $this->slideRepository->findOneBy(['code' => $code]);
         if (!$slide instanceof Slide) {
@@ -199,12 +205,18 @@ final class SliderDemoFixture extends AbstractFixture
             $this->entityManager->persist($slide);
         }
 
-        $slide->setName($title);
+        // A single-line label for the admin grid and image alt/title; the
+        // headline itself may carry a line break (kept for the translation).
+        $label = trim((string) preg_replace('/\s+/', ' ', $title));
+
+        $slide->setName($label);
         $slide->setEnabled(true);
         $slide->setSlideCover($this->uploadFixtureImage('desktop', $imageSet));
         $slide->setSlideCoverMobile($this->uploadFixtureImage('mobile', $imageSet));
         $slide->setSlideCoverVideo(null !== $video ? $this->uploadFixtureVideo($video) : null);
 
+        // Title/description are authored per locale, so the base slide holds
+        // only display configuration (mirrors SlideType's include_texts=false).
         $settings = array_merge($slide->getSlideSettings(), [
             'responsive' => [
                 'desktop' => [
@@ -213,8 +225,6 @@ final class SliderDemoFixture extends AbstractFixture
                     'contentVerticalPosition' => 'bottom',
                     'contentTextAlign' => 'left',
                     'contentAnimation' => 'fade-up',
-                    'title' => $title,
-                    'description' => $description,
                 ],
                 'tablet' => [],
                 'mobile' => [],
@@ -226,11 +236,20 @@ final class SliderDemoFixture extends AbstractFixture
         $slide->setSlideSettings($settings);
 
         $slide->setContentSettings(array_merge($slide->getContentSettings(), [
-            'slideCover' => ['alt' => $title, 'title' => $title],
+            'slideCover' => ['alt' => $label, 'title' => $label],
         ]));
 
+        // The rendered headline/text live on the language version. An optional
+        // per-breakpoint mobile title demonstrates different text per breakpoint.
         $translation = $slide->getOrCreateTranslation('en_US');
-        $translation->setName($title);
+        $translation->setName($label);
+        $translation->setSlideSettings(array_merge($translation->getSlideSettings(), [
+            'responsive' => [
+                'desktop' => ['title' => $title, 'description' => $description],
+                'tablet' => [],
+                'mobile' => null !== $mobileTitle ? ['title' => $mobileTitle] : [],
+            ],
+        ]));
 
         return $slide;
     }
