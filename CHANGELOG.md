@@ -155,6 +155,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Invalid create submissions (e.g. blank slider/slide/preset code) render
   form errors instead of a 500 (`empty_data` guards for strict-typed
   setters).
+- **Duplicated slide description on mobile**: below the mobile breakpoint,
+  `assets/shop/styles/slider.scss`'s tablet-only description span
+  (`.vanssa-slide__description .vanssa-breakpoint-text--tablet`) stayed
+  visible alongside the mobile one — its two-class selector still matched
+  under the mobile media query and outranked the single-class
+  `.vanssa-breakpoint-text--tablet { display: none; }` hide rule. Fixed by
+  repeating the description-scoped selector in the mobile breakpoint's
+  hide list so it wins on specificity.
 - On Slider Management pages the plugin's sidebar group stays open while
   the other admin sections collapse.
 - **Two-column editing workspace**: the slider/slide edit pages render the

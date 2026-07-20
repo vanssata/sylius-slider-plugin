@@ -732,7 +732,11 @@
 
 @include down($bp-mobile) {
     .vanssa-breakpoint-text--desktop,
-    .vanssa-breakpoint-text--tablet {
+    .vanssa-breakpoint-text--tablet,
+    // Must repeat the description-scoped selector: the tablet block above
+    // still matches below $bp-mobile and its two-class specificity would
+    // otherwise beat the single-class hide, duplicating the description.
+    .vanssa-slide__description .vanssa-breakpoint-text--tablet {
         display: none;
     }
 
