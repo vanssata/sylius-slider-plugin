@@ -1,4 +1,6 @@
-.PHONY: run dev
+.PHONY: init run dev debug up down clean php-shell node-shell node-watch node-watch-logs node-watch-stop node-build \
+	docker-compose-check database-init database-reset load-fixtures load-slider-fixtures cc mig \
+	phpstan ecs rector rector-fix phpunit behat mate-init mate-discover mate-serve rename run-github-tests
 
 DOCKER_COMPOSE ?= docker compose
 DOCKER_USER ?= "$(shell id -u):$(shell id -g)"
@@ -38,8 +40,19 @@ php-shell:
 node-shell:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm -i nodejs sh
 
+# Long-lived `encore dev --watch` as a managed compose service. Detached on purpose:
+# `docker compose run` with a never-exiting process leaks an orphan container.
+# The service also symlinks the plugin package into node_modules, so controller
+# edits actually reach the watcher (yarn classic copies `file:` deps otherwise).
 node-watch:
-	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm -i nodejs "(cd vendor/sylius/test-application && yarn install && yarn watch)"
+	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) --profile watch up -d nodejs-watch
+	@echo "Watching. Follow with: make node-watch-logs   Stop with: make node-watch-stop"
+
+node-watch-logs:
+	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) --profile watch logs -f nodejs-watch
+
+node-watch-stop:
+	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) --profile watch rm -sf nodejs-watch
 
 node-build:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm -i nodejs "(cd vendor/sylius/test-application && yarn install && yarn build)"

@@ -11,11 +11,56 @@ vendor/bin/console doctrine:database:create
 vendor/bin/console doctrine:migrations:migrate -n
 ```
 
+Docker's `make init` runs this same install+build. For ongoing plugin
+development, don't rerun `yarn build` after every edit — use the watcher
+described in [Frontend asset workflow](#frontend-asset-workflow-docker).
+
 Optional demo data:
 
 ```bash
 vendor/bin/console sylius:fixtures:load --suite=vanssa_sylius_slider_demo -n
 ```
+
+## Frontend asset workflow (Docker)
+
+A one-off build is fine for first-time setup or a clean-room check, but not
+for iterating on Stimulus controllers or SCSS. For day-to-day plugin
+development, start the long-lived watcher instead:
+
+```bash
+make node-watch          # start (or: docker compose --profile watch up -d nodejs-watch)
+make node-watch-logs     # follow build output
+make node-watch-stop     # stop when done
+```
+
+It's gated behind the `watch` Compose profile, so a plain `docker compose up
+-d` / `make up` never starts it. On first start it replaces the yarn-classic
+copy at `vendor/sylius/test-application/node_modules/@vanssa/sylius-slider-plugin`
+with a symlink to the real `assets/` tree — this is what makes Stimulus
+controller edits reach the watcher, and it retires the old `yarn install
+--force` refresh step. `yarn watch` is `encore dev --watch`, the same
+`encore dev` build as `yarn build` (only `build:prod` is `encore
+production`), so the watcher produces the identical dev bundle a one-off
+build would.
+
+Two things it does **not** pick up automatically:
+
+- **Manifest edits need a watcher restart.** The plugin's three
+  `controllers.json` files and `assets/package.json` are merged into
+  `var/cache/webpack/controllers.merged.*.json` only when webpack's config
+  loads. Editing a manifest while the watcher is running silently leaves it
+  building the old controller set — restart it (`make node-watch-stop &&
+  make node-watch`).
+- **Chrome caches bundles in memory.** Run `docker compose restart chrome`
+  before re-verifying with Playwright or the `@javascript` Behat tag (see
+  below).
+
+The symlink survives a plain `yarn install` — `docker compose up -d`, `make
+node-build`, and `composer run frontend-clear` all run it without `--force`
+and won't undo the swap. If file changes never reach the watcher (e.g. some
+bind-mount setups miss inotify events), recreate it with polling enabled —
+the env var is only read when the container is created, so stop it first:
+`make node-watch-stop && WATCHPACK_POLLING=true make node-watch`.
 
 ## Quality checks
 
@@ -56,7 +101,9 @@ docker compose run --rm -e APP_ENV=test -e BEHAT_BASE_URL=http://nginx \
 
 If Playwright/browser testing doesn't reflect a fresh JS build, restart the
 `chrome` container (`docker compose restart chrome`) — it can hold a stale
-bundle in memory.
+bundle in memory. When the watcher is running, also make sure it has
+finished recompiling first, and remember that manifest edits need a watcher
+restart — see [Frontend asset workflow](#frontend-asset-workflow-docker).
 
 ## Pull request rules
 

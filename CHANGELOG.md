@@ -320,6 +320,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   helper on the shop slider controller.
 
 ### Changed
+- **Contributor tooling**: asset rebuilds now run through a long-lived
+  watcher (`make node-watch` / the `nodejs-watch` Compose service behind the
+  `watch` profile) instead of a one-off `yarn build` per edit. It symlinks
+  the plugin package into the test application's `node_modules`, so Stimulus
+  controller edits are picked up without the old `yarn install --force`
+  refresh. See `docs/CONTRIBUTING.md`.
 - The admin preview surfaces migrated from `<iframe>` to `<turbo-frame>`
   (`symfony/ux-turbo` + `@hotwired/turbo` are new dependencies; Turbo
   Drive stays disabled in the admin).

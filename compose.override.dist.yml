@@ -66,6 +66,41 @@ services:
         volumes:
             - .:/srv/sylius:rw,cached
             - ./public:/srv/sylius/public:rw,delegated
+    nodejs-watch:
+        # Long-lived `encore dev --watch`. Gated behind the "watch" profile so a
+        # plain `docker compose up -d` never starts it.
+        #
+        #   docker compose --profile watch up -d nodejs-watch
+        #   docker compose --profile watch logs -f nodejs-watch
+        #   docker compose --profile watch rm -sf nodejs-watch
+        #
+        # The symlink below is load-bearing: yarn classic COPIES the
+        # "@vanssa/sylius-slider-plugin": "file:../../../assets" dependency, and
+        # the Stimulus controllers resolve through that copy — so a naive
+        # `yarn watch` silently ignores every controller edit. Linking the
+        # package at the real assets/ tree puts them back under the watcher.
+        image: node:${NODE_VERSION:-20}-alpine
+        user: ${DOCKER_USER:-1000:1000}
+        working_dir: /srv/sylius
+        profiles: ["watch"]
+        entrypoint: [ "/bin/sh","-c" ]
+        environment:
+            # Escape hatch: set WATCHPACK_POLLING=true if inotify misses events.
+            WATCHPACK_POLLING: ${WATCHPACK_POLLING:-false}
+            CHOKIDAR_USEPOLLING: ${WATCHPACK_POLLING:-false}
+        command:
+            - |
+                cd vendor/sylius/test-application
+                LINK=node_modules/@vanssa/sylius-slider-plugin
+                if [ ! -L "$$LINK" ]; then
+                    yarn install --force
+                    rm -rf "$$LINK"
+                    ln -s /srv/sylius/assets "$$LINK"
+                fi
+                exec yarn watch
+        volumes:
+            - .:/srv/sylius:rw,cached
+            - ./public:/srv/sylius/public:rw,delegated
     mailhog:
         ports:
             - "8025:8025"

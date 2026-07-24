@@ -193,14 +193,36 @@ merge dropped it.
 
 **LiveComponent morphing:** ux-live-component 2.31 morphs with idiomorph, which matches nodes by real `id` attributes only — `data-live-id` does nothing. Any list a LiveComponent re-renders while outside code mutates its DOM (drag reorder, modals re-parented to `<body>`) needs a unique `id` on every row (and stable ids on sibling anchors), or re-renders duplicate rows. `data-model` selects also need explicit `selected` attributes rendered from the server prop.
 
-Additionally, `vendor/sylius/test-application/package.json` depends on this plugin's assets via `"@vanssa/sylius-slider-plugin": "file:../../../assets"`. Yarn classic (v1) **copies** this into `node_modules/@vanssa/sylius-slider-plugin` rather than symlinking it, and a plain `yarn install` does **not** refresh that copy when only source files change (lockfile unaffected). After editing `assets/package.json` or controller source files, refresh with:
+**The `file:` dependency copy trap.** `vendor/sylius/test-application/package.json` depends on this plugin's assets via `"@vanssa/sylius-slider-plugin": "file:../../../assets"`. Yarn classic (v1) **copies** this into `node_modules/@vanssa/sylius-slider-plugin` rather than symlinking it, and a plain `yarn install` does **not** refresh that copy when only source files change (lockfile unaffected). This asymmetry is easy to miss: the webpack entries (`plugin-admin-entry`, `plugin-shop-entry`) point straight at `../../../assets/**/entrypoint.js`, so entrypoints and their SCSS are always live — but all 14 Stimulus controllers are pulled in by the bridge through the bare specifier `@vanssa/sylius-slider-plugin/...`, i.e. through the stale copy.
+
+## Asset watch mode
+
+Use a **watcher**, not one-off builds:
+
+```bash
+docker compose --profile watch up -d nodejs-watch     # start
+docker compose --profile watch logs -f nodejs-watch   # follow
+docker compose --profile watch rm -sf nodejs-watch    # stop
+```
+
+The `nodejs-watch` service runs `encore dev --watch` and, on first start, replaces the yarn copy with a symlink to the real `assets/` tree — which is what makes controller edits visible to the watcher and retires the `yarn install --force` step. It sits behind the `watch` compose profile, so a plain `docker compose up -d` never starts it. `yarn build` and `yarn watch` are both `encore dev` in this app, so watch output is identical to what a one-off build produces.
+
+Two things a running watcher does **not** handle:
+
+- **Manifest changes need a restart.** `webpack.config.js` merges the `controllers.json` files into `var/cache/webpack/controllers.merged.*.json` at config-load time only. Edit any `controllers.json` or `assets/package.json` and the watcher keeps building the old controller set, silently — restart it.
+- **Chrome caches bundles in memory.** If Playwright/browser testing doesn't reflect a fresh build, restart the container: `docker compose restart chrome`.
+
+If file events don't reach the watcher (edits never trigger a recompile), start it with `WATCHPACK_POLLING=true`.
+
+In this workspace `.claude/scripts/asset-watch.sh` wraps all of the above (`start | sync | restart | status | logs | stop`), where `sync` blocks until the latest edit has compiled and then restarts chrome; the `asset-watcher` subagent owns its lifecycle.
+
+Clean-room fallback when no watcher is running (e.g. reproducing a CI build):
 
 ```bash
 docker compose run --rm nodejs "cd vendor/sylius/test-application && yarn install --force"
 docker compose run --rm nodejs "cd vendor/sylius/test-application && yarn build"
+docker compose restart chrome
 ```
-
-If Playwright/browser testing doesn't reflect a fresh JS build, also restart the `chrome` container (`docker compose restart chrome`) — it can hold a stale bundle in memory.
 
 ## AI Development Guides
 
