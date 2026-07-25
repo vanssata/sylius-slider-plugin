@@ -86,7 +86,8 @@
             ],
             "includes": [
                 "mate/config.php"
-            ]
+            ],
+            "instructions": "mate/INSTRUCTIONS.md"
         }
     },
     "autoload": {

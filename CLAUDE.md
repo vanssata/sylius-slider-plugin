@@ -122,6 +122,7 @@ Nothing below is required to build or test the plugin.
 | `symfony-ux-skills` | The seven Symfony UX skills (stimulus, turbo, twig-component, live-component, ux-icons, ux-map, symfony-ux) | enabled at user scope |
 | `sylius-quality` | Local skill + `sylius-reviewer` / `sylius-bc-guard` / `sylius-e2e-author` agents | `.claude/skills`, `.claude/agents` |
 | Guard hooks | `vendor-guard`, `container-guard`, `bash-guard`, `assets-guard` | `.claude/hooks/`, wired in `.claude/settings.json` |
+| Frontend mate tools | Local mate extension: `frontend_map` (grouped index + build-integrity checks) and `frontend_read` (grouped file bodies) over `assets/`, `templates/`, `src/Twig/`, `config/twig_hooks/`, `tests/e2e/` | `mate/src/`, registered in `mate/config.php`; docs in `mate/INSTRUCTIONS.md` |
 
 Both MCP launchers `docker compose exec` into an already-running service. Never
 start them with `docker compose run` and never pass `mate serve
@@ -161,8 +162,10 @@ package key** — a per-context file's `@vanssa/sylius-slider-plugin` object
 `assets/admin/controllers.json` and `assets/shop/controllers.json` must each
 list **all 14** controllers (even the ones a context disables) — omitting one
 silently drops it from that context's build instead of falling back to a
-default. Nothing enforces this automatically — check the four key sets by hand
-after every manifest edit (`keys` sorts, so the diff is order-independent):
+default. Nothing in the repository enforces this — check the four key sets after
+every manifest edit (`keys` sorts, so the diff is order-independent). With the
+local AI tooling present, `frontend_map`'s `manifest_sync` check does the same
+comparison and names the diverging keys; the snippet below is the fallback:
 
 ```bash
 for f in assets/controllers.json assets/admin/controllers.json assets/shop/controllers.json; do
