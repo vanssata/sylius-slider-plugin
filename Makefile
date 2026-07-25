@@ -1,6 +1,6 @@
 .PHONY: init run dev debug up down clean php-shell node-shell node-watch node-watch-logs node-watch-stop node-build \
 	docker-compose-check database-init database-reset load-fixtures load-slider-fixtures cc mig \
-	phpstan ecs rector rector-fix phpunit behat mate-init mate-discover mate-serve rename run-github-tests
+	phpstan ecs rector rector-fix phpunit behat rename run-github-tests
 
 DOCKER_COMPOSE ?= docker compose
 DOCKER_USER ?= "$(shell id -u):$(shell id -g)"
@@ -20,7 +20,6 @@ run:
 
 dev:
 	@make -s up
-	@make -s mate-serve
 
 debug:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) -f compose.yml -f compose.override.yml -f compose.debug.yml up -d
@@ -101,15 +100,6 @@ phpunit:
 
 behat:
 	@ENV=$(ENV) DOCKER_USER=root $(DOCKER_COMPOSE) run --rm php vendor/bin/behat
-
-mate-init:
-	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/mate init -n
-
-mate-discover:
-	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/mate discover -n
-
-mate-serve:
-	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) exec -T php vendor/bin/mate serve --force-keep-alive
 
 rename:
 	@php bin/rename-plugin.php

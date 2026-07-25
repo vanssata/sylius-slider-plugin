@@ -78,17 +78,7 @@
         "symfony": {
             "require": "^7.4"
         },
-        "public-dir": "vendor/sylius/test-application/public",
-        "ai-mate": {
-            "extension": false,
-            "scan-dirs": [
-                "mate/src"
-            ],
-            "includes": [
-                "mate/config.php"
-            ],
-            "instructions": "mate/AGENT_INSTRUCTIONS.md"
-        }
+        "public-dir": "vendor/sylius/test-application/public"
     },
     "autoload": {
         "psr-4": {
@@ -100,9 +90,7 @@
             "Tests\\Vanssa\\SyliusSliderPlugin\\": [
                 "tests/",
                 "tests/TestApplication/src/"
-            ],
-            "App\\Mate\\": "mate/src/",
-            "Mate\\": "mate/src/"
+            ]
         }
     },
     "scripts": {
