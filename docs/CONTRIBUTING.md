@@ -126,9 +126,9 @@ restart — see [Frontend asset workflow](#frontend-asset-workflow-docker).
   `flex/recipes/vanssa/sylius-slider-plugin/<version>/` (human-readable
   sources) and is compiled to `flex/vanssa.sylius-slider-plugin.<version>.json`
   via `php flex/build-recipes.php` — see
-  [FLEX_RECIPE.md](FLEX_RECIPE.md) for the full layout and the
-  `.claude/scripts/flex-smoke.sh <branch>` verification helper (requires the
-  branch to already be pushed, since the endpoint is served from
+  [FLEX_RECIPE.md](FLEX_RECIPE.md) for the full layout and the pre-release smoke
+  test that proves the recipe applies on a clean project (requires the branch to
+  already be pushed, since the endpoint is served from
   `raw.githubusercontent.com`).
 - Extension points for third-party code (settings fields, style presets,
   video providers, style-preset mockups, fixtures) are documented in

@@ -155,10 +155,16 @@ package key** — a per-context file's `@vanssa/sylius-slider-plugin` object
 `assets/admin/controllers.json` and `assets/shop/controllers.json` must each
 list **all 14** controllers (even the ones a context disables) — omitting one
 silently drops it from that context's build instead of falling back to a
-default. A PostToolUse hook enforces identical key sets across
-`assets/package.json`'s `symfony.controllers`, `assets/controllers.json`,
-`assets/admin/controllers.json` and `assets/shop/controllers.json` for AI
-edits — if it fires, one of the four fell out of sync.
+default. Nothing enforces this automatically — check the four key sets by hand
+after every manifest edit (`keys` sorts, so the diff is order-independent):
+
+```bash
+for f in assets/controllers.json assets/admin/controllers.json assets/shop/controllers.json; do
+  diff <(jq -r '.symfony.controllers | keys[]' assets/package.json) \
+       <(jq -r '.controllers["@vanssa/sylius-slider-plugin"] | keys[]' "$f") >/dev/null \
+    && echo "$f: in sync" || echo "$f: OUT OF SYNC"
+done
+```
 
 **Entrypoints never start Stimulus:** `assets/admin/entrypoint.js` and
 `assets/shop/entrypoint.js` must **never** import `@symfony/stimulus-bridge`,
@@ -214,7 +220,7 @@ Two things a running watcher does **not** handle:
 
 If file events don't reach the watcher (edits never trigger a recompile), start it with `WATCHPACK_POLLING=true`.
 
-In this workspace `.claude/scripts/asset-watch.sh` wraps all of the above (`start | sync | restart | status | logs | stop`), where `sync` blocks until the latest edit has compiled and then restarts chrome; the `asset-watcher` subagent owns its lifecycle.
+Drive the watcher with the compose commands above — there is no wrapper script and no dedicated subagent, so starting it, waiting for the recompile to appear in `logs`, restarting chrome before a browser check, and stopping it when the task ends are all manual steps. Nothing stops it at session end either; a forgotten `nodejs-watch` keeps running until `rm -sf`.
 
 Clean-room fallback when no watcher is running (e.g. reproducing a CI build):
 

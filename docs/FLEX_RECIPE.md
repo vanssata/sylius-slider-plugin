@@ -66,7 +66,25 @@ composer require vanssa/sylius-slider-plugin
 
 ## Verifying before a release
 
-`.claude/scripts/flex-smoke.sh <branch>` (maintainer tooling) runs a throwaway
-`composer create-project sylius/sylius-standard` container, points it at the
-endpoint and asserts the recipe applied. The branch must be pushed first —
-the endpoint is served from raw.githubusercontent.com.
+Prove on a throwaway project that `composer require` against the in-repo endpoint
+actually applies the recipe. Push the branch first — the endpoint is served from
+raw.githubusercontent.com — then run (takes several minutes, needs network):
+
+```bash
+BRANCH=2.3
+ENDPOINT="https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/${BRANCH}/flex/index.json"
+
+docker run --rm composer:2 sh -ec "
+    composer create-project sylius/sylius-standard smoke --no-interaction --no-scripts --quiet
+    cd smoke
+    composer config --json extra.symfony.endpoint '[\"${ENDPOINT}\",\"flex://defaults\"]'
+    composer require vanssa/sylius-slider-plugin --no-interaction --no-scripts
+
+    grep -F 'VanssaSyliusSliderPlugin' config/bundles.php
+    ls -la config/packages/vanssa_sylius_slider.yaml config/routes/vanssa_sylius_slider.yaml
+    echo 'SMOKE TEST PASSED'
+"
+```
+
+The three assertions are the point: the bundle landed in `config/bundles.php`,
+and both the package config and the routes file were copied by the recipe.
