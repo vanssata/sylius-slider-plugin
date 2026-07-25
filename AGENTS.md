@@ -3,11 +3,20 @@ See @CLAUDE.md
 ## Rules
 
 - Never change code in `vendor/` or `node_modules/`.
-- There is **no MCP server** configured for this project. The `symfony-ai-mate`
-  server, its `mcp.json` / `.ai/mcp/mcp.json` configs and the `mate/` directory
-  (config, extensions, agent instructions) were removed on 2026-07-25 — use the
-  plain CLI and Docker commands documented in `CLAUDE.md` instead.
-- The `sylius/sylius-ai-dev-tools` dev dependency is still installed, so
-  `composer install` prints an "AI Mate installed! Run `vendor/bin/mate init`"
-  banner. It is a banner only — nothing is generated unless `mate init` is run
-  deliberately, which is also how `mate/` would come back if it is ever wanted.
+- **Nothing runs on the host.** This machine has no PHP and no Node — every
+  `php` / `composer` / `vendor/bin/*` / `yarn` / `node` invocation goes through
+  `docker compose run --rm php …`, `docker compose exec …` or a `make` target.
+  See `CLAUDE.md` → *AI tooling* for the full command table.
+- The `symfony-ai-mate` MCP server **is** configured, over stdio, via
+  `.claude/scripts/mate-mcp.sh` (referenced from the gitignored `mcp.json`,
+  which `.mcp.json` symlinks to). The launcher `exec`s into the running `php`
+  service — never `docker compose run`, which leaks a container per session.
+  Regenerate the gitignored `mate/` tree with `make mate-init` /
+  `make mate-discover`.
+
+<!-- BEGIN AI_MATE_INSTRUCTIONS -->
+AI Mate Summary:
+- Role: MCP-powered, project-aware coding guidance and tools.
+- Required action: Read and follow `mate/AGENT_INSTRUCTIONS.md` before taking any action in this project, and prefer MCP tools over raw CLI commands whenever possible.
+- Installed extensions: sylius/sylius-mate-extension, symfony/ai-mate, symfony/ai-symfony-mate-extension.
+<!-- END AI_MATE_INSTRUCTIONS -->

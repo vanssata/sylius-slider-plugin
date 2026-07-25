@@ -1,6 +1,7 @@
 .PHONY: init run dev debug up down clean php-shell node-shell node-watch node-watch-logs node-watch-stop node-build \
 	docker-compose-check database-init database-reset load-fixtures load-slider-fixtures cc mig \
-	phpstan ecs rector rector-fix phpunit behat rename run-github-tests
+	phpstan ecs rector rector-fix phpunit behat rename run-github-tests \
+	mate-init mate-discover
 
 DOCKER_COMPOSE ?= docker compose
 DOCKER_USER ?= "$(shell id -u):$(shell id -g)"
@@ -100,6 +101,17 @@ phpunit:
 
 behat:
 	@ENV=$(ENV) DOCKER_USER=root $(DOCKER_COMPOSE) run --rm php vendor/bin/behat
+
+# AI Mate (MCP server) — regenerate the local, gitignored `mate/` tree.
+# There is deliberately NO `mate-serve` target: `mate serve` speaks MCP over
+# stdio and is started by the client (see .claude/scripts/mate-mcp.sh), never
+# by a human or by `make dev`.
+mate-init:
+	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/mate init -n
+	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php composer dump-autoload
+
+mate-discover:
+	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/mate discover -n
 
 rename:
 	@php bin/rename-plugin.php
