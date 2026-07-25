@@ -139,6 +139,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Hook now points at `fashion-classic-arrows` instead of `homepage-main`.
 
 ### Fixed
+- **`composer run load-slider-demo-fixtures` always failed.** The script passed
+  `--suite=vanssa_sylius_slider_demo`, but `sylius:fixtures:load` declares
+  `suite` as a positional argument and has no `--suite` option, so the command
+  aborted with *"The "--suite" option does not exist."* The `make
+  load-slider-fixtures` target was always correct; only the composer script was
+  wrong.
+- **`make e2e` overwrote the committed documentation media.** `npx playwright
+  test` with no `--project` filter selects *every* configured project, and the
+  `docs-media` project regenerates the screenshots and GIFs — so an ordinary
+  test run rewrote 20 committed assets. The target now names its three
+  assertion projects explicitly; `make docs-media` remains the only thing that
+  touches `docs/screenshots/` and `docs/media/`.
 - **Per-slide tablet/mobile style overrides were silently ignored on the
   storefront**: the per-breakpoint block in
   `templates/components/vanssa_sylius_slider/shop/slide.html.twig` looped

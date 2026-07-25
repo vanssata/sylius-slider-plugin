@@ -125,8 +125,15 @@ e2e-up:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) --profile e2e up -d playwright
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(E2E_EXEC) sh -c '[ -x node_modules/.bin/playwright ] || npm install --no-audit --no-fund'
 
+# The three assertion projects, listed EXPLICITLY. `npx playwright test` with
+# no --project filter selects every configured project — including
+# `docs-media`, whose specs OVERWRITE the committed screenshots and GIFs. A
+# plain `make e2e` must never do that.
+E2E_PROJECTS = --project=desktop --project=tablet --project=mobile
+
 e2e: e2e-up
-	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(E2E_EXEC) npx playwright test $(ARGS)
+	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(E2E_EXEC) npx playwright test \
+		$(if $(findstring --project,$(ARGS)),,$(E2E_PROJECTS)) $(ARGS)
 
 # Fast visual loop while editing SCSS/CSS/JS: block until the compiled bundles
 # are newer than the newest assets/ source (i.e. the watcher caught up), then

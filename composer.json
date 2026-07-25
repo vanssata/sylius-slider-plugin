@@ -127,7 +127,7 @@
             "@frontend-clear"
         ],
         "load-slider-demo-fixtures": [
-            "vendor/bin/console sylius:fixtures:load --suite=vanssa_sylius_slider_demo -n"
+            "vendor/bin/console sylius:fixtures:load vanssa_sylius_slider_demo -n"
         ],
         "ai:verify": [
             "@php vendor/bin/ecs check --fix",

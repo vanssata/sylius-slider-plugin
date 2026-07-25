@@ -67,8 +67,12 @@ export default defineConfig({
             use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 } },
         },
         {
-            // Not tests — screenshot/GIF generators for docs/. Excluded from
-            // `make e2e` on purpose; run them with `make docs-media`.
+            // Not tests — screenshot/GIF generators for docs/. These OVERWRITE
+            // committed assets, so they must never run as part of an assertion
+            // pass. Playwright has no "exclude from the default run" flag: a
+            // bare `npx playwright test` selects EVERY configured project, so
+            // the exclusion is enforced by `make e2e` naming its three
+            // projects explicitly. Run these with `make docs-media`.
             name: 'docs-media',
             testDir: './tests/e2e/docs',
             use: { ...devices['Desktop Chrome'], viewport: { width: 1600, height: 950 } },
