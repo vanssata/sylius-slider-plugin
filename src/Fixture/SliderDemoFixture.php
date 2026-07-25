@@ -47,6 +47,18 @@ final class SliderDemoFixture extends AbstractFixture
             1,
             null,
             'gradient_overlay',
+            // Per-breakpoint layout overrides. Exactly one demo slide carries
+            // them on purpose: per-breakpoint everything is the plugin's
+            // headline feature, yet nothing in the demo data showed it, and it
+            // is the surface the shop/responsive-overrides e2e spec asserts on
+            // (the breakpoint <style> block used to never render at all).
+            tabletOverrides: [
+                'contentHorizontalPosition' => 'center',
+                'contentTextAlign' => 'center',
+            ],
+            mobileOverrides: [
+                'contentVerticalPosition' => 'center',
+            ],
         );
         $summerDresses = $this->createOrUpdateSlide(
             'summer-dresses',
@@ -184,6 +196,10 @@ final class SliderDemoFixture extends AbstractFixture
         return $slider;
     }
 
+    /**
+     * @param array<string, string> $tabletOverrides
+     * @param array<string, string> $mobileOverrides
+     */
     private function createOrUpdateSlide(
         string $code,
         string $title,
@@ -191,6 +207,8 @@ final class SliderDemoFixture extends AbstractFixture
         int $imageSet = 1,
         ?string $video = null,
         ?string $stylePreset = null,
+        array $tabletOverrides = [],
+        array $mobileOverrides = [],
     ): Slide {
         $slide = $this->slideRepository->findOneBy(['code' => $code]);
         if (!$slide instanceof Slide) {
@@ -216,8 +234,8 @@ final class SliderDemoFixture extends AbstractFixture
                     'title' => $title,
                     'description' => $description,
                 ],
-                'tablet' => [],
-                'mobile' => [],
+                'tablet' => $tabletOverrides,
+                'mobile' => $mobileOverrides,
             ],
         ]);
         if (null !== $stylePreset) {

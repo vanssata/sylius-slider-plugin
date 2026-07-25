@@ -15,6 +15,12 @@
 /compose.override.yml
 .phpunit.result.cache
 
+# Playwright (tests/e2e) — generated output, never the specs or baselines
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # Symfony CLI https://symfony.com/doc/current/setup/symfony_server.html#different-php-settings-per-project
 /.php-version
 /php.ini

@@ -1,0 +1,16 @@
+{
+    "name": "vanssa-sylius-slider-plugin-e2e",
+    "version": "0.0.0",
+    "private": true,
+    "description": "End-to-end (Playwright) test harness for the Vanssa Sylius Slider Plugin. Deliberately separate from assets/package.json, which is the published Symfony UX package manifest and must not gain test dependencies.",
+    "license": "MIT",
+    "scripts": {
+        "e2e": "playwright test",
+        "e2e:desktop": "playwright test --project=desktop",
+        "docs:media": "playwright test --project=docs-media"
+    },
+    "devDependencies": {
+        "@axe-core/playwright": "^4.10.2",
+        "@playwright/test": "1.61.1"
+    }
+}

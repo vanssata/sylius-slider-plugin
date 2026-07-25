@@ -101,6 +101,53 @@ services:
         volumes:
             - .:/srv/sylius:rw,cached
             - ./public:/srv/sylius/public:rw,delegated
+    chrome:
+        # Headless Chrome for the @javascript Behat leg (behat.yml's chrome
+        # session points at http://chrome:9222). Restart it after an asset
+        # rebuild — it keeps compiled bundles in memory.
+        image: zenika/alpine-chrome:latest
+        command:
+            - --no-sandbox
+            - --disable-dev-shm-usage
+            - --remote-debugging-address=0.0.0.0
+            - --remote-debugging-port=9222
+            - --remote-allow-origins=*
+            - --window-size=1600,950
+            - --hide-scrollbars
+        shm_size: 2gb
+        ports:
+            - "9222:9222"
+    playwright:
+        # Playwright runner for tests/e2e (`make e2e`) and the docs-media
+        # generators (`make docs-media`). Behind the "e2e" profile, so a plain
+        # `docker compose up -d` never starts it.
+        #
+        #   docker compose --profile e2e up -d playwright
+        #   docker compose --profile e2e exec -T playwright npx playwright test
+        #   docker compose --profile e2e rm -sf playwright
+        #
+        # Declarative service + `exec`, never `docker compose run -d`: a `run`
+        # with a never-exiting command leaks an orphan container per session
+        # (the same failure mode that leaked 22 php-run containers via the old
+        # mate MCP config).
+        build:
+            context: ./docker/playwright
+        # network_mode: host is load-bearing, not a convenience. Every Sylius
+        # channel in this project has hostname "localhost" and Sylius resolves
+        # the channel from the request host — from inside the compose network
+        # the app is reachable as http://nginx, which resolves to NO channel and
+        # every shop page 404s. Host networking makes http://localhost hit the
+        # published nginx port and the channel resolves. (Linux only; on
+        # macOS/Windows swap this for `extra_hosts` + http://host.docker.internal.)
+        network_mode: host
+        working_dir: /srv/sylius
+        user: ${DOCKER_USER:-1000:1000}
+        profiles: ["e2e"]
+        environment:
+            BASE_URL: ${BASE_URL:-http://localhost}
+        command: ["sleep", "infinity"]
+        volumes:
+            - .:/srv/sylius:rw,cached
     mailhog:
         ports:
             - "8025:8025"

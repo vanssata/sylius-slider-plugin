@@ -128,6 +128,11 @@
         ],
         "load-slider-demo-fixtures": [
             "vendor/bin/console sylius:fixtures:load --suite=vanssa_sylius_slider_demo -n"
+        ],
+        "ai:verify": [
+            "@php vendor/bin/ecs check --fix",
+            "@php vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=1G",
+            "@php vendor/bin/phpunit"
         ]
     }
 }
