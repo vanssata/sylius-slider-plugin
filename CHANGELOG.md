@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-07-25
+
 ### Added
 - **Media slots can be cleared from the admin**: every image/video slot on
   the slide form — base media and per-locale translation overrides alike —
@@ -593,6 +595,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   image/video slides, Symfony UX storefront rendering, Twig Hooks
   integration, demo fixtures, Behat and PHPUnit test setup.
 
+[2.3.0]: https://github.com/vanssata/sylius-slider-plugin/compare/2.2.9...2.3.0
 [2.2.9]: https://github.com/vanssata/sylius-slider-plugin/compare/2.2.8...2.2.9
 [2.2.8]: https://github.com/vanssata/sylius-slider-plugin/compare/2.2.7...2.2.8
 [2.2.7]: https://github.com/vanssata/sylius-slider-plugin/compare/2.2.6...2.2.7
