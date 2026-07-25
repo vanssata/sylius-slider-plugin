@@ -456,7 +456,11 @@ strength** in pixels.
 
 **Visibility**
 
-**Hide title**, **Hide description**, **Hide button**, per breakpoint.
+**Hide title**, **Hide description**, **Hide button**, per breakpoint — but
+ticking one on a single breakpoint hides that element at *every* viewport,
+because the shipped stylesheet declares the three rules without media
+queries (see *Visibility* in
+[options-reference.md](options-reference.md#visibility)).
 
 With the drawer closed, the slide edit page is the preview and its toolbar,
 rendering at whatever breakpoint width is selected:

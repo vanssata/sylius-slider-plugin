@@ -196,12 +196,12 @@ sliders, the demo fixtures switch it off), then
 `.vanssa-slider__inner` with `.vanssa-slider__wrapper` holding one
 `<article class="vanssa-slide">` per slide. Arrows
 (`.vanssa-slider__action--prev` / `--next`), pagination
-(`.vanssa-slider__pagination` with `.vanssa-slider__bullet` children), the
-autoplay progress bar (`.vanssa-slider__progress` with its
-`__progress-bar`) and a visually hidden `aria-live="polite"` region
-announcing "Slide 2 of 4" are siblings inside `__inner`. Arrows, pagination
-and the progress bar are only rendered when the slider has more than one
-slide.
+(`.vanssa-slider__pagination` with `.vanssa-slider__bullet` children) and the
+autoplay progress bar (`.vanssa-slider__progress` with its `__progress-bar`)
+sit inside `__inner`, next to `__wrapper`. The visually hidden
+`aria-live="polite"` region announcing "Slide 2 of 4" comes after `__inner`,
+as its sibling inside `__container`. Arrows, pagination and the progress bar
+are only rendered when the slider has more than one slide.
 
 A slider with no renderable slides prints `No active slides in this slider.`
 (translatable) instead of the carousel.
@@ -301,10 +301,11 @@ after it finishes.
 ### YouTube
 
 Paste a YouTube link into the *External video URL* field of a slot. Accepted
-forms are `youtube.com/watch?v=ID`, `/embed/ID`, `/shorts/ID`, `/live/ID` and
-`youtu.be/ID` (with or without `www.`, `m.` or the `-nocookie` host).
-Anything else is rejected with *"Unsupported video URL — only YouTube links
-are accepted."*
+forms are `youtube.com/watch?v=ID`, `/embed/ID`, `/shorts/ID` and `/live/ID`
+(with or without `www.`, `m.` or the `-nocookie` host), plus the short form
+`youtu.be/ID`, which is matched on that bare host only — no `www.`, `m.` or
+`-nocookie` variant of it. Anything else is rejected with *"Unsupported video
+URL — only YouTube links are accepted."*
 
 The link is normalized to `https://www.youtube.com/watch?v=ID` on save and
 rendered as a privacy-enhanced embed:

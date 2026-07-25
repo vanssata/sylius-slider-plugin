@@ -47,7 +47,17 @@ those codes instead of duplicating them.
 
 Other lifecycle targets: `make up`, `make down`, `make clean` (down `-v`, drops
 the database volume), `make database-reset` (drop + create + migrate),
-`make cc`, `make mig`, `make php-shell`, `make node-shell`.
+`make cc`, `make mig`, `make php-shell`, `make node-shell`. `make debug` is the
+same `up -d` with `compose.debug.yml` layered on top; that file is not in the
+repository, so the target fails until you write one. `make rename` runs
+`bin/rename-plugin.php` — the one target that executes on the host and
+therefore needs a host PHP.
+
+`make mate-init` and `make mate-discover` regenerate the gitignored `mate/`
+tree that the `symfony-ai-mate` MCP server reads, which is also why
+`composer.json` allows the `symfony/ai-mate-composer-plugin` plugin. That tree
+is not part of the repository and nothing in the build, the test suites or the
+asset pipeline needs it — skip both targets unless you run that server.
 
 Storefront and admin are served by the `nginx` container on
 `http://localhost` (`/admin` for the backend). Mailhog is on
@@ -112,9 +122,13 @@ On first start it replaces
 a symlink to the real `assets/` tree. That is load-bearing: yarn classic
 *copies* a `file:` dependency, and all 14 Stimulus controllers resolve through
 that copy, so without the symlink a controller edit is silently ignored while
-entrypoints and SCSS (which webpack references by path) do update. The symlink
-survives a plain `yarn install`, so `make up`, `make node-build` and
-`composer run frontend-clear` do not undo it.
+entrypoints and SCSS (which webpack references by path) do update. The link is
+only guaranteed at watcher start, and only when it is missing: the service runs
+`yarn install --force` and re-links `if [ ! -L "$LINK" ]`
+(`compose.override.yml`). Nothing keeps a later install from replacing it with
+a copy again — `make node-build` and `composer run frontend-clear` both run
+`yarn install` in that tree — so if controller edits stop reaching the browser,
+restart the watcher and let it re-link.
 
 In `vendor/sylius/test-application/package.json`, `build` is `encore dev` and
 `watch` is `encore dev --watch` (only `build:prod` is `encore production`), so
@@ -149,8 +163,12 @@ docker compose restart chrome
 ```
 
 Stop the watcher first. `make node-build`, `yarn build` and the watcher all
-write `vendor/sylius/test-application/public/build`, and Encore cleans that
-directory before every build (`cleanupOutputBeforeBuild()`).
+write under `vendor/sylius/test-application/public/build`, where each of the
+four Encore configs wipes its own output directory before it builds
+(`cleanupOutputBeforeBuild()`): `public/build/shop` and `public/build/admin`
+from the `@sylius-ui` base configs, `public/build/app/shop` and
+`public/build/app/admin` — the ones this plugin's entries land in — from the
+app's own `webpack.config.js`. Nothing cleans `public/build` itself.
 
 ## Quality checks
 

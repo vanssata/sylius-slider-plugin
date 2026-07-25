@@ -62,7 +62,8 @@ ENV=prod make load-slider-fixtures   # suite vanssa_sylius_slider_demo
 
 Both fixture loads are required. The plugin's demo suite
 (`vanssa_sylius_slider_demo`, a single fixture `vanssa_slider_demo`) creates only
-sliders, slides and style presets. The storefront channel and the
+sliders and slides; it writes no `StylePreset` rows — the presets it seeds them
+from live in configuration. The storefront channel and the
 `sylius@example.com` / `sylius` admin account used by `loginAsAdmin` come from
 the stock Sylius fixtures.
 
@@ -110,13 +111,20 @@ The three assertion projects never pick the generators up: `desktop` sets
 `testIgnore: ['docs/**']`, and `tablet` / `mobile` only match
 `shop/**/*.spec.ts`.
 
-Note that `make e2e` runs `npx playwright test` with no `--project` filter, which
-selects every configured project — `docs-media` included. To run the assertions
-without touching the committed media, name the projects:
+`make e2e` does not touch the committed media: its target names the three
+assertion projects explicitly, because a bare `npx playwright test` selects
+every configured project — `docs-media` included, whose specs overwrite the
+committed screenshots and GIFs.
 
-```bash
-make e2e ARGS='--project=desktop --project=tablet --project=mobile'
+```make
+E2E_PROJECTS = --project=desktop --project=tablet --project=mobile
+
+e2e: e2e-up
+	@… npx playwright test $(if $(findstring --project,$(ARGS)),,$(E2E_PROJECTS)) $(ARGS)
 ```
+
+Passing your own `--project` in `ARGS` suppresses that default list, so
+`make docs-media` remains the only command that regenerates the media.
 
 ## What makes the output deterministic
 

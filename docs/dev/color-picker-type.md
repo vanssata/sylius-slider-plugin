@@ -163,7 +163,7 @@ stays in full mode, so `picker_predefined_only` on its own does nothing.
 
 `picker_predefined_only` is a top-level form option. Nesting it inside
 `picker_options` has no effect at all: `buildView()` reads the top-level option,
-and an unknown key inside `picker_options` is simply passed through to Pickr,
+and an unknown key inside `picker_options` is passed straight through to Pickr,
 which ignores it. The field then keeps accepting arbitrary colours and no
 `Choice` constraint is added.
 

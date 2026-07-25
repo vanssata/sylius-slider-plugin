@@ -29,7 +29,17 @@ run:
 dev:
 	@make -s up
 
+# `compose.debug.yml` is not in this repository and never has been — it is a
+# per-developer overlay. The php service already runs Xdebug in debug mode
+# (compose.override.dist.yml), so this target is only for extra overrides on
+# top of that; fail with an explanation instead of a compose "no such file".
 debug:
+	@test -f compose.debug.yml || { \
+		echo "compose.debug.yml does not exist. It is a personal overlay, not part of the repository."; \
+		echo "The php service already sets XDEBUG_MODE=debug and PHP_IDE_CONFIG — plain 'make up' is usually enough."; \
+		echo "Create compose.debug.yml with your extra overrides if you need this target."; \
+		exit 1; \
+	}
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) -f compose.yml -f compose.override.yml -f compose.debug.yml up -d
 
 up:
@@ -162,10 +172,11 @@ docs-media: e2e-up
 e2e-down:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) --profile e2e rm -sf playwright
 
-# AI Mate (MCP server) — regenerate the local, gitignored `mate/` tree.
+# AI Mate (MCP server) — regenerate the local `mate/` tree. Both the tree and
+# the MCP client configuration are gitignored local tooling: optional, not
+# required to build or test the plugin.
 # There is deliberately NO `mate-serve` target: `mate serve` speaks MCP over
-# stdio and is started by the client (see .claude/scripts/mate-mcp.sh), never
-# by a human or by `make dev`.
+# stdio and is started by the MCP client, never by a human or by `make dev`.
 mate-init:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/mate init -n
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php composer dump-autoload

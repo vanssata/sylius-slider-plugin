@@ -171,6 +171,35 @@ loads `config/services.xml`:
    directory `@VanssaSyliusSliderPlugin/src/Migrations`, and
    `Sylius\Bundle\CoreBundle\Migrations` declared as executed before.
 
+The migration wiring is three overrides plus one call — the trait reads them
+to register the directory with `doctrine_migrations` and to order the plugin's
+migrations after the Sylius core ones:
+
+```php
+use PrependDoctrineMigrationsTrait;
+
+public function prepend(ContainerBuilder $container): void
+{
+    // … sylius_grid and doctrine.orm.mappings config above …
+    $this->prependDoctrineMigrations($container);
+}
+
+protected function getMigrationsNamespace(): string
+{
+    return 'DoctrineMigrations';
+}
+
+protected function getMigrationsDirectory(): string
+{
+    return '@VanssaSyliusSliderPlugin/src/Migrations';
+}
+
+protected function getNamespacesOfMigrationsExecutedBefore(): array
+{
+    return ['Sylius\Bundle\CoreBundle\Migrations'];
+}
+```
+
 `src/DependencyInjection/Configuration.php` builds the
 `vanssa_sylius_slider` tree:
 
@@ -200,6 +229,24 @@ private) with three bound arguments — `$projectDir`, `$sliderPresets`,
 `$stylePresets` — and one `prototype` over `../src/*` excluding
 `DependencyInjection`, `Entity`, `Factory`, `Migrations` and the bundle
 class. Everything else in `src/` is therefore a service by convention.
+
+```xml
+<defaults autowire="true" autoconfigure="true" public="false">
+    <bind key="$projectDir">%kernel.project_dir%</bind>
+    <bind key="$sliderPresets">%vanssa_sylius_slider.presets%</bind>
+    <bind key="$stylePresets">%vanssa_sylius_slider.style_presets%</bind>
+</defaults>
+
+<prototype namespace="Vanssa\SyliusSliderPlugin\" resource="../src/*" exclude="../src/{DependencyInjection,Entity,Factory,Migrations,VanssaSyliusSliderPlugin.php}" />
+
+<service id="Vanssa\SyliusSliderPlugin\Video\YouTubeVideoProvider">
+    <tag name="vanssa_sylius_slider.video_provider" />
+</service>
+```
+
+A constructor argument named `$stylePresets` anywhere under `src/` therefore
+receives the parameter without any per-service configuration, and a third-party
+video provider needs nothing but the same tag on its own definition.
 
 Explicit definitions on top of the prototype:
 

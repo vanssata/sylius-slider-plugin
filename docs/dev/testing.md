@@ -433,7 +433,7 @@ await page.goto(routes.shopSlider(SLIDERS.classicArrows));
 
 ### Support helpers
 
-`tests/e2e/support/` holds the three shared pieces:
+`tests/e2e/support/` holds the four shared pieces:
 
 - `data.ts` — the fixture contract described above.
 - `admin.ts` — `loginAsAdmin(page)`, `sliderIdByCode(page, code)`,
@@ -442,6 +442,31 @@ await page.goto(routes.shopSlider(SLIDERS.classicArrows));
   admin login form has no reliable label wiring. Everything after login uses
   role and accessible name.
 - `a11y.ts` — `expectNoA11yViolations(page, include, { disableRules })`.
+- `storefront.ts` — `slideSelector(code)`, `slide(scope, code)` and
+  `expectSlideIsActive(scope, code)`. The first two wrap
+  `.vanssa-slide[data-slide-code="…"]`, the plugin's own stable hook: every
+  slide exposes the same `article` role with no accessible name of its own, so
+  there is no ARIA equivalent to address one slide by.
+
+`expectSlideIsActive` is a **premise guard**, not a feature assertion. The shop
+template marks slide index 0 `is-active` and `slider_controller` sets
+`aria-hidden="true"` on every other slide; Playwright's ARIA snapshots and axe
+both skip aria-hidden subtrees. A snapshot or a11y scan rooted on a named slide
+therefore degrades silently to "0 nodes, 0 violations" once that slide is no
+longer first — a green run that asserted nothing. The guard fails with a pointed
+message instead, next to the cause rather than three specs away:
+
+```ts
+import { expectSlideIsActive } from '../support/storefront';
+
+await expectSlideIsActive(page, SLIDES.newCollection);
+```
+
+`data.ts` exports `CLASSIC_ARROWS_SLIDE_ORDER` for the same reason: it is the
+canonical slide order of `fashion-classic-arrows` as the demo fixture creates
+it. Any spec that reorders slides must restore **that** order, not merely the
+order it happened to find, or every later assertion rooted on
+`new-collection` sees an empty tree.
 
 ### ARIA snapshots over CSS selectors
 

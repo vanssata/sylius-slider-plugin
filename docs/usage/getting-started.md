@@ -361,7 +361,7 @@ disabled slides and slides whose channel list excludes the current channel.
 The quickest check is the built-in route — with a slider coded
 `homepage-main`:
 
-```
+```text
 /slider/homepage-main
 ```
 
@@ -410,7 +410,7 @@ a desktop and a mobile image from the media bundled under
 
 `new-collection` is the one demo slide that carries per-breakpoint layout
 overrides: tablet centres the content box horizontally, mobile also centres
-it vertically. Every other slide simply cascades from desktop, so putting
+it vertically. Every other slide cascades from desktop unchanged, so putting
 `new-collection` next to one of them is the quickest way to see the
 breakpoint cascade at work — that is exactly what the responsive GIF in
 [storefront.md](storefront.md) shows.

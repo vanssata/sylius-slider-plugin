@@ -187,10 +187,15 @@ bullets are also suppressed when the slider has one slide or fewer.
 | `navigationColor` | any CSS colour (`Assert\CssColor`) | `rgba(250, 204, 21, 1)` | yes | `--vanssa-slider-nav-color` |
 | `navigationBackgroundColor` | any CSS colour | `rgba(17, 24, 39, 0.85)` | yes | `--vanssa-slider-nav-bg` |
 
-`navigationColor` is restricted to the configured accent swatches
-(`picker_predefined_only`), so a free-form value is rejected with "Please
-choose one of predefined colors."; `navigationBackgroundColor` accepts any
-colour.
+Both colour fields offer the configured accent swatches and accept any CSS
+colour. `navigationColor` is meant to be limited to those swatches, but that
+restriction is not in effect today: `SliderSettingsType` nests
+`picker_predefined_only` inside the `picker_options` array, while
+`ColorPickerType` reads the top-level option, which stays `false`. So neither
+the server-side `Choice` constraint ("Please choose one of predefined
+colors.") nor the client-side swatches-only mode is applied — see
+[../dev/color-picker-type.md](../dev/color-picker-type.md) for the
+top-level-versus-nested rule.
 
 Legacy stored sizes `sm` / `md` / `lg` are still accepted and mapped to
 `1rem` / `1.5rem` / `2rem`.
@@ -206,8 +211,12 @@ Section: *Pagination*.
 | `paginationShape` | `circle`, `square` | `circle` | yes | class `vanssa-slider__bullet--circle` / `--square` (applied to `dots` only); mirrored to `--vanssa-slider-pagination-shape` |
 | `paginationSize` | `0.5rem`, `0.625rem`, `0.8rem`, `1rem` | `0.625rem` | yes | `--vanssa-slider-pagination-size` — the bullet `font-size`; bullets are `1em` square (`2.2em × 0.4em` for `lines`) |
 | `paginationShadow` | `none`, `soft`, `medium`, `strong`, `glow` | `none` | yes | `--vanssa-slider-pagination-shadow` (`none`; `0 2px 7px rgba(15,23,42,.22)`; `0 3px 9px rgba(15,23,42,.3)`; `0 6px 16px rgba(15,23,42,.4)`; `0 0 10px rgba(250,204,21,.55)`) |
-| `paginationColor` | any CSS colour, restricted to the accent swatches | `rgba(250, 204, 21, 0.45)` | yes | `--vanssa-slider-pagination-color` |
-| `paginationActiveColor` | any CSS colour, restricted to the accent swatches | `rgba(250, 204, 21, 1)` | yes | `--vanssa-slider-pagination-active` — also the fill of the autoplay progress bar |
+| `paginationColor` | any CSS colour, accent swatches offered | `rgba(250, 204, 21, 0.45)` | yes | `--vanssa-slider-pagination-color` |
+| `paginationActiveColor` | any CSS colour, accent swatches offered | `rgba(250, 204, 21, 1)` | yes | `--vanssa-slider-pagination-active` — also the fill of the autoplay progress bar |
+
+Both pagination colours are in the same position as `navigationColor`: the
+swatch restriction is intended but not enforced, so any CSS colour is
+accepted.
 
 Legacy stored sizes `sm` / `md` / `lg` map to `0.5rem` / `0.625rem` /
 `0.8rem`.
@@ -285,9 +294,11 @@ Details that decide what actually renders:
   field removes the external video from that slot (an uploaded file is
   untouched by this).
 - Only YouTube links are accepted: `youtube.com/watch?v=…`,
-  `youtube.com/embed/…`, `/shorts/…`, `/live/…`, `youtu.be/…`, with or
-  without `www.`/`m.`, and the `youtube-nocookie.com` variants. Anything else
-  fails with "Unsupported video URL — only YouTube links are accepted."
+  `youtube.com/embed/…`, `/shorts/…`, `/live/…` — with or without
+  `www.`/`m.` and in their `youtube-nocookie.com` variants — plus
+  `youtu.be/…`, which is matched on that bare host only, without those
+  prefixes. Anything else fails with "Unsupported video URL — only YouTube
+  links are accepted."
   The link is normalised to `https://www.youtube.com/watch?v=<id>` on save
   and rendered as a `youtube-nocookie.com/embed/<id>` iframe
   (`mute=1`, `playsinline=1`, `controls=0`, `rel=0`, `enablejsapi=1`).
@@ -344,8 +355,12 @@ for the texts.
 | `buttonFontSize` | same list | `1.2rem` | yes | yes (always applied) | `--vanssa-slide-button-size` |
 
 The base slide form deliberately has **no** title/description fields: those
-two are translated content and exist only under Translations. A slide with no
-translations therefore renders no headline and no description.
+two are translated content and are edited only under Translations. The
+storefront, however, reads `title` and `description` from the merged
+base + translation settings, so a base value written another way — fixtures,
+a style preset, your own code — still renders. The demo slides do exactly
+that: their texts live in the base `responsive.desktop` settings and their
+translations carry only the name.
 
 All three breakpoint texts are rendered into the markup at once, wrapped in
 `.vanssa-breakpoint-text--desktop|tablet|mobile` spans, and switched by CSS.
@@ -606,13 +621,14 @@ Catalogue keys, all with a `values` list and a `default`:
 - `presets.color_switcher.theme` (`classic`, `monolith`, `nano`),
   `.default_representation` (`HEX`, `RGBA`, `HSLA`, `HSVA`, `CMYK`) and
   `.swatches.text` / `.neutral` / `.accent` — the colour lists offered by
-  every colour field. Slider navigation and pagination colours are
-  restricted to `swatches.accent`, so shrinking that list narrows what an
-  editor may pick.
+  every colour field. Slider navigation and pagination colours offer
+  `swatches.accent`, so shrinking that list narrows what the picker suggests
+  there — it does not currently limit what may be saved, see
+  [Arrows & Navigation](#arrows--navigation).
 
 A `default` that is not in its own `values` list is ignored and the first
-entry of the list is used instead — no error is raised, the field simply
-preselects something you did not ask for.
+entry of the list is used instead — no error is raised, and the field
+preselects a value you did not ask for.
 
 Three values differ between the plugin's `config/config.yaml` and the
 compiled-in defaults of the configuration class, so a project that registers
