@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { loginAsAdmin, slideIdByCode, sliderIdByCode } from '../support/admin';
+import { loginAsAdmin, openSettingsDrawer, openSettingsSection, slideIdByCode, sliderIdByCode } from '../support/admin';
 import { SLIDERS, SLIDES, routes } from '../support/data';
 import { freezeMotion, hold, recordGif, shot } from './support/media';
 
@@ -55,7 +55,7 @@ test.describe('docs media: admin', () => {
         await shot(page.locator('.vanssa-preview-panel').first(), 'admin-slider-preview-panel');
 
         // Full workspace with the settings drawer open — the documented default view.
-        await page.getByRole('button', { name: 'Settings' }).first().click();
+        await openSettingsDrawer(page);
         await expect(page.locator('.vanssa-workspace')).toBeVisible();
         await page.waitForTimeout(400);
         await shot(page, 'admin-slider-edit-homepage-main');
@@ -64,10 +64,9 @@ test.describe('docs media: admin', () => {
     test('add-slides browser modal', async ({ page }) => {
         const id = await sliderIdByCode(page, SLIDERS.classicArrows);
         await page.goto(routes.adminSliderEdit(id));
-        await page.getByRole('button', { name: 'Settings' }).first().click();
+        await openSettingsDrawer(page);
 
-        const slidesSection = page.getByRole('button', { name: /Slides/i }).last();
-        await slidesSection.click();
+        await openSettingsSection(page, 'Slides');
 
         const addButton = page.getByRole('button', { name: /^Add/ }).first();
         await expect(addButton).toBeVisible();
@@ -93,7 +92,7 @@ test.describe('docs media: admin', () => {
         await shot(modal, 'admin-slide-edit-modal');
     });
 
-    test('slide edit page: preview, media settings, translations', async ({ page }) => {
+    test('slide edit page: preview and per-breakpoint media settings', async ({ page }) => {
         const id = await slideIdByCode(page, SLIDES.newCollection);
         await page.goto(routes.adminSlideEdit(id));
 
@@ -101,22 +100,27 @@ test.describe('docs media: admin', () => {
         await freezeMotion(page);
         await shot(page.locator('.vanssa-preview-panel').first(), 'admin-slide-live-preview');
 
-        await page.getByRole('button', { name: 'Settings' }).first().click();
-        await page.waitForTimeout(400);
-
-        const mediaSection = page.getByRole('button', { name: /Media|Settings/i }).first();
-        if (await mediaSection.isVisible()) {
-            await mediaSection.click();
-            await page.waitForTimeout(300);
-        }
+        await openSettingsDrawer(page);
+        await expect(page.getByText('Media & Settings').first()).toBeVisible();
         await shot(page, 'admin-slide-media-settings');
+    });
 
-        const translations = page.getByRole('button', { name: /Translations/i }).first();
-        if (await translations.isVisible()) {
-            await translations.click();
-            await page.waitForTimeout(400);
-            await shot(page, 'admin-slide-translations');
-        }
+    test('slide edit page: per-locale translations', async ({ page }) => {
+        // The Translations card is `.d-none` until the toolbar's Language
+        // dropdown selects a locale — on edit pages the form is toolbar-driven
+        // (form_context_controller), there is no per-locale accordion
+        // (templates/admin/slide/form/sections/translations.html.twig:7-27).
+        const id = await slideIdByCode(page, SLIDES.newCollection);
+        await page.goto(routes.adminSlideEdit(id));
+        await expect(page.locator('.vanssa-workspace')).toBeVisible();
+
+        await openSettingsDrawer(page);
+        await page.getByRole('combobox', { name: 'Language' }).selectOption('de_DE');
+
+        const translations = page.locator('[data-vanssa-context-locale="de_DE"]').first();
+        await expect(translations).toBeVisible();
+        await freezeMotion(page);
+        await shot(page, 'admin-slide-translations');
     });
 
     test('preset gallery on the create page', async ({ page }) => {
@@ -135,20 +139,19 @@ test.describe('docs media: admin', () => {
         await expect(page.locator('.vanssa-workspace')).toBeVisible();
         await expect(page.locator(`turbo-frame#vanssa-slider-preview-frame-${id}`)).toBeVisible();
 
-        const settings = page.getByRole('button', { name: 'Settings' }).first();
-
         await recordGif(
             page,
             'admin-workspace',
             [
                 ...hold(3),
                 async () => {
-                    await settings.click();
+                    await openSettingsDrawer(page);
                     await page.waitForTimeout(500);
                 },
                 ...hold(4),
                 async () => {
-                    await settings.click();
+                    // The drawer head's own toggle, not the toolbar one.
+                    await page.getByRole('button', { name: 'Close settings' }).first().click();
                     await page.waitForTimeout(500);
                 },
                 ...hold(2),
@@ -235,8 +238,8 @@ test.describe('docs media: admin', () => {
     test('add-slides-browser.gif — attaching slides from the browser modal', async ({ page }) => {
         const id = await sliderIdByCode(page, SLIDERS.classicArrows);
         await page.goto(routes.adminSliderEdit(id));
-        await page.getByRole('button', { name: 'Settings' }).first().click();
-        await page.getByRole('button', { name: /Slides/i }).last().click();
+        await openSettingsDrawer(page);
+        await openSettingsSection(page, 'Slides');
 
         const addButton = page.getByRole('button', { name: /^Add/ }).first();
         await expect(addButton).toBeVisible();

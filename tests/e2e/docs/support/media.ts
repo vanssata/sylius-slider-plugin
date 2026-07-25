@@ -24,6 +24,7 @@ const FRAME_DIR = path.join(REPO_ROOT, 'var/docs-media-frames');
  * Deliberately NOT applied to the GIF generators — motion is the point there.
  */
 export async function freezeMotion(page: Page): Promise<void> {
+    await hideBrokenImages(page);
     await page.addStyleTag({
         content: `
             *, *::before, *::after {
@@ -36,6 +37,26 @@ export async function freezeMotion(page: Page): Promise<void> {
                 scroll-behavior: auto !important;
             }
         `,
+    });
+}
+
+/**
+ * Hide images that failed to load, so a host-app asset gap does not put a
+ * broken-image glyph in the plugin's documentation.
+ *
+ * Concretely: the Sylius admin brand image is served from
+ * `/build/admin/images/sylius-logo-dark-text.png`, but the test application's
+ * webpack config emits no `images/` directory at all — the file 404s in this
+ * dev stack. That is an upstream `sylius/test-application` gap (and `vendor/`
+ * is off limits), not something a reader of these docs needs to see.
+ */
+export async function hideBrokenImages(page: Page): Promise<void> {
+    await page.evaluate(() => {
+        document.querySelectorAll('img').forEach((img) => {
+            if (img.complete && img.naturalWidth === 0) {
+                img.style.visibility = 'hidden';
+            }
+        });
     });
 }
 
@@ -77,6 +98,10 @@ export async function recordGif(
     rmSync(frames, { recursive: true, force: true });
     mkdirSync(frames, { recursive: true });
     mkdirSync(MEDIA_DIR, { recursive: true });
+
+    // Applied here rather than at each call site: every frame of every GIF
+    // wants it, and a host-app asset that 404s is never part of the story.
+    await hideBrokenImages(page);
 
     let index = 0;
     const capture = async () => {
