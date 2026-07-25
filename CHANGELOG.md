@@ -8,6 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **End-to-end test suite (Playwright)** under `tests/e2e/`, run entirely in
+  containers via a new `playwright` compose service (profile `e2e`, built from
+  `docker/playwright/`). Entry points: `make e2e`, `make e2e-check SPEC=…`
+  (one spec on desktop/tablet/mobile, after waiting for the asset watcher) and
+  `make e2e-down`. Three viewport projects — desktop 1400×900, tablet 820×1180,
+  mobile 390×844 — with the tablet/mobile pair scoped to the storefront specs.
+  Assertions are ARIA-snapshot and role based rather than CSS-selector based,
+  paired with `@axe-core/playwright` scans of the plugin's own markup. The
+  service uses `network_mode: host` because every Sylius channel here has
+  hostname `localhost`: from inside the compose network the app is only
+  reachable as `http://nginx`, which resolves to no channel and 404s.
+- **`make verify`** — the fast deterministic loop (ECS `--fix`, PHPStan,
+  PHPUnit with `APP_ENV=test`), backed by a new `ai:verify` composer script.
+- **Generated documentation media**: every screenshot and GIF under `docs/` is
+  now produced by `make docs-media` from `tests/e2e/docs/*.docs.spec.ts` under
+  fixed viewports, `en-US`, UTC and frozen animations, with GIFs assembled from
+  explicit frames by ffmpeg (`palettegen`/`paletteuse`) rather than recorded
+  video. New assets: `responsive-breakpoints.gif`, `slide-edit-modal.gif`,
+  `add-slides-browser.gif`, and `admin-slide-edit-modal.png` — which
+  `docs/SCREENSHOTS.md` referenced but never had.
+- **Demo fixtures now exercise the per-breakpoint overrides**: the
+  `new-collection` slide carries tablet (content centred horizontally) and
+  mobile (also centred vertically) layout overrides. Per-breakpoint everything
+  is the plugin's headline feature but no demo data showed it, and it is the
+  surface the storefront regression spec asserts on.
 - **Editing workspace**: the slider/slide edit pages are a two-column
   workspace — the live preview is the main surface; the settings live in a
   right-hand **drawer** (fixed to the viewport, independently scrolling,
@@ -320,6 +345,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   helper on the shop slider controller.
 
 ### Changed
+- **Documentation split into two tracks.** `docs/usage/` is for running the
+  plugin in a shop (`getting-started`, `admin-guide`, `style-presets`,
+  `storefront`, `options-reference`); `docs/dev/` is for extending it
+  (`architecture`, `adding-a-stimulus-controller`, `extending`,
+  `style-presets`, `color-picker-type`, `testing`, `docs-media`,
+  `contributing`). `README.md` shrinks from 580 lines to an index.
+  `docs/SCREENSHOTS.md` is gone — its captures moved into the usage guides
+  and the capture process into `docs/dev/docs-media.md`. `docs/EXTENDING.md`,
+  `docs/COLOR_PICKER_TYPE.md` and `docs/CONTRIBUTING.md` moved under
+  `docs/dev/` and were expanded into working examples;
+  `docs/FLEX_RECIPE.md` stays where it is.
 - **Contributor tooling**: asset rebuilds now run through a long-lived
   watcher (`make node-watch` / the `nodejs-watch` Compose service behind the
   `watch` profile) instead of a one-off `yarn build` per edit. It symlinks

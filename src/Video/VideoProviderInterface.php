@@ -10,7 +10,7 @@ namespace Vanssa\SyliusSliderPlugin\Video;
  * provider recognizes its URLs and turns them into embeddable players.
  *
  * Register implementations with the vanssa_sylius_slider.video_provider tag
- * (autoconfigured) to add a provider — see docs/EXTENDING.md.
+ * (autoconfigured) to add a provider — see docs/dev/extending.md.
  */
 interface VideoProviderInterface
 {

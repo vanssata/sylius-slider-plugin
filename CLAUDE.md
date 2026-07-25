@@ -4,71 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-### Docker Environment (Recommended)
+> **Everything runs in containers.** This machine has no PHP and no Node
+> installed, so a bare `php` / `composer` / `vendor/bin/*` / `yarn` / `npx`
+> command fails (and `.claude/hooks/container-guard.sh` denies it with the
+> right replacement). Use a `make` target, `docker compose run --rm php …`,
+> `docker compose exec -T php …`, or `docker compose run --rm nodejs "<one
+> string>"`.
+
+### Environment
 ```bash
-# Initialize Docker environment and install dependencies
-make init
+make init             # build images, install deps, create compose.override.yml
+make up / make down   # start / stop the stack (nginx on http://localhost)
+make clean            # down -v
 
-# Initialize database and run migrations
-make database-init
+make database-init    # create the DB and run migrations
+make database-reset   # drop + create + migrate
+make load-fixtures            # full Sylius fixtures
+make load-slider-fixtures     # vanssa_sylius_slider_demo only
 
-# Load fixtures (optional)
-make load-fixtures
-
-# Start/stop containers
-make up
-make down
-
-# Access containers
-make php-shell
-make node-shell
+make php-shell / make node-shell
+make cc / make mig
 ```
 
-### Traditional Development
-```bash
-# Frontend setup
-(cd vendor/sylius/test-application && yarn install)
-(cd vendor/sylius/test-application && yarn build)
-vendor/bin/console assets:install
-
-# Database setup
-vendor/bin/console doctrine:database:create
-vendor/bin/console doctrine:migrations:migrate -n
-vendor/bin/console sylius:fixtures:load -n
-
-# Start server
-symfony server:start -d
-```
+The stack runs with `APP_ENV=${ENV:-prod}` (see `compose.override.dist.yml`),
+so by default there is **no web debug toolbar** — which is what the docs-media
+generators rely on. Start with `ENV=dev make up` when you want the profiler.
 
 ### Testing
 ```bash
-# PHPUnit tests
-vendor/bin/phpunit
-make phpunit  # Docker
-
-# Behat tests (non-JS)
-vendor/bin/behat --strict --tags="~@javascript&&~@mink:chromedriver"
-make behat  # Docker
-
-# Behat tests (JS scenarios)
-# Requires Chrome headless and symfony server
-APP_ENV=test symfony server:start --port=8080 --daemon
-vendor/bin/behat --strict --tags="@javascript,@mink:chromedriver"
+make verify        # the fast loop: ECS --fix, PHPStan, PHPUnit (APP_ENV=test)
+make phpunit       # PHPUnit only, APP_ENV=test
+make behat         # Behat; the @javascript leg drives the `chrome` service
+make e2e           # Playwright suite (tests/e2e) in the `playwright` service
+make e2e-check SPEC=tests/e2e/shop/slider-behavior.spec.ts   # one spec, 3 viewports
+make e2e-down      # stop the Playwright service when the task ends
 ```
+
+`make verify` is `composer ai:verify` inside the container — that is the
+command the `sylius-quality` skill means when it says "run `composer
+ai:verify`". There is no `composer ai:e2e`: composer runs in the `php`
+container and Playwright lives in a different one, so `make e2e` is the entry
+point. See `docs/dev/testing.md` for when to reach for Behat vs Playwright.
 
 ### Code Quality
 ```bash
-# PHPStan analysis (level max + baseline configured in phpstan.neon)
-vendor/bin/phpstan analyse -c phpstan.neon
-make phpstan  # Docker
-
-# Rector (dry-run / apply)
-make rector
-make rector-fix
-
-# Coding standards
-vendor/bin/ecs check
-make ecs  # Docker
+make phpstan       # level max + baseline (phpstan.neon)
+make ecs           # Easy Coding Standard
+make rector        # dry-run
+make rector-fix    # apply
 ```
 
 ### Docker Compose command quoting
@@ -93,37 +76,60 @@ composer run test-app-init
 
 ## Architecture
 
-This is a **Sylius Plugin Skeleton** - a template for creating Sylius e-commerce plugins. It provides a complete development environment with both traditional and Docker setups.
+A Sylius 2.x plugin for storefront sliders and banners. Full map:
+`docs/dev/architecture.md`. The essentials:
 
-### Core Structure
-- **Main Plugin Class**: `src/VanssaSyliusSliderPlugin.php` - Entry point using `SyliusPluginTrait`
-- **DI Extension**: `src/DependencyInjection/VanssaSyliusSliderExtension.php` - Handles service loading and Doctrine migrations
-- **Services**: `config/services.xml` - Service definitions with XML configuration
-- **Routes**: `config/routes/` - Separate admin and shop route definitions
-- **Templates**: `templates/` - Twig templates for admin and shop with Twig hooks support
+- **Plugin class**: `src/VanssaSyliusSliderPlugin.php` (`SyliusPluginTrait`)
+- **DI extension**: `src/DependencyInjection/VanssaSyliusSliderExtension.php` —
+  service loading and Doctrine migration namespace
+- **Services**: `config/services.xml`; **routes**: `config/routes/{admin,shop}.yaml`
+- **Templates**: `templates/` — admin workspace, Twig components, Twig hooks
+- **Migrations**: `src/Migrations/` (not `tests/`)
 
-### Key Features
-- **Test Application**: Uses `sylius/test-application` for plugin testing in isolation
-- **Asset Management**: Webpack Encore for frontend asset compilation
-- **Database**: Doctrine migrations with proper namespace handling
-- **Testing**: Full Behat + PHPUnit setup with browser testing support
-- **Code Quality**: PHPStan, ECS (Easy Coding Standard), and Rector integration
+**The bootable kernel is `vendor/sylius/test-application`**, not
+`tests/TestApplication`. `tests/TestApplication/` only contributes
+config/templates/src that are merged into it, and `composer.json`
+`extra.public-dir` points at the vendor path. Any tooling that assumes
+`tests/TestApplication/public` is a document root is wrong here — that includes
+the `sylius-dev` skill and `sylius-quality`'s stock Playwright config, both of
+which are written for an application layout rather than a plugin one.
 
-### Development Environment
-- **Docker**: Complete containerized environment with PHP, Node.js, and database
-- **Traditional**: Local Symfony server with manual dependency management
-- **Frontend**: Yarn-based asset pipeline through test application
-
-### Testing Strategy
-- **Unit/Integration**: PHPUnit for isolated component testing
-- **Functional**: Behat for feature testing with browser automation
-- **Static Analysis**: PHPStan for type checking and code quality
-- **Standards**: ECS for coding standard enforcement
+The console binary is `vendor/bin/console`; the PHP namespace is
+`Vanssa\SyliusSliderPlugin\`.
 
 ### Database Configuration
 Database credentials should be configured in:
 - `tests/TestApplication/.env` (for development)
 - `tests/TestApplication/.env.test` (for testing)
+
+The compose stack overrides `DATABASE_URL` per environment
+(`mysql://root@mysql/sylius_%kernel.environment%`), so `sylius_dev`,
+`sylius_test` and `sylius_prod` are three separate databases. A test run
+without `APP_ENV=test` hits the wrong one — `make phpunit` and `make verify`
+set it for you.
+
+## AI tooling
+
+`.claude/`, `mcp.json` / `.mcp.json`, `mate/` and `CLAUDE.local.md` are
+**gitignored local tooling**: functional on disk, absent from the repository.
+Nothing below is required to build or test the plugin.
+
+| Layer | What it is | Entry point |
+|---|---|---|
+| `symfony-ai-mate` MCP | Introspects the running Sylius kernel (`sylius/sylius-ai-dev-tools`) | `.claude/scripts/mate-mcp.sh`, referenced from `mcp.json` |
+| `playwright` MCP | Browser driving inside the `playwright` container | `.claude/scripts/playwright-mcp.sh` |
+| `sylius-dev` skill | Official Sylius skill (plugin `sylius-dev@sylius-ai-dev-skills`) | enabled in `.claude/settings.json` |
+| `symfony-ux-skills` | The seven Symfony UX skills (stimulus, turbo, twig-component, live-component, ux-icons, ux-map, symfony-ux) | enabled at user scope |
+| `sylius-quality` | Local skill + `sylius-reviewer` / `sylius-bc-guard` / `sylius-e2e-author` agents | `.claude/skills`, `.claude/agents` |
+| Guard hooks | `vendor-guard`, `container-guard`, `bash-guard`, `assets-guard` | `.claude/hooks/`, wired in `.claude/settings.json` |
+
+Both MCP launchers `docker compose exec` into an already-running service. Never
+start them with `docker compose run` and never pass `mate serve
+--force-keep-alive`: that combination creates a container per session and keeps
+the process alive after the client closes stdin, which is what once leaked 22
+`syliusslider-php-run-*` containers.
+
+Regenerate the mate tree with `make mate-init` / `make mate-discover`.
 
 ## Stimulus Controller Manifests (Important Gotchas)
 
@@ -206,9 +212,9 @@ merge dropped it.
 Use a **watcher**, not one-off builds:
 
 ```bash
-docker compose --profile watch up -d nodejs-watch     # start
-docker compose --profile watch logs -f nodejs-watch   # follow
-docker compose --profile watch rm -sf nodejs-watch    # stop
+docker compose --profile watch up -d nodejs-watch     # start   (= make node-watch)
+docker compose --profile watch logs -f nodejs-watch   # follow  (= make node-watch-logs)
+docker compose --profile watch rm -sf nodejs-watch    # stop    (= make node-watch-stop)
 ```
 
 The `nodejs-watch` service runs `encore dev --watch` and, on first start, replaces the yarn copy with a symlink to the real `assets/` tree — which is what makes controller edits visible to the watcher and retires the `yarn install --force` step. It sits behind the `watch` compose profile, so a plain `docker compose up -d` never starts it. `yarn build` and `yarn watch` are both `encore dev` in this app, so watch output is identical to what a one-off build produces.
@@ -216,11 +222,22 @@ The `nodejs-watch` service runs `encore dev --watch` and, on first start, replac
 Two things a running watcher does **not** handle:
 
 - **Manifest changes need a restart.** `webpack.config.js` merges the `controllers.json` files into `var/cache/webpack/controllers.merged.*.json` at config-load time only. Edit any `controllers.json` or `assets/package.json` and the watcher keeps building the old controller set, silently — restart it.
-- **Chrome caches bundles in memory.** If Playwright/browser testing doesn't reflect a fresh build, restart the container: `docker compose restart chrome`.
+- **Chrome caches bundles in memory.** The `chrome` service (Behat's `@javascript` leg) keeps compiled bundles in memory; restart it before a browser check: `docker compose restart chrome`. Playwright is unaffected — `make e2e` starts a fresh browser context each run.
 
 If file events don't reach the watcher (edits never trigger a recompile), start it with `WATCHPACK_POLLING=true`.
 
-Drive the watcher with the compose commands above — there is no wrapper script and no dedicated subagent, so starting it, waiting for the recompile to appear in `logs`, restarting chrome before a browser check, and stopping it when the task ends are all manual steps. Nothing stops it at session end either; a forgotten `nodejs-watch` keeps running until `rm -sf`.
+**Fast visual loop while editing SCSS/CSS/JS:**
+
+```bash
+make node-watch                                              # once per task
+make e2e-check SPEC=tests/e2e/shop/responsive-overrides.spec.ts
+```
+
+`make e2e-check` blocks until the compiled bundles are newer than the newest
+`assets/` source (i.e. the watcher caught up), then runs that one spec on
+desktop + tablet + mobile. Seconds, not a full suite.
+
+Drive the watcher with the commands above — there is no wrapper script and no dedicated subagent, so starting it, waiting for the recompile to appear in `logs`, and stopping it when the task ends are all manual steps. Nothing stops it at session end either; a forgotten `nodejs-watch` keeps running until `rm -sf`.
 
 Clean-room fallback when no watcher is running (e.g. reproducing a CI build):
 
@@ -230,15 +247,25 @@ docker compose run --rm nodejs "cd vendor/sylius/test-application && yarn build"
 docker compose restart chrome
 ```
 
-## AI Development Guides
+## Documentation layout
 
-This project includes specialized AI guides to assist with common plugin development tasks:
+- `docs/usage/` — for someone using the plugin in their shop
+  (`getting-started`, `admin-guide`, `style-presets`, `storefront`,
+  `options-reference`).
+- `docs/dev/` — for someone extending it (`architecture`,
+  `adding-a-stimulus-controller`, `extending`, `style-presets`,
+  `color-picker-type`, `testing`, `docs-media`, `contributing`).
+- `docs/FLEX_RECIPE.md` stays where it is. `README.md` is a short index.
+- Screenshots and GIFs under `docs/screenshots/` and `docs/media/` are
+  **generated** — regenerate with `make docs-media`, never hand-edit
+  (`docs/dev/docs-media.md`).
 
-- **CLEANUP_GUIDE.md** - Guidelines for cleaning up and organizing plugin code
-- **RENAME_GUIDE.md** - Step-by-step instructions for renaming plugins and components
-- **COMPATIBILITY_GUIDE.md** - Best practices for maintaining compatibility across different Sylius versions
+## Repository maintenance guides
 
-These guides provide detailed instructions and automated workflows to help maintain code quality and ensure proper plugin structure.
+- **CLEANUP_GUIDE.md** — cleaning up and organizing plugin code
+- **RENAME_GUIDE.md** — renaming the plugin and its components
+- **COMPATIBILITY_GUIDE.md** — compatibility across Sylius versions
+
 # Symfony UX Frontend Stack
 
 This project uses the Symfony UX frontend stack. Seven agent skills are installed to help you work with it.
