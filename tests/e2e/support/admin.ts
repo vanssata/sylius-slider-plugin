@@ -27,6 +27,29 @@ export async function loginAsAdmin(page: Page): Promise<void> {
 }
 
 /**
+ * Open the slider/slide workspace settings drawer from the preview toolbar.
+ *
+ * `exact: true` is load-bearing. The drawer head renders a
+ * `<button aria-label="Close settings">`, which a non-exact "Settings" match
+ * also hits; that only fails to be a strict-mode violation today because the
+ * drawer is `display: none` and hidden nodes are excluded from the role engine.
+ * Open the drawer by any other route first and the loose form breaks.
+ */
+export async function openSettingsDrawer(page: Page): Promise<void> {
+    await page.getByRole('button', { name: 'Settings', exact: true }).first().click();
+}
+
+/**
+ * Expand one section of the drawer's flat settings accordion.
+ *
+ * `exact: true` for the same reason: "Slides" would otherwise also match the
+ * section's own "Add slides…" button once the panel is open.
+ */
+export async function openSettingsSection(page: Page, name: string): Promise<void> {
+    await page.getByRole('button', { name, exact: true }).first().click();
+}
+
+/**
  * Resolve a slider's numeric admin id from its code by reading the grid.
  *
  * The demo fixtures are re-loadable, so ids are not stable across a

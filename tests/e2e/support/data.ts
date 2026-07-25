@@ -35,6 +35,23 @@ export const SLIDES = {
     runwayVideo: 'runway-video',
 } as const;
 
+/**
+ * The canonical slide order of `fashion-classic-arrows` as the demo fixture
+ * creates it (src/Fixture/SliderDemoFixture.php).
+ *
+ * This matters beyond bookkeeping: the shop template marks slide index 0
+ * `is-active`, and `slider_controller` sets `aria-hidden="true"` on every other
+ * slide — so ARIA snapshots and axe scans rooted on a specific slide only see
+ * anything while that slide is first. Any spec that reorders slides must
+ * restore THIS order, not merely whatever it happened to find.
+ */
+export const CLASSIC_ARROWS_SLIDE_ORDER = [
+    SLIDES.newCollection,
+    SLIDES.summerDresses,
+    SLIDES.denimEssentials,
+    SLIDES.graphicTees,
+] as const;
+
 /** Breakpoint bands from templates/components/vanssa_sylius_slider/shop/slide.html.twig. */
 export const VIEWPORTS = {
     desktop: { width: 1400, height: 900 },

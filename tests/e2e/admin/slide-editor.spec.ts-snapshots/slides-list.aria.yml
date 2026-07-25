@@ -1,0 +1,24 @@
+- article:
+  - text: ⋮⋮
+  - img "New Collection"
+  - text: New Collection new-collection
+  - button "Edit"
+  - button "Remove from this slider"
+- article:
+  - text: ⋮⋮
+  - img "Summer Dresses"
+  - text: Summer Dresses summer-dresses
+  - button "Edit"
+  - button "Remove from this slider"
+- article:
+  - text: ⋮⋮
+  - img "Denim Essentials"
+  - text: Denim Essentials denim-essentials
+  - button "Edit"
+  - button "Remove from this slider"
+- article:
+  - text: ⋮⋮
+  - img "Graphic Tees"
+  - text: Graphic Tees graphic-tees
+  - button "Edit"
+  - button "Remove from this slider"

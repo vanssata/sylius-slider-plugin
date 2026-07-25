@@ -1,0 +1,83 @@
+# Admin slider grid, default sort `code: asc` (config/grids/admin/slider.yaml).
+#
+# Hand-tightened after generation, on purpose:
+#  * the sortable columnheaders' `/url` values are dropped — they only encode
+#    the *next* sort direction and say nothing about the plugin;
+#  * every row's edit `/url` is a regex: the demo fixtures are re-loadable, so
+#    slider ids change on every `sylius:fixtures:load` (support/admin.ts
+#    resolves them at runtime for the same reason);
+#  * the two unnamed row actions are the vendor Sylius edit link and delete
+#    button, which have no accessible name — see the spec's findings.
+#
+# ARIA snapshots match in "contain" mode, so a temporary slider created by a
+# concurrently running spec shows up as an extra row and is tolerated; the six
+# demo sliders must still be present, in this order, with these slide counts.
+- table:
+  - rowgroup:
+    - row "Code Name Slides Enabled Actions":
+      - columnheader "Code"
+      - columnheader "Name"
+      - columnheader "Slides"
+      - columnheader "Enabled"
+      - columnheader "Actions"
+  - rowgroup:
+    - row "fashion-autoplay-showcase Fashion Autoplay Showcase 4":
+      - cell "fashion-autoplay-showcase"
+      - cell "Fashion Autoplay Showcase"
+      - cell "4"
+      - cell
+      - cell:
+        - button "Preview"
+        - link:
+          - /url: /\/admin\/sliders\/\d+\/edit/
+        - button
+    - row "fashion-classic-arrows Fashion Classic Arrows 4":
+      - cell "fashion-classic-arrows"
+      - cell "Fashion Classic Arrows"
+      - cell "4"
+      - cell
+      - cell:
+        - button "Preview"
+        - link:
+          - /url: /\/admin\/sliders\/\d+\/edit/
+        - button
+    - row "fashion-compact-banner Fashion Compact Banner 3":
+      - cell "fashion-compact-banner"
+      - cell "Fashion Compact Banner"
+      - cell "3"
+      - cell
+      - cell:
+        - button "Preview"
+        - link:
+          - /url: /\/admin\/sliders\/\d+\/edit/
+        - button
+    - row "fashion-fullscreen-hero Fashion Fullscreen Hero 3":
+      - cell "fashion-fullscreen-hero"
+      - cell "Fashion Fullscreen Hero"
+      - cell "3"
+      - cell
+      - cell:
+        - button "Preview"
+        - link:
+          - /url: /\/admin\/sliders\/\d+\/edit/
+        - button
+    - row "fashion-minimal-fade Fashion Minimal Fade 3":
+      - cell "fashion-minimal-fade"
+      - cell "Fashion Minimal Fade"
+      - cell "3"
+      - cell
+      - cell:
+        - button "Preview"
+        - link:
+          - /url: /\/admin\/sliders\/\d+\/edit/
+        - button
+    - row "fashion-parallax-showcase Fashion Parallax Showcase 4":
+      - cell "fashion-parallax-showcase"
+      - cell "Fashion Parallax Showcase"
+      - cell "4"
+      - cell
+      - cell:
+        - button "Preview"
+        - link:
+          - /url: /\/admin\/sliders\/\d+\/edit/
+        - button
