@@ -62,27 +62,38 @@
 {% endmacro %}
 
 {% macro media_item(accordion_id, media, gated, override_field, open_by_default) %}
+    {# Never |default(null) on a FormView: a leaf view (checkbox, text input)
+       is Countable with count 0, which Twig's `default` filter treats as
+       empty and silently nulls out. #}
+    {% set image_remove_field = media.image_remove_field is defined ? media.image_remove_field : null %}
+    {% set video_remove_field = media.video_remove_field is defined ? media.video_remove_field : null %}
+    {% set video_url_field = media.video_url_field is defined ? media.video_url_field : null %}
     <div class="accordion-item"{% if gated %} data-slider-settings-item-guard="media"{% endif %}>
         {{ _self.header('tabler:photo', 'sylius.ui.media'|trans, accordion_id ~ '-media', open_by_default, override_field) }}
         <div id="{{ accordion_id }}-media" class="accordion-collapse collapse{% if open_by_default %} show{% endif %}" data-bs-parent="#{{ accordion_id }}"{% if gated %} data-slider-settings-media-override-only{% endif %}>
             <div class="accordion-body row">
                 <div class="col-12 col-md-6">
-                    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/image_upload_preview_field.html.twig' with {
+                    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/media_upload_field.html.twig' with {
                         field: media.image_field,
-                        image_path: media.image_path,
+                        kind: 'image',
+                        media_path: media.image_path,
+                        remove_field: image_remove_field,
                         preview_id: media.preview_id
-                    } %}
+                    } only %}
                 </div>
                 <div class="col-12 col-md-6">
-                    {{ form_row(media.video_field, { label: 'Video (self-hosted upload)', help: media.video_help|default('Optional video for this breakpoint; it replaces the image when set.') }) }}
-                    {# Not |default(null): a leaf FormView is Countable(0) and
-                       Twig's default filter would silently null it out. #}
-                    {% if media.video_url_field is defined and media.video_url_field is not null %}
-                        {{ form_row(media.video_url_field) }}
-                    {% endif %}
-                    {% if media.video_path %}
-                        <div class="text-secondary small mt-1">{{ ux_icon('tabler:video', {'class': 'icon me-1'}) }}{{ media.video_path }}</div>
-                    {% endif %}
+                    {% include '@VanssaSyliusSliderPlugin/admin/shared/form/media_upload_field.html.twig' with {
+                        field: media.video_field,
+                        kind: 'video',
+                        media_path: media.video_path,
+                        remove_field: video_remove_field,
+                        url_field: video_url_field,
+                        preview_id: media.preview_id ~ '-video',
+                        row_options: {
+                            label: 'Video (self-hosted upload)',
+                            help: media.video_help|default('Optional video for this breakpoint; it replaces the image when set.')
+                        }
+                    } only %}
                 </div>
             </div>
         </div>

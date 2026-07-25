@@ -5,9 +5,9 @@
    Create pages have no preview panel, so they keep the classic tabs. #}
 {% set toolbar_driven = slide.id is not null %}
 {% set breakpoints = [
-    { key: 'desktop', icon: 'tabler:device-desktop', image_field: form.slideCoverFile, image_path: slide.slideCover, video_field: form.slideCoverVideoFile, video_url_field: form.slideCoverVideoUrl, video_path: slide.slideCoverVideo },
-    { key: 'mobile', icon: 'tabler:device-mobile', image_field: form.slideCoverMobileFile, image_path: slide.slideCoverMobile, video_field: form.slideCoverVideoMobileFile, video_url_field: form.slideCoverVideoMobileUrl, video_path: slide.slideCoverVideoMobile },
-    { key: 'tablet', icon: 'tabler:device-tablet', image_field: form.slideCoverTabletFile, image_path: slide.slideCoverTablet, video_field: form.slideCoverVideoTabletFile, video_url_field: form.slideCoverVideoTabletUrl, video_path: slide.slideCoverVideoTablet },
+    { key: 'desktop', icon: 'tabler:device-desktop', image_field: form.slideCoverFile, image_path: slide.slideCover, image_remove_field: form.slideCoverRemove, video_field: form.slideCoverVideoFile, video_url_field: form.slideCoverVideoUrl, video_path: slide.slideCoverVideo, video_remove_field: form.slideCoverVideoRemove },
+    { key: 'mobile', icon: 'tabler:device-mobile', image_field: form.slideCoverMobileFile, image_path: slide.slideCoverMobile, image_remove_field: form.slideCoverMobileRemove, video_field: form.slideCoverVideoMobileFile, video_url_field: form.slideCoverVideoMobileUrl, video_path: slide.slideCoverVideoMobile, video_remove_field: form.slideCoverVideoMobileRemove },
+    { key: 'tablet', icon: 'tabler:device-tablet', image_field: form.slideCoverTabletFile, image_path: slide.slideCoverTablet, image_remove_field: form.slideCoverTabletRemove, video_field: form.slideCoverVideoTabletFile, video_url_field: form.slideCoverVideoTabletUrl, video_path: slide.slideCoverVideoTablet, video_remove_field: form.slideCoverVideoTabletRemove },
 ] %}
 
 <div class="card mb-3 vanssa-slider-admin" id="vanssa-slide-media-settings"{% if toolbar_driven %} data-vanssa-context-locale="__base__"{% endif %}>
@@ -66,9 +66,11 @@
                         media: {
                             image_field: breakpoint.image_field,
                             image_path: breakpoint.image_path,
+                            image_remove_field: breakpoint.image_remove_field,
                             video_field: breakpoint.video_field,
                             video_url_field: breakpoint.video_url_field,
                             video_path: breakpoint.video_path,
+                            video_remove_field: breakpoint.video_remove_field,
                             preview_id: form.vars.id ~ '-' ~ breakpoint.key ~ '-preview',
                             video_help: 'Optional video for the ' ~ breakpoint.key ~ ' version; it replaces the image when set.'
                         }

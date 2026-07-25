@@ -409,7 +409,24 @@ Each breakpoint is an accordion with these items:
   over the upload** for that slot. Clearing it removes the external video.
   A link the plugin cannot parse is rejected with *Unsupported video URL —
   only YouTube links are accepted.*
-- The currently stored video path is printed underneath when there is one.
+
+Every image and video slot renders as a preview tile. An empty tile shows
+a placeholder icon only — there is nothing to remove, so there is no ×.
+Hovering a filled tile reveals an × in its top-right corner; clicking it:
+
+- marks that slot for deletion — the tile dims, *Removed on save* appears
+  below it, and the × turns into an undo button, because nothing is
+  written to the slide until you save the form;
+- clears any file you had just picked for that slot and empties its
+  *External video URL* field, so a leftover URL cannot override the
+  removal;
+- refreshes the live preview immediately, so you see the fallback that
+  will take effect — clearing the mobile cover, for example, makes the
+  mobile preview fall back to the desktop one.
+
+Picking a new file for a slot always wins over a pending removal. The same
+tiles, with the same behavior, also cover the per-locale media overrides in
+[Slide translations, per locale](#slide-translations-per-locale).
 
 **Texts & Typography**
 
@@ -483,7 +500,7 @@ What each one gates:
 
 | Checkbox | Fields it activates |
 | --- | --- |
-| Media | This locale's images and videos, for all three breakpoints |
+| Media | This locale's images and videos, for all three breakpoints — same hover-to-remove tiles as the base form |
 | Layout | Position, align, padding, margin, width, max height, radius, class |
 | Colors | Text, headline, description, background, media overlay |
 | Effects | Animation type, duration, delay, blur preset and strength |

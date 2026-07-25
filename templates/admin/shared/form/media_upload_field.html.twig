@@ -1,0 +1,111 @@
+{# One media slot of the slide form: a hoverable preview tile, the file input
+   and — for videos — the external-URL input, all inside one
+   `vanssa-image-upload-preview` controller scope.
+
+   Params:
+   - field: the FileType FormView (required)
+   - kind: 'image' (default) or 'video' — picks the tile element and icon
+   - media_path: the currently stored path/URL, or null
+   - remove_field: the unmapped "remove this media" CheckboxType FormView, or
+     null to render a tile with no remove control
+   - url_field: the external-video-URL TextType FormView (video slots only)
+   - preview_id: DOM id for the tile's media element
+   - row_options: extra options forwarded to form_row(field) #}
+{% set previewId = preview_id|default('preview-' ~ random()) %}
+{% set kind = kind|default('image') %}
+{% set mediaPath = media_path|default(null) %}
+{# Not |default(null): a leaf FormView is Countable(0), which Twig's `default`
+   filter treats as empty and would silently null out. #}
+{% set removeField = remove_field is defined ? remove_field : null %}
+{% set urlField = url_field is defined ? url_field : null %}
+{% set rowOptions = row_options|default({}) %}
+{# Two independent states. `is-empty` means the slot holds nothing, so there is
+   nothing to remove and no × renders. `is-unpreviewable` means the slot IS
+   filled but has nothing to paint — an external provider reference (YouTube)
+   has no local file to play — so the icon placeholder stands in while the ×
+   stays reachable. #}
+{% set isEmbed = kind == 'video' and mediaPath is not empty and vanssa_video_embed_url(mediaPath, false) is not empty %}
+{% set hasPreviewableMedia = mediaPath is not empty and not isEmbed %}
+{% set tileClasses = [mediaPath is empty ? 'is-empty' : '', isEmbed ? 'is-unpreviewable' : '']|filter(c => c is not empty)|join(' ') %}
+
+<div
+    class="row g-3 align-items-start mb-3"
+    {{ stimulus_controller('vanssa-image-upload-preview') }}
+    data-vanssa-media-kind="{{ kind }}"
+>
+    <div class="col-auto">
+        <div class="vanssa-media-tile {{ tileClasses }}" {{ stimulus_target('vanssa-image-upload-preview', 'tile') }}>
+            {% if kind == 'video' %}
+                {# preload="metadata" is enough to paint the first frame as a
+                   still; the tile never plays. #}
+                <video
+                    id="{{ previewId }}"
+                    class="vanssa-media-tile__media"
+                    muted
+                    playsinline
+                    preload="metadata"
+                    {% if hasPreviewableMedia %}src="{{ mediaPath }}"{% endif %}
+                    {{ stimulus_target('vanssa-image-upload-preview', 'preview') }}
+                ></video>
+            {% else %}
+                <span
+                    id="{{ previewId }}"
+                    class="vanssa-media-tile__media"
+                    style="{{ hasPreviewableMedia ? "background-image: url('" ~ mediaPath ~ "')" : '' }}"
+                    {{ stimulus_target('vanssa-image-upload-preview', 'preview') }}
+                ></span>
+            {% endif %}
+
+            <span class="vanssa-media-tile__placeholder" aria-hidden="true">
+                {{ ux_icon(kind == 'video' ? 'tabler:video' : 'tabler:photo', {'class': 'icon'}) }}
+            </span>
+
+            {% if removeField is not null %}
+                <button
+                    type="button"
+                    class="vanssa-media-tile__remove"
+                    data-action="vanssa-image-upload-preview#remove"
+                    title="{{ 'vanssa_sylius_slider.ui.remove_media'|trans }}"
+                    aria-label="{{ 'vanssa_sylius_slider.ui.remove_media'|trans }}"
+                >
+                    {{ ux_icon('tabler:x', {'class': 'icon'}) }}
+                </button>
+                <button
+                    type="button"
+                    class="vanssa-media-tile__undo"
+                    data-action="vanssa-image-upload-preview#undo"
+                    title="{{ 'vanssa_sylius_slider.ui.undo_removal'|trans }}"
+                    aria-label="{{ 'vanssa_sylius_slider.ui.undo_removal'|trans }}"
+                >
+                    {{ ux_icon('tabler:arrow-back-up', {'class': 'icon'}) }}
+                </button>
+            {% endif %}
+        </div>
+
+        {% if removeField is not null %}
+            {# Marks the slot for deletion on save. A hidden checkbox still
+               submits when checked, so no extra state has to be mirrored. #}
+            <div class="d-none">
+                {{ form_widget(removeField, { attr: {
+                    'data-vanssa-image-upload-preview-target': 'remove',
+                } }) }}
+            </div>
+            <div class="vanssa-media-tile__pending small mt-1">
+                {{ 'vanssa_sylius_slider.ui.removed_on_save'|trans }}
+            </div>
+        {% endif %}
+    </div>
+    <div class="col">
+        {{ form_row(field, rowOptions|merge({
+            attr: (rowOptions.attr|default({}))|merge({
+                'data-action': 'change->vanssa-image-upload-preview#update',
+                'data-vanssa-image-upload-preview-target': 'input',
+            }),
+        })) }}
+        {% if urlField is not null %}
+            {{ form_row(urlField, { attr: {
+                'data-vanssa-image-upload-preview-target': 'url',
+            } }) }}
+        {% endif %}
+    </div>
+</div>

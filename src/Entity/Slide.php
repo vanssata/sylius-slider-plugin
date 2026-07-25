@@ -393,13 +393,28 @@ class Slide implements ResourceInterface, TranslatableInterface
      * Groups identical breakpoint media so the template renders each
      * distinct video/image only once, tagged with its breakpoints.
      *
+     * $onlyBreakpoint collapses the result to that breakpoint's effective
+     * media, tagged with ALL breakpoints so the template renders it without
+     * the media-query-gated `--on-*` classes. The admin previews need this:
+     * they render inside a turbo-frame sharing the admin page's viewport, so
+     * a CSS media query could only ever select the desktop variant — the same
+     * reason PreviewBreakpointFlattener bakes the settings in server-side.
+     *
      * @return array<int, array{type: 'video'|'image', src: string, breakpoints: array<int, string>}>
      */
-    public function getLocalizedMediaGroups(string $locale, ?string $fallbackLocale = null): array
+    public function getLocalizedMediaGroups(string $locale, ?string $fallbackLocale = null, ?string $onlyBreakpoint = null): array
     {
+        $breakpoints = ['desktop', 'tablet', 'mobile'];
+
+        if (null !== $onlyBreakpoint) {
+            $media = $this->getLocalizedMediaForBreakpoint($onlyBreakpoint, $locale, $fallbackLocale);
+
+            return null === $media ? [] : [$media + ['breakpoints' => $breakpoints]];
+        }
+
         $groups = [];
 
-        foreach (['desktop', 'tablet', 'mobile'] as $breakpoint) {
+        foreach ($breakpoints as $breakpoint) {
             $media = $this->getLocalizedMediaForBreakpoint($breakpoint, $locale, $fallbackLocale);
             if (null === $media) {
                 continue;

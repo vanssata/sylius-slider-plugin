@@ -293,6 +293,14 @@ Details that decide what actually renders:
 - An **external URL wins over the upload** for its slot. Clearing the URL
   field removes the external video from that slot (an uploaded file is
   untouched by this).
+- Each slot can also be cleared without a replacement upload: the × on the
+  slot's preview tile (see *Media* in
+  [admin-guide.md](admin-guide.md#slide-media-and-settings-per-breakpoint))
+  checks an unmapped `slideCover{,Mobile,Tablet}Remove` /
+  `slideCoverVideo{,Mobile,Tablet}Remove` checkbox that blanks the column on
+  save — the video checkbox blanks the external URL too, since it shares
+  the same column. Picking a new file for the slot overrides a pending
+  removal.
 - Only YouTube links are accepted: `youtube.com/watch?v=…`,
   `youtube.com/embed/…`, `/shorts/…`, `/live/…` — with or without
   `www.`/`m.` and in their `youtube-nocookie.com` variants — plus

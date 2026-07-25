@@ -33,11 +33,18 @@ use Vanssa\SyliusSliderPlugin\Video\VideoProviderRegistry;
 
 final class SlideType extends AbstractType
 {
-    /** @var array<string, array{url: string, getter: string, setter: string}> file field => external-URL wiring per video slot */
+    /** @var array<string, array{url: string, remove: string, getter: string, setter: string}> file field => external-URL wiring per video slot */
     private const VIDEO_SLOTS = [
-        'slideCoverVideoFile' => ['url' => 'slideCoverVideoUrl', 'getter' => 'getSlideCoverVideo', 'setter' => 'setSlideCoverVideo'],
-        'slideCoverVideoMobileFile' => ['url' => 'slideCoverVideoMobileUrl', 'getter' => 'getSlideCoverVideoMobile', 'setter' => 'setSlideCoverVideoMobile'],
-        'slideCoverVideoTabletFile' => ['url' => 'slideCoverVideoTabletUrl', 'getter' => 'getSlideCoverVideoTablet', 'setter' => 'setSlideCoverVideoTablet'],
+        'slideCoverVideoFile' => ['url' => 'slideCoverVideoUrl', 'remove' => 'slideCoverVideoRemove', 'getter' => 'getSlideCoverVideo', 'setter' => 'setSlideCoverVideo'],
+        'slideCoverVideoMobileFile' => ['url' => 'slideCoverVideoMobileUrl', 'remove' => 'slideCoverVideoMobileRemove', 'getter' => 'getSlideCoverVideoMobile', 'setter' => 'setSlideCoverVideoMobile'],
+        'slideCoverVideoTabletFile' => ['url' => 'slideCoverVideoTabletUrl', 'remove' => 'slideCoverVideoTabletRemove', 'getter' => 'getSlideCoverVideoTablet', 'setter' => 'setSlideCoverVideoTablet'],
+    ];
+
+    /** @var array<string, array{remove: string, setter: string, directory: string}> file field => storage wiring per image slot */
+    private const IMAGE_SLOTS = [
+        'slideCoverFile' => ['remove' => 'slideCoverRemove', 'setter' => 'setSlideCover', 'directory' => 'slider/base-cover'],
+        'slideCoverMobileFile' => ['remove' => 'slideCoverMobileRemove', 'setter' => 'setSlideCoverMobile', 'directory' => 'slider/base-cover-mobile'],
+        'slideCoverTabletFile' => ['remove' => 'slideCoverTabletRemove', 'setter' => 'setSlideCoverTablet', 'directory' => 'slider/base-cover-tablet'],
     ];
 
     public function __construct(
@@ -124,6 +131,8 @@ final class SlideType extends AbstractType
             ])
         ;
 
+        self::addMediaRemovalFields($builder);
+
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             $slide = $event->getData();
             if (!$slide instanceof Slide) {
@@ -192,22 +201,19 @@ final class SlideType extends AbstractType
                 $slide->setUrl(null);
             }
 
-            /** @var UploadedFile|null $cover */
-            $cover = $form->get('slideCoverFile')->getData();
-            if ($cover instanceof UploadedFile) {
-                $slide->setSlideCover($this->uploadedMediaStorage->store($cover, 'slider/base-cover'));
-            }
+            // A fresh upload always wins; otherwise the "remove" flag from the
+            // media tile's × empties the slot.
+            foreach (self::IMAGE_SLOTS as $fileField => $slot) {
+                $upload = $form->get($fileField)->getData();
+                if ($upload instanceof UploadedFile) {
+                    $slide->{$slot['setter']}($this->uploadedMediaStorage->store($upload, $slot['directory']));
 
-            /** @var UploadedFile|null $mobile */
-            $mobile = $form->get('slideCoverMobileFile')->getData();
-            if ($mobile instanceof UploadedFile) {
-                $slide->setSlideCoverMobile($this->uploadedMediaStorage->store($mobile, 'slider/base-cover-mobile'));
-            }
+                    continue;
+                }
 
-            /** @var UploadedFile|null $tablet */
-            $tablet = $form->get('slideCoverTabletFile')->getData();
-            if ($tablet instanceof UploadedFile) {
-                $slide->setSlideCoverTablet($this->uploadedMediaStorage->store($tablet, 'slider/base-cover-tablet'));
+                if (true === $form->get($slot['remove'])->getData()) {
+                    $slide->{$slot['setter']}(null);
+                }
             }
 
             // External video URLs win over file uploads for their slot; a
@@ -244,9 +250,37 @@ final class SlideType extends AbstractType
                 $video = $form->get($fileField)->getData();
                 if ($video instanceof UploadedFile) {
                     $slide->{$slot['setter']}($this->uploadedMediaStorage->store($video, 'slider/base-cover-video'));
+
+                    continue;
+                }
+
+                if (true === $form->get($slot['remove'])->getData()) {
+                    $slide->{$slot['setter']}(null);
                 }
             }
         });
+    }
+
+    /**
+     * One unmapped "remove this media" checkbox per image/video slot, toggled
+     * by the × on the slot's preview tile
+     * (admin/shared/form/media_upload_field.html.twig). Unmapped and
+     * label-less: the tile owns the whole interaction.
+     */
+    private static function addMediaRemovalFields(FormBuilderInterface $builder): void
+    {
+        $removeFields = array_merge(
+            array_column(self::IMAGE_SLOTS, 'remove'),
+            array_column(self::VIDEO_SLOTS, 'remove'),
+        );
+
+        foreach ($removeFields as $field) {
+            $builder->add($field, CheckboxType::class, [
+                'required' => false,
+                'mapped' => false,
+                'label' => false,
+            ]);
+        }
     }
 
     /**

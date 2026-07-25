@@ -421,7 +421,11 @@ forms.
 - `SlideType` — `sliders` (`EntityType`), `channels`, six unmapped
   `FileType` upload fields (`slideCoverFile`, `slideCoverMobileFile`,
   `slideCoverTabletFile`, and the three video equivalents), three video URL
-  text fields, `position`, `enabled`, `settings` (`SlideSettingsType`),
+  text fields, six unmapped `CheckboxType` removal fields
+  (`slideCover{,Mobile,Tablet}Remove`,
+  `slideCoverVideo{,Mobile,Tablet}Remove`) toggled by the × on each media
+  tile and applied on `POST_SUBMIT` (a fresh upload always wins over a
+  pending removal), `position`, `enabled`, `settings` (`SlideSettingsType`),
   `addButton`/`buttonLabel`/`url`, `translations`.
 - `StylePresetType` — the `settings` child gets a
   `Form\DataTransformer\JsonArrayTransformer` model transformer, so the
@@ -457,7 +461,22 @@ SliderSettingsOverrideType               (SliderTranslation::$settings)
 `SlideTranslationType` follows the same idea with explicit opt-in
 checkboxes — `overrideMedia`, `overrideLayout`, `overrideColors`,
 `overrideEffects`, `overrideVisibility` — deciding which parts of the base
-slide the locale actually replaces.
+slide the locale actually replaces. It carries the same six unmapped media
+removal fields as `SlideType`, under the same names, so a locale's own
+media tiles clear and undo independently of the base slide's.
+
+Both forms' image/video fields render through one shared template,
+`templates/admin/shared/form/media_upload_field.html.twig` — a preview
+tile, its file input and, for video slots, the external-URL input, all
+inside one `vanssa-image-upload-preview` Stimulus controller scope. It
+replaces the old `image_upload_preview_field.html.twig`, which only
+covered images and had no removal control. The controller keeps its
+original name even though it now also drives the ×/undo removal state and
+the video tiles — renaming it would mean keeping four stimulus-bridge
+manifests in sync (see
+[adding-a-stimulus-controller.md](adding-a-stimulus-controller.md)). Tile
+styling is `assets/admin/styles/media_tile.scss`, imported from
+`assets/admin/entrypoint.js`.
 
 Choice options are not hard-coded in the form types: they call
 `SettingsPresetProvider::values()` and `safeDefault()` with the
@@ -580,12 +599,28 @@ and unsaved form state.
   `flattenSlideSettings()` collapses `responsive.desktop|tablet|mobile` down
   to the effective desktop variant. Both then clear the responsive block.
   Without this the preview frame — which shares the admin viewport — could
-  only ever show desktop.
+  only ever show desktop. Slide **media** lives in entity columns, not the
+  settings JSON, so the flattener cannot bake it in the same way:
+  `Slide::getLocalizedMediaGroups()` takes an optional `$onlyBreakpoint`
+  that collapses the result to that one breakpoint's effective media,
+  tagged with all three breakpoints so it renders unconditionally instead
+  of behind a `vanssa-slide__media--on-<breakpoint>` class the admin
+  viewport could never match. `SlideComponent` and `SliderComponent` expose
+  this as a `previewBreakpoint` prop, which `SlidePreviewController` and
+  `SliderPreviewController` set from the request's `breakpoint` query
+  parameter and the two preview templates pass straight through to the shop
+  components — the same breakpoint used for the settings flattening above,
+  so settings and media always agree on what the preview shows.
 - **Drafts.** Both controllers have an `applyDraftOverrides()` that takes an
   `overrides` parameter (POST body or query string) containing a raw
   bracket-notation form snapshot — `slider[settings][…]`,
   `slider[translations][<locale>][settings][…]` — `parse_str`s it and merges
   it into the in-memory entity. Nothing is flushed.
+  `SlidePreviewController` also reads the media removal checkboxes out of
+  that snapshot (`applyMediaRemovals()`), so a slot the admin just cleared
+  with a tile's × drops out of the preview before the form is saved. An
+  unchecked checkbox submits nothing, so the key's mere presence in the
+  draft means "flagged for removal".
 
 Both preview controllers accept `channel`, `locale`, `breakpoint` and
 `overrides`, call `$this->profiler?->disable()` so the web debug toolbar
@@ -703,7 +738,7 @@ values: `vanssa-slider`, `vanssa-slide-video`, `vanssa-slider-settings`,
 `assets/admin/entrypoint.js` carries only what must run eagerly outside
 Stimulus: `Turbo.session.drive = false` (without it Turbo Drive hijacks
 every Sylius admin navigation), the sidebar focus behaviour for
-`/admin/(sliders|slides|style-presets)`, and the five admin stylesheet
+`/admin/(sliders|slides|style-presets)`, and the six admin stylesheet
 imports. `assets/shop/entrypoint.js` is comment-only; the file exists
 because `vendor/sylius/test-application/webpack.config.js` hard-codes it as
 the `plugin-shop-entry` entry. Storefront CSS arrives through the `slider`

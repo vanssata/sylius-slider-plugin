@@ -30,6 +30,22 @@ final readonly class SlidePreviewController
     private const DEFAULT_LOCALE_SENTINEL = '__default__';
 
     /**
+     * The slide form's unmapped "remove this media" checkboxes (see
+     * SlideType/SlideTranslationType), so a slot the admin just cleared with
+     * the tile's × disappears from the preview before the form is saved.
+     *
+     * @var array<string, string> checkbox field => setter
+     */
+    private const MEDIA_REMOVAL_FIELDS = [
+        'slideCoverRemove' => 'setSlideCover',
+        'slideCoverMobileRemove' => 'setSlideCoverMobile',
+        'slideCoverTabletRemove' => 'setSlideCoverTablet',
+        'slideCoverVideoRemove' => 'setSlideCoverVideo',
+        'slideCoverVideoMobileRemove' => 'setSlideCoverVideoMobile',
+        'slideCoverVideoTabletRemove' => 'setSlideCoverVideoTablet',
+    ];
+
+    /**
      * @param ChannelRepositoryInterface<ChannelInterface> $channelRepository
      * @param array<int, string> $shopEntrypoints
      */
@@ -104,6 +120,10 @@ final readonly class SlidePreviewController
             'themeName' => $channel->getThemeName(),
             'shopEntrypoints' => $this->shopEntrypoints,
             'sliderSettings' => $sliderSettings,
+            // Media lives in entity columns, not settings, so the flattener
+            // above cannot bake it in — the component resolves it per
+            // breakpoint instead.
+            'breakpoint' => $breakpoint,
         ]));
     }
 
@@ -162,6 +182,8 @@ final readonly class SlidePreviewController
             $slide->setSlideSettings(array_replace_recursive($slide->getSlideSettings(), $baseSettings));
         }
 
+        self::applyMediaRemovals($slide, $slideData);
+
         if ($isDefault) {
             return;
         }
@@ -197,6 +219,23 @@ final readonly class SlidePreviewController
 
         if (isset($localeData['url']) && is_string($localeData['url'])) {
             $translation->setUrl($localeData['url']);
+        }
+
+        self::applyMediaRemovals($translation, $localeData);
+    }
+
+    /**
+     * An unchecked checkbox submits nothing, so the key's mere presence in the
+     * draft means "this slot is flagged for removal".
+     *
+     * @param array<string, mixed> $data the draft's slide or translation branch
+     */
+    private static function applyMediaRemovals(Slide|SlideTranslation $target, array $data): void
+    {
+        foreach (self::MEDIA_REMOVAL_FIELDS as $field => $setter) {
+            if (array_key_exists($field, $data)) {
+                $target->{$setter}(null);
+            }
         }
     }
 

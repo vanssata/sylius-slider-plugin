@@ -22,4 +22,12 @@ final class SlideComponent
     public array $sliderSettings = [];
 
     public bool $lazyLoad = false;
+
+    /**
+     * Admin previews only: renders the slide as ONE breakpoint would look,
+     * because the preview frame shares the admin page's viewport and no media
+     * query can select the tablet/mobile variants there. Null on the
+     * storefront, where the real viewport does the selecting.
+     */
+    public ?string $previewBreakpoint = null;
 }

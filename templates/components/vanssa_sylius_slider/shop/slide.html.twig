@@ -214,8 +214,11 @@
     {{ stimulus_target('vanssa-slider', 'slide') }}>
     {# Each breakpoint resolves its own media (video wins over image,
        missing mobile/tablet media falls back to desktop); identical media
-       renders once and is shown per breakpoint via CSS classes. #}
-    {% set mediaGroups = this.slide.localizedMediaGroups(this.localeCode, this.fallbackLocaleCode) %}
+       renders once and is shown per breakpoint via CSS classes. In an admin
+       preview `previewBreakpoint` collapses that to the one requested
+       breakpoint, rendered unconditionally — the preview frame shares the
+       admin viewport, so the CSS classes would always pick desktop. #}
+    {% set mediaGroups = this.slide.localizedMediaGroups(this.localeCode, this.fallbackLocaleCode, this.previewBreakpoint) %}
     {% for media in mediaGroups %}
         {% set breakpointClasses = media.breakpoints|map(bp => 'vanssa-slide__media--on-' ~ bp)|join(' ') %}
         {% set allBreakpoints = media.breakpoints|length == 3 %}

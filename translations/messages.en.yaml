@@ -25,6 +25,9 @@ vanssa_sylius_slider:
         custom_preset: custom
         edit_slide: Edit slide
         open_full_editor: Open full editor
+        remove_media: Remove this media
+        undo_removal: Undo removal
+        removed_on_save: Removed on save
 
 vanssa:
     sylius:

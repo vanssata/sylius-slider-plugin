@@ -23,11 +23,18 @@ use Vanssa\SyliusSliderPlugin\Video\VideoProviderRegistry;
 
 final class SlideTranslationType extends AbstractType
 {
-    /** @var array<string, array{url: string, getter: string, setter: string}> file field => external-URL wiring per video slot */
+    /** @var array<string, array{url: string, remove: string, getter: string, setter: string}> file field => external-URL wiring per video slot */
     private const VIDEO_SLOTS = [
-        'slideCoverVideoFile' => ['url' => 'slideCoverVideoUrl', 'getter' => 'getSlideCoverVideo', 'setter' => 'setSlideCoverVideo'],
-        'slideCoverVideoMobileFile' => ['url' => 'slideCoverVideoMobileUrl', 'getter' => 'getSlideCoverVideoMobile', 'setter' => 'setSlideCoverVideoMobile'],
-        'slideCoverVideoTabletFile' => ['url' => 'slideCoverVideoTabletUrl', 'getter' => 'getSlideCoverVideoTablet', 'setter' => 'setSlideCoverVideoTablet'],
+        'slideCoverVideoFile' => ['url' => 'slideCoverVideoUrl', 'remove' => 'slideCoverVideoRemove', 'getter' => 'getSlideCoverVideo', 'setter' => 'setSlideCoverVideo'],
+        'slideCoverVideoMobileFile' => ['url' => 'slideCoverVideoMobileUrl', 'remove' => 'slideCoverVideoMobileRemove', 'getter' => 'getSlideCoverVideoMobile', 'setter' => 'setSlideCoverVideoMobile'],
+        'slideCoverVideoTabletFile' => ['url' => 'slideCoverVideoTabletUrl', 'remove' => 'slideCoverVideoTabletRemove', 'getter' => 'getSlideCoverVideoTablet', 'setter' => 'setSlideCoverVideoTablet'],
+    ];
+
+    /** @var array<string, array{remove: string, setter: string}> file field => setter per image slot */
+    private const IMAGE_SLOTS = [
+        'slideCoverFile' => ['remove' => 'slideCoverRemove', 'setter' => 'setSlideCover'],
+        'slideCoverMobileFile' => ['remove' => 'slideCoverMobileRemove', 'setter' => 'setSlideCoverMobile'],
+        'slideCoverTabletFile' => ['remove' => 'slideCoverTabletRemove', 'setter' => 'setSlideCoverTablet'],
     ];
 
     public function __construct(
@@ -129,6 +136,8 @@ final class SlideTranslationType extends AbstractType
             ])
         ;
 
+        self::addMediaRemovalFields($builder);
+
         // Unmapped children must be populated in POST_SET_DATA — the data
         // mapper resets them to their configured data right after PRE_SET_DATA.
         $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event): void {
@@ -198,21 +207,22 @@ final class SlideTranslationType extends AbstractType
                 }
             }
 
-            foreach ([
-                'slideCoverFile' => 'setSlideCover',
-                'slideCoverMobileFile' => 'setSlideCoverMobile',
-                'slideCoverTabletFile' => 'setSlideCoverTablet',
-                'slideCoverVideoFile' => 'setSlideCoverVideo',
-                'slideCoverVideoMobileFile' => 'setSlideCoverVideoMobile',
-                'slideCoverVideoTabletFile' => 'setSlideCoverVideoTablet',
-            ] as $field => $setter) {
+            // A fresh upload always wins; otherwise the "remove" flag from the
+            // media tile's × empties the slot.
+            foreach (self::IMAGE_SLOTS + self::VIDEO_SLOTS as $field => $slot) {
                 if (isset($externalHandled[$field])) {
                     continue;
                 }
 
                 $file = $form->get($field)->getData();
                 if ($file instanceof UploadedFile) {
-                    $translation->{$setter}($this->uploadedMediaStorage->store($file, 'slider/translation-cover'));
+                    $translation->{$slot['setter']}($this->uploadedMediaStorage->store($file, 'slider/translation-cover'));
+
+                    continue;
+                }
+
+                if (true === $form->get($slot['remove'])->getData()) {
+                    $translation->{$slot['setter']}(null);
                 }
             }
 
@@ -237,6 +247,27 @@ final class SlideTranslationType extends AbstractType
             $slideCode = $slide instanceof Slide ? $slide->getCode() : null;
             $translation->setName(is_string($desktopTitle) && '' !== trim($desktopTitle) ? $desktopTitle : $slideCode);
         });
+    }
+
+    /**
+     * One unmapped "remove this media" checkbox per image/video slot, toggled
+     * by the × on the slot's preview tile
+     * (admin/shared/form/media_upload_field.html.twig).
+     */
+    private static function addMediaRemovalFields(FormBuilderInterface $builder): void
+    {
+        $removeFields = array_merge(
+            array_column(self::IMAGE_SLOTS, 'remove'),
+            array_column(self::VIDEO_SLOTS, 'remove'),
+        );
+
+        foreach ($removeFields as $field) {
+            $builder->add($field, CheckboxType::class, [
+                'required' => false,
+                'mapped' => false,
+                'label' => false,
+            ]);
+        }
     }
 
     /**

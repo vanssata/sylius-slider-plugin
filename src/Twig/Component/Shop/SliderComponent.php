@@ -23,6 +23,9 @@ final class SliderComponent
 
     public ?string $fallbackLocaleCode = null;
 
+    /** Admin previews only — see {@see SlideComponent::$previewBreakpoint}. */
+    public ?string $previewBreakpoint = null;
+
     /**
      * @return array<int, Slide>
      */

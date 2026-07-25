@@ -282,6 +282,56 @@ final class SlideOverridesTest extends TestCase
         self::assertSame('/media/de.mp4', $slide->getLocalizedMediaGroups('de_DE')[0]['src']);
     }
 
+    /**
+     * $onlyBreakpoint collapses the result to that one breakpoint's effective
+     * media (mirroring getLocalizedMediaForBreakpoint()), tagged with ALL
+     * THREE breakpoints so the shop template renders it unconditionally
+     * instead of behind the media-query-gated `--on-*` CSS classes.
+     */
+    public function testOnlyBreakpointCollapsesToASingleGroupTaggedWithAllBreakpoints(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideCoverMobile('/media/mobile-cover.jpg');
+        // No tablet cover is set: it must fall back to the desktop cover.
+
+        $mobileGroups = $slide->getLocalizedMediaGroups('en_US', null, 'mobile');
+        self::assertCount(1, $mobileGroups);
+        self::assertSame('image', $mobileGroups[0]['type']);
+        self::assertSame('/media/mobile-cover.jpg', $mobileGroups[0]['src']);
+        self::assertSame(['desktop', 'tablet', 'mobile'], $mobileGroups[0]['breakpoints']);
+
+        $desktopGroups = $slide->getLocalizedMediaGroups('en_US', null, 'desktop');
+        self::assertCount(1, $desktopGroups);
+        self::assertSame('/media/base-cover.jpg', $desktopGroups[0]['src']);
+        self::assertSame(['desktop', 'tablet', 'mobile'], $desktopGroups[0]['breakpoints']);
+
+        $tabletGroups = $slide->getLocalizedMediaGroups('en_US', null, 'tablet');
+        self::assertCount(1, $tabletGroups);
+        self::assertSame('/media/base-cover.jpg', $tabletGroups[0]['src'], 'Tablet has no cover of its own, so it must fall back to the desktop cover.');
+        self::assertSame(['desktop', 'tablet', 'mobile'], $tabletGroups[0]['breakpoints']);
+    }
+
+    public function testOnlyBreakpointPrefersVideoOverImageForTheSameBreakpoint(): void
+    {
+        $slide = $this->createSlide();
+        $slide->setSlideCoverVideo('/media/base.mp4');
+
+        $groups = $slide->getLocalizedMediaGroups('en_US', null, 'desktop');
+
+        self::assertCount(1, $groups);
+        self::assertSame('video', $groups[0]['type']);
+        self::assertSame('/media/base.mp4', $groups[0]['src']);
+        self::assertSame(['desktop', 'tablet', 'mobile'], $groups[0]['breakpoints']);
+    }
+
+    public function testOnlyBreakpointReturnsEmptyArrayWhenSlideHasNoMediaAtAll(): void
+    {
+        $slide = new Slide();
+        $slide->setCode('empty-slide');
+
+        self::assertSame([], $slide->getLocalizedMediaGroups('en_US', null, 'desktop'));
+    }
+
     private function createSlide(): Slide
     {
         $slide = new Slide();

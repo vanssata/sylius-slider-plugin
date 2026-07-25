@@ -7,9 +7,9 @@
 {% set slide_entity = form.parent.parent.vars.data|default(null) %}
 {% set toolbar_driven = slide_entity is not null and slide_entity.id is not null %}
 {% set translation_breakpoints = [
-    { key: 'desktop', icon: 'tabler:device-desktop', image_field: form.slideCoverFile, image_path: translation ? translation.slideCover : null, video_field: form.slideCoverVideoFile, video_url_field: form.slideCoverVideoUrl, video_path: translation ? translation.slideCoverVideo : null },
-    { key: 'mobile', icon: 'tabler:device-mobile', image_field: form.slideCoverMobileFile, image_path: translation ? translation.slideCoverMobile : null, video_field: form.slideCoverVideoMobileFile, video_url_field: form.slideCoverVideoMobileUrl, video_path: translation ? translation.slideCoverVideoMobile : null },
-    { key: 'tablet', icon: 'tabler:device-tablet', image_field: form.slideCoverTabletFile, image_path: translation ? translation.slideCoverTablet : null, video_field: form.slideCoverVideoTabletFile, video_url_field: form.slideCoverVideoTabletUrl, video_path: translation ? translation.slideCoverVideoTablet : null },
+    { key: 'desktop', icon: 'tabler:device-desktop', image_field: form.slideCoverFile, image_path: translation ? translation.slideCover : null, image_remove_field: form.slideCoverRemove, video_field: form.slideCoverVideoFile, video_url_field: form.slideCoverVideoUrl, video_path: translation ? translation.slideCoverVideo : null, video_remove_field: form.slideCoverVideoRemove },
+    { key: 'mobile', icon: 'tabler:device-mobile', image_field: form.slideCoverMobileFile, image_path: translation ? translation.slideCoverMobile : null, image_remove_field: form.slideCoverMobileRemove, video_field: form.slideCoverVideoMobileFile, video_url_field: form.slideCoverVideoMobileUrl, video_path: translation ? translation.slideCoverVideoMobile : null, video_remove_field: form.slideCoverVideoMobileRemove },
+    { key: 'tablet', icon: 'tabler:device-tablet', image_field: form.slideCoverTabletFile, image_path: translation ? translation.slideCoverTablet : null, image_remove_field: form.slideCoverTabletRemove, video_field: form.slideCoverVideoTabletFile, video_url_field: form.slideCoverVideoTabletUrl, video_path: translation ? translation.slideCoverVideoTablet : null, video_remove_field: form.slideCoverVideoTabletRemove },
 ] %}
 
 <div class="col-12 vanssa-slider-admin" data-controller="vanssa-slider-settings vanssa-responsive-copy">
@@ -81,9 +81,11 @@
                     media: {
                         image_field: breakpoint.image_field,
                         image_path: breakpoint.image_path,
+                        image_remove_field: breakpoint.image_remove_field,
                         video_field: breakpoint.video_field,
                         video_url_field: breakpoint.video_url_field,
                         video_path: breakpoint.video_path,
+                        video_remove_field: breakpoint.video_remove_field,
                         preview_id: form.vars.id ~ '-' ~ breakpoint.key ~ '-preview',
                         video_help: 'Optional video for the ' ~ breakpoint.key ~ ' version of this locale.'
                     }

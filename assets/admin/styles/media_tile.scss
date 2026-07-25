@@ -1,0 +1,127 @@
+// One media slot's preview tile in the slide form
+// (templates/admin/shared/form/media_upload_field.html.twig).
+//
+// States, all driven by classes the image-upload-preview controller toggles:
+//   - filled            → the media fills the tile, × appears on hover/focus
+//   - .is-empty         → the icon placeholder shows, no × (nothing to remove)
+//   - .is-unpreviewable → filled but nothing to paint (an external YouTube
+//     reference): placeholder shows, × stays reachable
+//   - .is-media-removed on the row → the slot is flagged for deletion on save:
+//     the tile dims, "Removed on save" shows and × becomes an undo button.
+
+$vanssa-media-tile-size: 100%;
+
+.vanssa-media-tile {
+    position: relative;
+    width: $vanssa-media-tile-size;
+    height: 150px;
+    border: 1px solid var(--tblr-border-color, #dadfe5);
+    border-radius: var(--tblr-border-radius, 4px);
+    overflow: hidden;
+    background-color: var(--tblr-bg-surface-secondary, #f1f5f9);
+
+    &__media {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    &__placeholder {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        color: var(--tblr-secondary, #667382);
+        pointer-events: none;
+    }
+
+    &.is-empty &__placeholder,
+    &.is-unpreviewable &__placeholder {
+        display: flex;
+    }
+
+    &__remove,
+    &__undo {
+        position: absolute;
+        top: 0.25rem;
+        right: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        color: #fff;
+        background: rgb(15 23 42 / 65%);
+        opacity: 0;
+        transition: opacity 0.15s ease, background-color 0.15s ease;
+
+        &:hover,
+        &:focus-visible {
+            background: rgb(15 23 42 / 90%);
+        }
+
+        .icon {
+            width: 0.875rem;
+            height: 0.875rem;
+        }
+    }
+
+    &__undo {
+        display: none;
+    }
+
+    // Hover the tile OR keyboard-focus the button: the × must be reachable
+    // without a pointer.
+    &:hover &__remove,
+    &__remove:focus-visible {
+        opacity: 1;
+    }
+
+    // Nothing stored and nothing picked — there is nothing to remove.
+    &.is-empty &__remove {
+        display: none;
+    }
+
+    &__pending {
+        display: none;
+        // Not Tabler's `.text-danger` (#d63939): at this size it lands under
+        // 4.5:1 on the card background and fails axe's color-contrast rule.
+        // `-text-emphasis` is the accessible pairing and Tabler already flips
+        // it per theme (#561717 light, #e68888 dark).
+        color: var(--tblr-danger-text-emphasis, #561717);
+    }
+}
+
+.is-media-removed {
+    .vanssa-media-tile {
+        // Dim the media, not the tile: opacity on the tile would fade the
+        // undo button sitting inside it too.
+        &__media,
+        &__placeholder {
+            opacity: 0.35;
+        }
+
+        &__remove {
+            display: none;
+        }
+
+        // The undo affordance stays visible: the removal only takes effect on
+        // save, and nothing else on the page says so.
+        &__undo {
+            display: flex;
+            opacity: 1;
+        }
+    }
+
+    .vanssa-media-tile__pending {
+        display: block;
+    }
+}

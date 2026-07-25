@@ -12,6 +12,7 @@
 import * as Turbo from '@hotwired/turbo';
 import './styles/rgba_color_picker.scss';
 import './styles/accordion.scss';
+import './styles/media_tile.scss';
 import './styles/preview_modal.scss';
 import './styles/preview_panel.scss';
 import './styles/slider_slides_preview.scss';

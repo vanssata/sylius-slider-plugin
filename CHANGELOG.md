@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Media slots can be cleared from the admin**: every image/video slot on
+  the slide form — base media and per-locale translation overrides alike —
+  is a preview tile. Hovering a filled tile reveals an ×; clicking it marks
+  the slot for deletion (the tile dims with *Removed on save* and the ×
+  becomes an undo button, since nothing is written until the form saves),
+  clears any file just picked for that slot, empties its *External video
+  URL* field, and refreshes the live preview immediately to show the
+  fallback that will apply. A newly picked file always overrides a pending
+  removal; an empty slot shows a placeholder icon and no ×. Backed by six
+  new unmapped checkboxes on `SlideType` and `SlideTranslationType`
+  (`slideCover{,Mobile,Tablet}Remove`,
+  `slideCoverVideo{,Mobile,Tablet}Remove`) and a new
+  `assets/admin/styles/media_tile.scss`; the `vanssa-image-upload-preview`
+  Stimulus controller keeps its identifier but now also drives the
+  removal/undo state and video tiles. **Template replaced**:
+  `templates/admin/shared/form/image_upload_preview_field.html.twig` is
+  gone, replaced by `templates/admin/shared/form/media_upload_field.html.twig`
+  (which now handles video slots too) — a project overriding the old
+  template path should move its override to the new one.
 - **End-to-end test suite (Playwright)** under `tests/e2e/`, run entirely in
   containers via a new `playwright` compose service (profile `e2e`, built from
   `docker/playwright/`). Entry points: `make e2e`, `make e2e-check SPEC=…`
@@ -139,6 +158,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Hook now points at `fashion-classic-arrows` instead of `homepage-main`.
 
 ### Fixed
+- **Admin preview showed the desktop image/video at every breakpoint**: the
+  preview renders in a `<turbo-frame>` sharing the admin page's viewport, so
+  the CSS media queries (and the shop's `matchMedia` JS) that pick a
+  slide's tablet/mobile media on the storefront could never match there —
+  switching the toolbar to Mobile or Tablet kept showing the desktop cover
+  even when a breakpoint-specific one was set. Fixed the same way
+  `PreviewBreakpointFlattener` already fixed this for settings: media is
+  now baked in server-side too — `Slide::getLocalizedMediaGroups()` takes
+  an optional `$onlyBreakpoint`, and `SlideComponent`/`SliderComponent` take
+  a `previewBreakpoint` prop that `SlidePreviewController` and
+  `SliderPreviewController` pass through from the `?breakpoint=` query
+  parameter.
 - **`composer run load-slider-demo-fixtures` always failed.** The script passed
   `--suite=vanssa_sylius_slider_demo`, but `sylius:fixtures:load` declares
   `suite` as a positional argument and has no `--suite` option, so the command

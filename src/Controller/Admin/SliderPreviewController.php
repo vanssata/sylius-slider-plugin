@@ -87,6 +87,10 @@ final readonly class SliderPreviewController
             'fallbackLocaleCode' => $fallbackLocaleCode,
             'themeName' => $channel->getThemeName(),
             'shopEntrypoints' => $this->shopEntrypoints,
+            // Media lives in entity columns, not settings, so the flattener
+            // above cannot bake it in — the component resolves it per
+            // breakpoint instead.
+            'breakpoint' => $breakpoint,
         ]));
     }
 
