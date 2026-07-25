@@ -30,6 +30,25 @@ when@prod:
             result_cache_driver:
                 type: pool
                 pool: doctrine.result_cache_pool
+
+when@dev:
+    # The test application's own monolog.yaml logs every channel at debug level
+    # into a single never-rotated file. Measured on a 100 MB sample of a grown
+    # var/log/dev.log: doctrine accounted for 74.5% of the bytes and event for
+    # 17.7% — together 92% — which is how that file reached 709 MB.
+    #
+    # Both channels stay fully visible in the web profiler (the Doctrine and
+    # Events panels collect independently of monolog handlers), so dropping
+    # them from the *file* costs nothing in practice while keeping request,
+    # security, php and error entries greppable. Rotation caps the rest.
+    monolog:
+        handlers:
+            main:
+                type: rotating_file
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: debug
+                max_files: 3
+                channels: ['!doctrine', '!event']
 sylius_twig_hooks:
     hooks:
         'sylius_shop.homepage.index':
