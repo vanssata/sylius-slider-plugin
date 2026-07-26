@@ -1089,10 +1089,14 @@ will not have it. Rules the plugin follows:
 - Never rename a JSON key without keeping the old one readable.
 
 Structural changes (new columns, new tables) do need a migration. The plugin
-ships its own under `src/Migrations` with the namespace `DoctrineMigrations`,
-registered through `PrependDoctrineMigrationsTrait` with the directory alias
-`@VanssaSyliusSliderPlugin/src/Migrations`. In a project, generate migrations
-into your own configured directory as usual:
+ships its own under `src/Migrations` with the namespace
+`VanssaSyliusSliderPluginMigrations`, registered through
+`PrependDoctrineMigrationsTrait` with the directory alias
+`@VanssaSyliusSliderPlugin/src/Migrations`. Those files keep their own
+top-level namespace despite living under the plugin's PSR-4 root, so
+`composer.json` excludes `/src/Migrations/` from the classmap — Doctrine
+loads them by path, not autoloading. In a project, generate migrations into
+your own configured directory as usual:
 
 ```bash
 docker compose run --rm php vendor/bin/console doctrine:migrations:diff

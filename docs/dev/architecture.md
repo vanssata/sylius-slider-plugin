@@ -113,7 +113,7 @@ containers (`docker compose run --rm php <cmd>`,
 │   ├── Service/                    UploadedMediaStorage
 │   ├── Menu/                       AdminMenuListener
 │   ├── Fixture/                    SliderDemoFixture
-│   └── Migrations/                 10 DoctrineMigrations\Version*.php files
+│   └── Migrations/                 10 VanssaSyliusSliderPluginMigrations\Version*.php files
 ├── templates/
 │   ├── admin/                      hook templates, grid fields, preview pages
 │   ├── components/vanssa_sylius_slider/  Twig component templates (admin + shop)
@@ -167,8 +167,9 @@ loads `config/services.xml`:
    (`is_bundle: false`, attribute driver, dir `src/Entity`, prefix
    `Vanssa\SyliusSliderPlugin\Entity`).
 3. Calls `prependDoctrineMigrations()` from
-   `PrependDoctrineMigrationsTrait`, with namespace `DoctrineMigrations`,
-   directory `@VanssaSyliusSliderPlugin/src/Migrations`, and
+   `PrependDoctrineMigrationsTrait`, with namespace
+   `VanssaSyliusSliderPluginMigrations`, directory
+   `@VanssaSyliusSliderPlugin/src/Migrations`, and
    `Sylius\Bundle\CoreBundle\Migrations` declared as executed before.
 
 The migration wiring is three overrides plus one call — the trait reads them
@@ -186,7 +187,7 @@ public function prepend(ContainerBuilder $container): void
 
 protected function getMigrationsNamespace(): string
 {
-    return 'DoctrineMigrations';
+    return 'VanssaSyliusSliderPluginMigrations';
 }
 
 protected function getMigrationsDirectory(): string
@@ -767,9 +768,17 @@ start, which is why watch mode is the supported workflow.
 
 ## Migrations
 
-`src/Migrations/` holds ten `DoctrineMigrations\Version*` classes, wired by
-`prependDoctrineMigrations()` in the extension. They are ordinary Doctrine
-migrations that run in the consuming application's migration namespace.
+`src/Migrations/` holds ten `VanssaSyliusSliderPluginMigrations\Version*`
+classes, wired by `prependDoctrineMigrations()` in the extension. They are
+ordinary Doctrine migrations, but they run in the plugin's own migration
+namespace rather than the consuming application's `DoctrineMigrations` — so
+they stay separate from whatever the host project generates.
+
+The files sit under `src/`, inside the `Vanssa\SyliusSliderPlugin\` PSR-4
+root, but declare their own top-level namespace instead — Doctrine loads
+migrations by path, not by class-loader autoloading, so `composer.json` lists
+`/src/Migrations/` under `autoload.exclude-from-classmap` to stop Composer
+warning that they don't comply with PSR-4.
 
 The history is worth knowing before you write the eleventh:
 
@@ -902,7 +911,7 @@ SliderPreviewController::__invoke
 | A form field on a resource | `src/Form/Type/{SliderType,SlideType,StylePresetType}.php` + the hook template that renders it under `templates/admin/<res>/form/sections/` | The field must be rendered by some hookable, or `render_rest: false` silently drops it. |
 | A Stimulus controller | `assets/{admin,shop}/controllers/` + all four manifests | See [adding-a-stimulus-controller.md](adding-a-stimulus-controller.md). Manifests are merged at webpack config-load time; the watcher must be restarted after any manifest edit. |
 | A route | custom routes at the **top** of `config/routes/admin.yaml` (before the `sylius.resource` imports) or an attribute on `src/Controller/Shop/SliderController.php` | Resource route imports claim broad paths; a custom route declared after them is unreachable. Shop routes are not locale-prefixed. |
-| A migration | `src/Migrations/Version<UTC timestamp>.php`, namespace `DoctrineMigrations` | Generate with `docker compose run --rm php vendor/bin/console doctrine:migrations:diff`, then review: the diff also contains the test application's own schema unless you trim it. |
+| A migration | `src/Migrations/Version<UTC timestamp>.php`, namespace `VanssaSyliusSliderPluginMigrations` | Generate with `docker compose run --rm php vendor/bin/console doctrine:migrations:diff`, then review: the diff also contains the test application's own schema unless you trim it. |
 | A template override (in a project) | your app's `templates/bundles/VanssaSyliusSliderPlugin/<same relative path>` | Only works for `@VanssaSyliusSliderPlugin/...` templates. Component templates are referenced from the `#[AsTwigComponent]` attribute, so overriding the file is the way to change them without replacing the class. |
 | A hook section in the admin | an entry in `config/twig_hooks/admin/<res>.yaml` + a template under `templates/admin/<res>/` | Disabling the vendor fallback (`default: { enabled: false }`) is often required, otherwise fields render twice. |
 | A grid column or action | `config/grids/admin/<res>.yaml`; custom action types also need an entry in the `sylius_grid.templates.action` prepend in `VanssaSyliusSliderExtension::prepend()` | `options.template` on an action does **not** select the template — the global map does. |

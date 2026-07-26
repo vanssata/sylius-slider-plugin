@@ -122,8 +122,8 @@ locale-prefixed like the rest of the storefront.
 ### Database
 
 The bundle registers its own migrations directory
-(`src/Migrations`, namespace `DoctrineMigrations`) through the DI extension,
-so the standard command picks them up:
+(`src/Migrations`, namespace `VanssaSyliusSliderPluginMigrations`) through the
+DI extension, so the standard command picks them up:
 
 ```bash
 bin/console doctrine:migrations:migrate -n

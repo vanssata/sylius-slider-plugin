@@ -93,7 +93,10 @@
     "autoload": {
         "psr-4": {
             "Vanssa\\SyliusSliderPlugin\\": "src/"
-        }
+        },
+        "exclude-from-classmap": [
+            "/src/Migrations/"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

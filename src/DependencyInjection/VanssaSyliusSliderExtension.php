@@ -66,7 +66,7 @@ final class VanssaSyliusSliderExtension extends AbstractResourceExtension implem
 
     protected function getMigrationsNamespace(): string
     {
-        return 'DoctrineMigrations';
+        return 'VanssaSyliusSliderPluginMigrations';
     }
 
     protected function getMigrationsDirectory(): string

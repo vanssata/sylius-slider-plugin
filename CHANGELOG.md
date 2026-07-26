@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **BC break**: the plugin's Doctrine migrations namespace is renamed from
+  `DoctrineMigrations` to `VanssaSyliusSliderPluginMigrations`
+  (`src/DependencyInjection/VanssaSyliusSliderExtension.php`, all ten classes
+  under `src/Migrations/`). Existing installations recorded these migrations
+  in the `sylius_migrations` table under the old `DoctrineMigrations\Version*`
+  names, so after upgrading they will show as not migrated — do **not**
+  re-run them blindly. Either rename the recorded version strings to the new
+  namespace, or mark them executed with `doctrine:migrations:version --add`.
+  `composer.json` also excludes `/src/Migrations/` from the classmap, since
+  those files keep their own top-level namespace instead of following the
+  plugin's PSR-4 root.
+
 ## [2.3.0] - 2026-07-25
 
 ### Added
