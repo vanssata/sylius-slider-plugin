@@ -10,6 +10,16 @@ twig:
         - '@VanssaSyliusSliderPlugin/form/theme/color_picker.html.twig'
 
 vanssa_sylius_slider:
+    preview:
+        # The plugin's default list ends with "app.shop:plugin-shop-entry", an
+        # entry that only exists in sylius/test-application. This project's
+        # Encore config (webpack.config.js) builds "shop-entry" and
+        # "app-shop-entry" instead — and the slider SCSS is autoimported by the
+        # "slider" Stimulus controller, so it ships inside app-shop-entry.css.
+        shop_entrypoints:
+            - 'shop:shop-entry'
+            - 'app.shop:app-shop-entry'
+
     presets:
         slider:
             container_width:
