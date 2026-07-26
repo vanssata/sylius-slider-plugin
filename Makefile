@@ -30,13 +30,14 @@ dev:
 	@make -s up
 
 # `compose.debug.yml` is not in this repository and never has been — it is a
-# per-developer overlay. The php service already runs Xdebug in debug mode
-# (compose.override.dist.yml), so this target is only for extra overrides on
-# top of that; fail with an explanation instead of a compose "no such file".
+# per-developer overlay. The php service ships Xdebug but keeps it off
+# (XDEBUG_MODE defaults to `off` in compose.override.dist.yml), so this target
+# is only for extra overrides; fail with an explanation instead of a compose
+# "no such file".
 debug:
 	@test -f compose.debug.yml || { \
 		echo "compose.debug.yml does not exist. It is a personal overlay, not part of the repository."; \
-		echo "The php service already sets XDEBUG_MODE=debug and PHP_IDE_CONFIG — plain 'make up' is usually enough."; \
+		echo "Xdebug is off by default — 'XDEBUG_MODE=debug make up' turns it on without this target."; \
 		echo "Create compose.debug.yml with your extra overrides if you need this target."; \
 		exit 1; \
 	}
