@@ -1,8 +1,47 @@
 {
   "bundles": {
-    "Vanssa\\SyliusSliderPlugin\\VanssaSyliusSliderPlugin": ["all"]
+    "Vanssa\\SyliusSliderPlugin\\VanssaSyliusSliderPlugin": [
+      "all"
+    ]
   },
   "copy-from-recipe": {
     "config/": "%CONFIG_DIR%/"
-  }
+  },
+  "add-lines": [
+    {
+      "file": "assets/shop/controllers.json",
+      "position": "after_target",
+      "target": "\"controllers\": {",
+      "warn_if_missing": true,
+      "content": "    \"@vanssa/sylius-slider-plugin\": {\n      \"slider\": {\n        \"enabled\": true,\n        \"fetch\": \"eager\",\n        \"autoimport\": {\n          \"@vanssa/sylius-slider-plugin/shop/styles/slider.scss\": true\n        }\n      },\n      \"slide-video\": {\n        \"enabled\": true,\n        \"fetch\": \"eager\"\n      }\n    },"
+    },
+    {
+      "file": "assets/admin/controllers.json",
+      "position": "after_target",
+      "target": "\"controllers\": {",
+      "warn_if_missing": true,
+      "content": "    \"@vanssa/sylius-slider-plugin\": {\n      \"slider\": {\n        \"enabled\": true,\n        \"fetch\": \"eager\",\n        \"autoimport\": {\n          \"@vanssa/sylius-slider-plugin/shop/styles/slider.scss\": true\n        }\n      },\n      \"slide-video\": {\n        \"enabled\": true,\n        \"fetch\": \"eager\"\n      },\n      \"slider-settings\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"slider-slides-preview\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"rgba-color-picker\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\",\n        \"autoimport\": {\n          \"@simonwep/pickr/dist/themes/classic.min.css\": true\n        }\n      },\n      \"responsive-copy\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"preview-frame\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"preset-applier\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"preset-gallery\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"form-context\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"animation-settings\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"image-upload-preview\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"mockup-picker\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      },\n      \"modal-portal\": {\n        \"enabled\": true,\n        \"fetch\": \"lazy\"\n      }\n    },"
+    }
+  ],
+  "post-install-output": [
+    "",
+    "  <bg=blue;fg=white> Vanssa Sylius Slider </>",
+    "",
+    "  The Stimulus controllers were added to <comment>assets/shop/controllers.json</> (storefront pair)",
+    "  and <comment>assets/admin/controllers.json</> (full set).",
+    "",
+    "  Finish the install:",
+    "",
+    "    * <comment>bin/console doctrine:migrations:migrate</> — creates the slider tables.",
+    "",
+    "    * <comment>yarn install --force</> then <comment>yarn build</> — Yarn Classic *copies* <comment>file:</> dependencies",
+    "      instead of symlinking them, so without <comment>--force</> it keeps serving a stale copy.",
+    "",
+    "    * <comment>bin/console assets:install</> — publishes the style-preset mockups.",
+    "",
+    "    * Register the plugin's admin entrypoint in your Encore config: it carries the Turbo",
+    "      Drive opt-out, the sidebar behavior and the admin styles. See the Frontend assets",
+    "      section of <comment>docs/usage/getting-started.md</>.",
+    ""
+  ]
 }

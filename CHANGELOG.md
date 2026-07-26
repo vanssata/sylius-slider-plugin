@@ -5,7 +5,49 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.3.2] - 2026-07-27
+
+### Changed
+- **Storefront builds stop compiling the 12 admin Stimulus controllers and
+  the Pickr stylesheet.** `assets/package.json`'s `symfony.controllers`
+  section keeps all 14 entries and their `main`/`name`/`fetch`/`autoimport`
+  values, but `enabled` is now a *seed* value for a consumer's root
+  `assets/controllers.json`: the storefront pair (`slider`, `slide-video`)
+  stays `true`, the 12 admin controllers seed as `false`. The Flex recipe
+  (`flex/recipes/vanssa/sylius-slider-plugin/2.3/manifest.json`) gained two
+  `add-lines` patches that write the storefront pair into a consumer's
+  `assets/shop/controllers.json` and the full 14-controller set into
+  `assets/admin/controllers.json` (the admin build still fetches `slider`
+  and `slide-video` eagerly, since the admin previews render the storefront
+  slider inside turbo-frames/iframes), plus `post-install-output` describing
+  the remaining manual steps. Both `sylius/sylius-standard` and
+  `vendor/sylius/test-application` merge `[assets/controllers.json,
+  assets/<context>/controllers.json]` with a shallow spread per package
+  key, so the per-context file replaces the root seed wholesale — the
+  measurable effect is that a consumer's storefront bundle no longer
+  compiles the admin controllers or the Pickr `classic.min.css` it never
+  used. `composer.json` still carries the `symfony-ux` keyword (so Flex
+  still adds the `file:` dependency and peerDependencies to a consumer's
+  `package.json`); the recipe deliberately does not patch `package.json`
+  itself. Existing consumers should run `composer recipes:update
+  vanssa/sylius-slider-plugin` to pick up the new recipe `ref`; see
+  `UPGRADE.md`. Versions: `composer.json` and `assets/package.json` both
+  bump to `2.3.2`.
+
+### Fixed
+- **The documented install command failed on a current
+  `sylius/sylius-standard`.** That skeleton locks `api-platform` at `4.3.x`,
+  which the plugin's `conflict` block forbids, so a plain `composer require`
+  aborted with *"conflicts with api-platform/doctrine-orm >=4.3"*. The
+  install docs now use `composer require vanssa/sylius-slider-plugin -W` so
+  the resolver may move those transitive packages down. Verified against a
+  throwaway `sylius/sylius-standard` project.
+- Documented what a manual (non-recipe) install has to do for the admin
+  workspace: without the recipe's per-context patches the root seed leaves
+  the 12 admin controllers `enabled: false`, so the storefront works but the
+  admin does not until those entries are wired by hand.
+
+## [2.3.1] - 2026-07-26
 
 ### Changed
 - **BC break**: the plugin's Doctrine migrations namespace is renamed from
@@ -608,6 +650,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   image/video slides, Symfony UX storefront rendering, Twig Hooks
   integration, demo fixtures, Behat and PHPUnit test setup.
 
+[2.3.2]: https://github.com/vanssata/sylius-slider-plugin/compare/2.3.1...2.3.2
+[2.3.1]: https://github.com/vanssata/sylius-slider-plugin/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/vanssata/sylius-slider-plugin/compare/2.2.9...2.3.0
 [2.2.9]: https://github.com/vanssata/sylius-slider-plugin/compare/2.2.8...2.2.9
 [2.2.8]: https://github.com/vanssata/sylius-slider-plugin/compare/2.2.7...2.2.8

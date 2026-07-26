@@ -38,6 +38,16 @@ its controllers.
 Composer will refuse to install those packages at `4.3.x` alongside this
 plugin; that is deliberate and not an error on your side.
 
+A current `sylius/sylius-standard` ships a lock file with `api-platform` at
+`4.3.x`, so a plain `composer require` stops with *"vanssa/sylius-slider-plugin
+2.3.2 conflicts with api-platform/doctrine-orm >=4.3"*. Add `-W`
+(`--with-all-dependencies`) so the resolver is allowed to move those
+transitive packages down:
+
+```bash
+composer require vanssa/sylius-slider-plugin -W
+```
+
 ## Install the package
 
 The commands below are the ones you run **in your own shop**. If you are
@@ -62,12 +72,14 @@ the bundle, the config import and the route imports for you:
 ```bash
 composer config --json extra.symfony.endpoint \
     '["https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/index.json","flex://defaults"]'
-composer require vanssa/sylius-slider-plugin
+composer require vanssa/sylius-slider-plugin -W
 ```
 
-The recipe writes exactly three things — the bundle entry in
-`config/bundles.php`, `config/packages/vanssa_sylius_slider.yaml` and
-`config/routes/vanssa_sylius_slider.yaml`. How the endpoint resolves, how to
+The recipe writes five things — the bundle entry in `config/bundles.php`,
+`config/packages/vanssa_sylius_slider.yaml`,
+`config/routes/vanssa_sylius_slider.yaml`, and the plugin's controller blocks
+in `assets/shop/controllers.json` and `assets/admin/controllers.json` (see
+[Frontend assets](#frontend-assets) below). How the endpoint resolves, how to
 regenerate it and how to smoke-test it before a release is documented in
 [../FLEX_RECIPE.md](../FLEX_RECIPE.md).
 
@@ -76,7 +88,7 @@ Continue with [Database](#database).
 ### Option B — wire it by hand
 
 ```bash
-composer require vanssa/sylius-slider-plugin
+composer require vanssa/sylius-slider-plugin -W
 ```
 
 ```php
@@ -149,22 +161,57 @@ core Flex's `PackageJsonSynchronizer` therefore adds
 }
 ```
 
-to your root `package.json` and seeds your `assets/controllers.json` with the
-plugin's controller block. This happens whether or not you configured the
-recipe endpoint in Option A — see
-[../FLEX_RECIPE.md](../FLEX_RECIPE.md#what-it-automates).
+to your root `package.json` and seeds your root `assets/controllers.json`
+with all 14 controllers — but only the storefront pair (`slider`,
+`slide-video`) `enabled: true`; the 12 admin controllers seed as `enabled:
+false`. This happens whether or not you configured the recipe endpoint in
+Option A — see [../FLEX_RECIPE.md](../FLEX_RECIPE.md#what-it-automates).
+
+If you used Option A, the recipe itself (independently of the Flex seeding
+above) also patches two per-context files: the storefront pair into
+`assets/shop/controllers.json`, and the full 14-controller set into
+`assets/admin/controllers.json`. Both `sylius/sylius-standard` and
+`vendor/sylius/test-application` build their Stimulus bridge manifest by
+merging `[assets/controllers.json, assets/<context>/controllers.json]` with a
+shallow spread per package key, so the per-context file **replaces** the
+whole `@vanssa/sylius-slider-plugin` object from the root file rather than
+merging into it — the per-context entries win in both builds, and the root
+seed is only a fallback for a project that has no per-context files at all.
+
+**If you used Option B**, nothing writes those per-context files for you, and
+the root seed alone leaves the 12 admin controllers `enabled: false` — the
+storefront works, the admin workspace does not. Either enable them in your
+root `assets/controllers.json`, or (better, and what the recipe does) copy the
+plugin's own `assets/admin/controllers.json` block from
+`vendor/vanssa/sylius-slider-plugin/assets/admin/controllers.json` into your
+`assets/admin/controllers.json`, and its `assets/shop/controllers.json` block
+into yours.
 
 Two of the controllers are the storefront pair (`slider` — Stimulus
 identifier `vanssa-slider`, and `slide-video` — `vanssa-slide-video`); the
 other twelve drive the admin workspace. The `slider` entry carries an
 `autoimport` for `@vanssa/sylius-slider-plugin/shop/styles/slider.scss`,
 which is how the storefront CSS reaches your build — you never import that
-file yourself.
+file yourself. Since 2.3.2 the storefront build only compiles this pair by
+default, so a shop bundle no longer pulls in the 12 admin controllers or the
+Pickr CSS (`rgba-color-picker`'s `autoimport`) it never used.
+
+**Edge case:** the recipe's patches are line-based (Flex `add-lines`,
+inserted right after the `"controllers": {` line). If your
+`assets/shop/controllers.json` or `assets/admin/controllers.json` has an
+*empty* `"controllers": {}` object, the inserted block lands as a top-level
+JSON key instead of inside `controllers` — the file stays valid JSON, but the
+bridge silently ignores the entries. If the file or the `"controllers": {`
+anchor is missing entirely, Flex prints the block instead of writing it. Both
+cases are easy to check for: the block should sit *inside* `controllers`, one
+level down from where you'd expect a fresh entry. The fix in either case is
+to paste the block into the `controllers` object by hand. Stock Sylius ships
+both files non-empty, so this only affects projects that changed them.
 
 Then build:
 
 ```bash
-yarn install
+yarn install --force
 yarn build
 bin/console assets:install
 bin/console cache:clear

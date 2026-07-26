@@ -7,16 +7,32 @@ consuming application's own `startStimulusApp()`. Nothing in this plugin starts
 a Stimulus application.
 
 That design has one cost: **four** manifests must carry the same controller key
-set. Today that is 14 keys — 2 shop controllers and 12 admin controllers. Get
-one of them wrong and the webpack build either fails with a confusing message
-or, worse, silently drops the controller from one context's bundle.
+set, plus a **fifth** place — the Flex recipe — that patches two of those keys
+into a consumer's own files. Today that is 14 keys — 2 shop controllers and 12
+admin controllers. Get one of them wrong and the webpack build either fails
+with a confusing message or, worse, silently drops the controller from one
+context's bundle.
 
 | File | Role |
 | --- | --- |
-| `assets/package.json` (`symfony.controllers`) | Authoritative source: `main`, `name`, `fetch`, `enabled`, `autoimport`. What Symfony Flex copies into a consumer project. |
+| `assets/package.json` (`symfony.controllers`) | Authoritative source: `main`, `name`, `fetch`, `enabled`, `autoimport`. What Symfony Flex copies into a consumer project. Since 2.3.2 `enabled` here is a *seed* value for a consumer's root `assets/controllers.json`, not the local build's own setting — see below. |
 | `assets/controllers.json` | This repo's own dev manifest. Mirrors the package defaults, all `enabled: true`. |
 | `assets/admin/controllers.json` | Per-context manifest for the admin Encore build. All 14 enabled, all `eager`. |
 | `assets/shop/controllers.json` | Per-context manifest for the shop Encore build. `slider` + `slide-video` enabled, the 12 admin controllers `enabled: false`. |
+| `flex/recipes/vanssa/sylius-slider-plugin/2.3/manifest.json` (`add-lines`) | The Flex recipe source. Two `add-lines` blocks patch the storefront pair into a consumer's `assets/shop/controllers.json` and the full 14-controller set into their `assets/admin/controllers.json`. Regenerate the archived recipe with `docker compose run --rm php php flex/build-recipes.php` after editing. See [../FLEX_RECIPE.md](../FLEX_RECIPE.md). |
+
+**`enabled` means two different things now.** In `assets/controllers.json`,
+`assets/admin/controllers.json` and `assets/shop/controllers.json`, `enabled`
+is read by *this repo's own* webpack build — get it wrong and a controller
+compiles into the wrong bundle here. In `assets/package.json`, `enabled` is
+only a *seed* for a fresh consumer's root `assets/controllers.json`: storefront
+controllers seed `true`, admin-only controllers seed `false`. The local build
+never reads `assets/package.json`'s `enabled` directly — it reads the merged
+`controllers.json` files — so the two deliberately diverge for the 12 admin
+controllers (`false` as a consumer seed, `true` in this repo's own admin
+manifest). The `manifest_sync` check (and the `jq`/`diff` snippet below)
+compares key sets only, not `enabled` values, so this divergence does not
+trip it.
 
 ## How registration actually resolves
 
@@ -136,12 +152,20 @@ the `files` allowlist of the published package.
                 "main": "admin/controllers/char_counter_controller.js",
                 "name": "vanssa-char-counter",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             }
         }
     }
 }
 ```
+
+`enabled` here is not this repo's own build setting — it is the *seed* value
+Flex writes into a fresh consumer's root `assets/controllers.json`. Storefront
+controllers seed `true`; admin-only controllers, like this one, seed `false`.
+The local build never reads this value directly (see steps 3–4 below), so
+getting it "wrong" does not break anything in this repo — it only changes what
+a brand-new consumer's root manifest looks like before the Flex recipe's
+per-context patches take over.
 
 If the controller needs a third-party package, add it to `dependencies` in the
 same file (this is how `@simonwep/pickr` reaches `rgba-color-picker`), and put
@@ -149,10 +173,10 @@ any stylesheet it needs in `autoimport` rather than importing it from a template
 
 ### 3. `assets/controllers.json`
 
-The repo's dev manifest. Every entry here is `enabled: true` — this file stands
-in for what Flex seeds into a consumer's `assets/controllers.json`, and the
-bridge manifest is the only registrar, so disabling anything here disables it
-outright.
+The repo's dev manifest. Every entry here is `enabled: true`, regardless of
+what `assets/package.json` seeds — this file is what this repo's own webpack
+build actually reads, and the bridge manifest is the only registrar, so
+disabling anything here disables it outright.
 
 ```json
 {
@@ -204,7 +228,40 @@ before emitting any import, so it costs nothing in the shop bundle.
 }
 ```
 
-### 6. The template
+### 6. The Flex recipe
+
+A fifth place, easy to forget because it lives outside `assets/`:
+`flex/recipes/vanssa/sylius-slider-plugin/2.3/manifest.json` has two
+`add-lines` entries that patch these same controllers into a *consumer's*
+per-context files on `composer require` — one targets
+`assets/shop/controllers.json`, the other `assets/admin/controllers.json`.
+Each `content` value is the per-controller JSON that gets inserted, escaped
+as a single string. Add the new controller to whichever block(s) match where
+it belongs — the shop block, the admin block, or both. `char-counter` is
+admin-only, so it only needs the admin block; add an entry shaped like the
+existing ones already in that block's `content` string:
+
+```json
+"char-counter": {
+    "enabled": true,
+    "fetch": "lazy"
+},
+```
+
+(with the quotes and newlines escaped to match the surrounding string — copy
+an existing entry's escaping rather than writing it from scratch). Then
+regenerate the archived recipe — run this in the container, there is no host
+PHP:
+
+```bash
+docker compose run --rm php php flex/build-recipes.php
+```
+
+That rewrites `flex/vanssa.sylius-slider-plugin.2.3.json` from the
+human-readable source. See [../FLEX_RECIPE.md](../FLEX_RECIPE.md) for how the
+recipe resolves and how to smoke-test it before a release.
+
+### 7. The template
 
 `stimulus_controller()` / `stimulus_target()` (symfony/stimulus-bundle) are used
 across the plugin's admin templates; raw `data-*` attributes work identically.
@@ -222,7 +279,7 @@ across the plugin's admin templates; raw `data-*` attributes work identically.
 </div>
 ```
 
-### 7. Restart the watcher, then check the browser
+### 8. Restart the watcher, then check the browser
 
 Manifests are merged when `webpack.config.js` is **loaded**, not when a file
 changes. A running `encore dev --watch` keeps building the previous controller
@@ -321,20 +378,22 @@ What the entrypoints legitimately contain:
 
 ## Renaming or removing a controller
 
-A rename is four manifest key renames plus the file rename plus every template
-reference to the identifier — `data-controller`, `data-action`, and the
+A rename is four manifest key renames, plus the matching key(s) in the Flex
+recipe's `add-lines` blocks (followed by `docker compose run --rm php php
+flex/build-recipes.php`), plus the file rename, plus every template reference
+to the identifier — `data-controller`, `data-action`, and the
 `data-<identifier>-*-target` / `-value` / `-param` attributes all embed it:
 
 ```bash
 grep -rn 'vanssa-char-counter' templates/ assets/ features/ tests/
 ```
 
-Removal is the same four manifests plus the file plus the template markup. Note
-that only the controller identifier carries the `vanssa-` prefix; unrelated
-literal data attributes used as markers (for example
-`data-slider-settings-*-only` or `data-vanssa-context-locale`) are matched by
-string in controller code and must be renamed together with that code, not with
-the identifier.
+Removal is the same set — four manifests, the recipe's `add-lines` blocks,
+the file, the template markup. Note that only the controller identifier
+carries the `vanssa-` prefix; unrelated literal data attributes used as
+markers (for example `data-slider-settings-*-only` or
+`data-vanssa-context-locale`) are matched by string in controller code and
+must be renamed together with that code, not with the identifier.
 
 ## Failure modes
 

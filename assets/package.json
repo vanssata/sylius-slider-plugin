@@ -1,6 +1,6 @@
 {
     "name": "@vanssa/sylius-slider-plugin",
-    "version": "2.3.0",
+    "version": "2.3.2",
     "description": "Stimulus controllers and styles for the Vanssa Sylius Slider Plugin (Symfony UX package)",
     "license": "MIT",
     "keywords": [
@@ -39,19 +39,19 @@
                 "main": "admin/controllers/slider_settings_controller.js",
                 "name": "vanssa-slider-settings",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "slider-slides-preview": {
                 "main": "admin/controllers/slider_slides_preview_controller.js",
                 "name": "vanssa-slider-slides-preview",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "rgba-color-picker": {
                 "main": "admin/controllers/rgba_color_picker_controller.js",
                 "name": "vanssa-rgba-color-picker",
                 "fetch": "lazy",
-                "enabled": true,
+                "enabled": false,
                 "autoimport": {
                     "@simonwep/pickr/dist/themes/classic.min.css": true
                 }
@@ -60,55 +60,55 @@
                 "main": "admin/controllers/responsive_copy_controller.js",
                 "name": "vanssa-responsive-copy",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "preview-frame": {
                 "main": "admin/controllers/preview_frame_controller.js",
                 "name": "vanssa-preview-frame",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "preset-applier": {
                 "main": "admin/controllers/preset_applier_controller.js",
                 "name": "vanssa-preset-applier",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "preset-gallery": {
                 "main": "admin/controllers/preset_gallery_controller.js",
                 "name": "vanssa-preset-gallery",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "form-context": {
                 "main": "admin/controllers/form_context_controller.js",
                 "name": "vanssa-form-context",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "animation-settings": {
                 "main": "admin/controllers/animation_settings_controller.js",
                 "name": "vanssa-animation-settings",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "image-upload-preview": {
                 "main": "admin/controllers/image_upload_preview_controller.js",
                 "name": "vanssa-image-upload-preview",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "mockup-picker": {
                 "main": "admin/controllers/mockup_picker_controller.js",
                 "name": "vanssa-mockup-picker",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             },
             "modal-portal": {
                 "main": "admin/controllers/modal_portal_controller.js",
                 "name": "vanssa-modal-portal",
                 "fetch": "lazy",
-                "enabled": true
+                "enabled": false
             }
         }
     },

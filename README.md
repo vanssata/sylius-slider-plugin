@@ -83,15 +83,23 @@ lifted.
 
 ```bash
 composer config --json extra.symfony.endpoint '["https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/index.json","flex://defaults"]'
-composer require vanssa/sylius-slider-plugin
+composer require vanssa/sylius-slider-plugin -W
 bin/console doctrine:migrations:migrate -n
-yarn install && yarn build && bin/console assets:install
+yarn install --force && yarn build && bin/console assets:install
 ```
 
-The Flex recipe registers the bundle, imports the config and mounts the admin
-and shop routes; core Flex's `PackageJsonSynchronizer` wires the 14 Stimulus
-controllers into your `assets/controllers.json`. Manual wiring, the frontend
-contract and the optional Twig Hooks homepage integration are in
+`--force` matters on the first install too: Yarn Classic *copies* `file:`
+dependencies into `node_modules` instead of symlinking them, so a plain
+`yarn install` can leave a stale copy of the plugin's assets in place.
+
+The Flex recipe registers the bundle, imports the config, mounts the admin
+and shop routes, and patches the storefront pair into your
+`assets/shop/controllers.json` and the full 14-controller set into your
+`assets/admin/controllers.json`. Separately, core Flex's
+`PackageJsonSynchronizer` seeds your root `assets/controllers.json` with all
+14 controllers, but only the storefront pair active — the per-context files
+above take precedence in both builds. Manual wiring, the frontend contract
+and the optional Twig Hooks homepage integration are in
 [docs/usage/getting-started.md](docs/usage/getting-started.md);
 [docs/FLEX_RECIPE.md](docs/FLEX_RECIPE.md) explains what the endpoint resolves
 and writes.
@@ -118,20 +126,25 @@ and writes.
 - [Contributing](docs/dev/contributing.md) — local setup and release flow
 - [Flex recipe](docs/FLEX_RECIPE.md) — how the recipe endpoint works
 
-[Changelog](CHANGELOG.md)
+[Changelog](CHANGELOG.md) · [Upgrade guide](UPGRADE.md)
 
 ## Upgrading
 
 ```bash
 composer update vanssa/sylius-slider-plugin
+composer recipes:update vanssa/sylius-slider-plugin
 bin/console doctrine:migrations:migrate -n
-yarn install && yarn build && bin/console assets:install
+yarn install --force && yarn build && bin/console assets:install
 ```
 
-Yarn Classic *copies* `file:` dependencies instead of symlinking them, so run
-`yarn install --force` if a rebuild does not pick up plugin asset changes.
-Check [CHANGELOG.md](CHANGELOG.md) for new config keys, migrations or
-controller manifest changes.
+`composer recipes:update` re-applies the Flex recipe's patches — this is what
+picks up a changed recipe `ref`, such as the controller-manifest split added
+in 2.3.2. Yarn Classic *copies* `file:` dependencies instead of symlinking
+them, so `yarn install --force` is not optional after an upgrade — a plain
+install can keep serving a stale copy of the plugin's assets. Check
+[CHANGELOG.md](CHANGELOG.md) for new config keys, migrations or controller
+manifest changes; see [UPGRADE.md](UPGRADE.md) for the 2.3.2 controller-split
+migration specifically.
 
 ## License
 

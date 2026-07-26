@@ -138,16 +138,18 @@ The plugin is a proper Symfony UX package now: controllers register **only**
 through the `@symfony/stimulus-bridge` manifest, inside the consuming app's own
 `startStimulusApp()`. When adding, renaming, or removing a Stimulus controller
 in `assets/admin/controllers/` or `assets/shop/controllers/`, **four** places
-must stay in sync (identical key sets, all 14 controllers), or the webpack
-build breaks or runs stale code:
+must stay in sync (identical key sets, all 14 controllers), plus a **fifth**
+— the Flex recipe, see below — or the webpack build breaks or runs stale
+code:
 
 - `assets/package.json`'s embedded `"symfony": { "controllers": {...} }`
   section — the authoritative source (`main` file path, registered `name`,
   `fetch`, `enabled`, `autoimport`) that Flex copies into a fresh consumer
   project and that `@symfony/stimulus-bridge` resolves for npm-package
   installs.
-- `assets/controllers.json` — this repo's own top-level dev manifest, mirrors
-  the package.json defaults (`enabled: true` throughout).
+- `assets/controllers.json` — this repo's own top-level dev manifest
+  (`enabled: true` throughout — see the `enabled` divergence noted below;
+  this file no longer mirrors `assets/package.json`'s values one-for-one).
 - `assets/admin/controllers.json` — per-context manifest for
   sylius/test-application's admin Encore build (all 14 enabled, all fetched
   eagerly for admin dev convenience).
@@ -196,8 +198,8 @@ merged config for `app-admin-entry` + `plugin-admin-entry` created TWO
 Stimulus applications, double-firing everything. Now that the entrypoints
 never start a Stimulus app or register anything themselves, the bridge
 manifest is the *only* registrar, so `enabled: true` is required, not
-optional — this mirrors what Symfony Flex seeds into a fresh consumer
-project's `assets/controllers.json` on `composer require` (see README). The
+optional, for every controller in *this repo's own* manifests — see the
+divergence from what Flex seeds into a fresh consumer project below. The
 `live` controller (`@symfony/ux-live-component`, registered by the test app's
 own `controllers.json`) is unaffected by any of this.
 
@@ -205,6 +207,26 @@ If the manifests disagree, expect "Controller ... does not exist in the
 package" or "contains a reference to the file ..." build errors, or (worse) a
 controller silently missing from one context's build because the shallow
 merge dropped it.
+
+**A fifth place, outside `assets/`:** the Flex recipe
+(`flex/recipes/vanssa/sylius-slider-plugin/2.3/manifest.json`)'s `add-lines`
+blocks patch the same controller keys into a *consumer's*
+`assets/shop/controllers.json` and `assets/admin/controllers.json` on
+`composer require`. Adding, renaming or removing a controller means updating
+these blocks too (shop, admin, or both, depending on where the controller
+belongs), then regenerating the archived recipe with `docker compose run
+--rm php php flex/build-recipes.php`. See `docs/dev/adding-a-stimulus-controller.md`
+and `docs/FLEX_RECIPE.md`.
+
+**`enabled` in `assets/package.json` now deliberately diverges from this
+repo's own `controllers.json` files.** Since 2.3.2 it is a *seed* value for a
+fresh consumer's root `assets/controllers.json` — storefront controllers
+`true`, admin-only controllers `false` — not a setting this repo's build
+reads. The local build reads `enabled` from the merged `controllers.json`
+files instead, where every entry stays `true` (see "Why `enabled: true` is
+correct now" above). The `manifest_sync` check (and the `jq`/`diff` fallback)
+compares key sets only, not `enabled` values, so this divergence does not
+trip it.
 
 **LiveComponent morphing:** ux-live-component 2.31 morphs with idiomorph, which matches nodes by real `id` attributes only — `data-live-id` does nothing. Any list a LiveComponent re-renders while outside code mutates its DOM (drag reorder, modals re-parented to `<body>`) needs a unique `id` on every row (and stable ids on sibling anchors), or re-renders duplicate rows. `data-model` selects also need explicit `selected` attributes rendered from the server prop.
 
