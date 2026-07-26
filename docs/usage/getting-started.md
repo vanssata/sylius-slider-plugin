@@ -229,7 +229,62 @@ symlinking them, and a plain `yarn install` does not refresh that copy when
 only the plugin's source files changed. After upgrading the plugin, run
 `yarn install --force` before `yarn build` if a change does not show up.
 
-#### Encore entries
+#### Entrypoints
+
+The plugin's `assets/admin/entrypoint.js` carries three things that have to run
+outside Stimulus, so it has to reach your build one way or another:
+
+- `Turbo.session.drive = false` — the plugin depends on `@hotwired/turbo` for
+  its preview frames. Without this line Turbo Drive intercepts every link and
+  form submit in the whole Sylius admin, which is not built for it.
+- the sidebar behavior that keeps the Slider Management group open on
+  `/admin/sliders`, `/admin/slides` and `/admin/style-presets`,
+- the admin stylesheets (`accordion.scss`, `preview_panel.scss`,
+  `preview_modal.scss`, `rgba_color_picker.scss`,
+  `slider_slides_preview.scss`).
+
+Skip it and nothing errors — every controller still loads and runs — but the
+settings panel renders inline and expanded instead of as an overlay, every
+sidebar group stays expanded, and Turbo Drive hijacks the admin. That silence
+is why the recipe now wires it for you.
+
+The **shop** entrypoint is a comment-only file. It registers nothing and
+imports nothing — the storefront styles arrive through the `slider`
+controller's `autoimport`. Including it is harmless and keeps the contract if a
+future release adds eager shop-side code; leaving it out changes nothing today.
+
+Pick **one** of the two wirings below. Doing both loads the admin styles and
+the sidebar handler twice.
+
+##### Option A — let the recipe do it (default since 2.3.4)
+
+If you installed through the Flex endpoint, this already happened: the recipe
+prepends the imports to your own entrypoints, and there is nothing to do.
+
+```js
+// assets/admin/entrypoint.js — added by the recipe
+import '@vanssa/sylius-slider-plugin/admin/entrypoint';
+```
+
+```js
+// assets/shop/entrypoint.js — added by the recipe
+import '@vanssa/sylius-slider-plugin/shop/entrypoint';
+```
+
+The specifier is the npm package name, which core Flex's
+`PackageJsonSynchronizer` guarantees is in your `package.json`; the package
+root maps to the plugin's `assets/` directory. Don't rewrite these to a
+`@vendor/...` alias — `@vendor` is a project-local Encore alias whose target
+differs between applications, and not every project defines one.
+
+`composer remove` strips the imports again, and re-running the recipe will not
+duplicate them.
+
+##### Option B — separate Encore entries
+
+The pre-2.3.4 wiring, still supported, and the right choice if you'd rather
+keep the plugin's CSS in its own bundle. Delete the imports from Option A
+first.
 
 A Sylius `webpack.config.js` exports several Encore configurations (one per
 build). Add the plugin's entrypoints next to your own admin and shop entries,
@@ -270,22 +325,6 @@ The third argument is the Encore *build* name the entry belongs to. Sylius
 splits its Encore output into several builds — `shop`, `admin`, `app.shop`
 and `app.admin` under `webpack_encore.builds` — so the entry name alone is
 not enough; use the same build name you registered the entry in.
-
-The **admin** entry is the one you cannot skip. It carries three things that
-have to run outside Stimulus:
-
-- `Turbo.session.drive = false` — the plugin depends on `@hotwired/turbo` for
-  its preview frames. Without this line Turbo Drive intercepts every link and
-  form submit in the whole Sylius admin, which is not built for it.
-- the sidebar behavior that keeps the Slider Management group open on
-  `/admin/sliders`, `/admin/slides` and `/admin/style-presets`,
-- the admin stylesheets (`accordion.scss`, `preview_panel.scss`,
-  `preview_modal.scss`, `rgba_color_picker.scss`,
-  `slider_slides_preview.scss`).
-
-The **shop** entry is a comment-only file. It registers nothing and imports
-nothing — the storefront styles arrive through the `slider` controller's
-`autoimport`. Including it is harmless; leaving it out changes nothing.
 
 Neither entrypoint calls `startStimulusApp()` or registers a controller: the
 bridge manifest is the only registrar. If you register one of the plugin's

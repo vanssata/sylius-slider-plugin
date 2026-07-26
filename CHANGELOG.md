@@ -5,6 +5,40 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.4] - 2026-07-27
+
+### Added
+- **The Flex recipe now registers the plugin's entrypoints.** Two new
+  `add-lines` patches in
+  `flex/recipes/vanssa/sylius-slider-plugin/2.3/manifest.json` prepend
+  `import '@vanssa/sylius-slider-plugin/admin/entrypoint';` to a consumer's
+  `assets/admin/entrypoint.js` and the `shop` counterpart to
+  `assets/shop/entrypoint.js`. This was previously a manual step that
+  `post-install-output` only *described*, and skipping it failed silently:
+  every Stimulus controller still loaded and ran, so nothing errored, but the
+  admin lost `Turbo.session.drive = false` (Turbo Drive then hijacked every
+  admin navigation), the sidebar-focus behavior, and all five admin
+  stylesheets — leaving the settings panel rendered inline and expanded
+  instead of as an overlay, with every sidebar group expanded.
+
+  Both patches use `"position": "top"` rather than the `"after_target"` used
+  by the controller-manifest patches: an `entrypoint.js` has no stable anchor
+  string to target, and `after_target` with a target that isn't found does not
+  fail the install — Flex prints the lines and writes nothing, which would
+  have reproduced exactly the silent breakage the patches exist to prevent.
+  The specifier is the npm package name (guaranteed present in a consumer's
+  `package.json` by core Flex's `PackageJsonSynchronizer`, with the package
+  root mapping to the plugin's `assets/` directory), *not* a `@vendor/...`
+  Encore alias — `@vendor` resolves to `<root>/vendor` in `sylius-standard`
+  but to `../..` in `vendor/sylius/test-application`, and nothing guarantees a
+  consumer defines it at all.
+
+  Both patches are idempotent (`AddLinesConfigurator` skips content already
+  present) and `composer remove` strips them again. Consumers who wire the
+  entrypoints as separate Encore entries — the pre-2.3.4 instructions, still
+  documented as Option B in `docs/usage/getting-started.md` — should delete
+  the injected imports, or the admin styles and sidebar handler load twice.
+
 ## [2.3.2] - 2026-07-27
 
 ### Changed

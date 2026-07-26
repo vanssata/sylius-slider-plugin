@@ -9,6 +9,18 @@
   },
   "add-lines": [
     {
+      "file": "assets/shop/entrypoint.js",
+      "position": "top",
+      "warn_if_missing": true,
+      "content": "import '@vanssa/sylius-slider-plugin/shop/entrypoint';"
+    },
+    {
+      "file": "assets/admin/entrypoint.js",
+      "position": "top",
+      "warn_if_missing": true,
+      "content": "import '@vanssa/sylius-slider-plugin/admin/entrypoint';"
+    },
+    {
       "file": "assets/shop/controllers.json",
       "position": "after_target",
       "target": "\"controllers\": {",
@@ -28,7 +40,8 @@
     "  <bg=blue;fg=white> Vanssa Sylius Slider </>",
     "",
     "  The Stimulus controllers were added to <comment>assets/shop/controllers.json</> (storefront pair)",
-    "  and <comment>assets/admin/controllers.json</> (full set).",
+    "  and <comment>assets/admin/controllers.json</> (full set), and the plugin's entrypoints were",
+    "  imported at the top of <comment>assets/admin/entrypoint.js</> and <comment>assets/shop/entrypoint.js</>.",
     "",
     "  Finish the install:",
     "",
@@ -39,9 +52,9 @@
     "",
     "    * <comment>bin/console assets:install</> — publishes the style-preset mockups.",
     "",
-    "    * Register the plugin's admin entrypoint in your Encore config: it carries the Turbo",
-    "      Drive opt-out, the sidebar behavior and the admin styles. See the Frontend assets",
-    "      section of <comment>docs/usage/getting-started.md</>.",
+    "  If you already register the plugin's entrypoints as separate Encore entries, drop the",
+    "  imports just added — otherwise the admin styles and sidebar handler load twice. See the",
+    "  Frontend assets section of <comment>docs/usage/getting-started.md</>.",
     ""
   ]
 }

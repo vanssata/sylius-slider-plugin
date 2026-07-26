@@ -39,6 +39,10 @@ On `composer require vanssa/sylius-slider-plugin`:
   `assets/admin/controllers.json` (the admin build fetches `slider` and
   `slide-video` eagerly too, since the admin previews render the storefront
   slider inside turbo-frames/iframes)
+- Two `add-lines` patches prepending the plugin's UX-package entrypoints to the
+  consumer's own — `import '@vanssa/sylius-slider-plugin/admin/entrypoint';`
+  into `assets/admin/entrypoint.js`, and the `shop` counterpart into
+  `assets/shop/entrypoint.js` (see [Entrypoint patches](#entrypoint-patches))
 - `post-install-output` printing the remaining manual steps
 
 The two controller patches are Flex `add-lines`, inserted right after the
@@ -52,7 +56,43 @@ nothing. Stock Sylius ships both files non-empty, so this only affects
 projects that changed them; the fix is pasting the block into `controllers`
 by hand.
 
-These five are what *this* endpoint/recipe adds. Separately — and
+### Entrypoint patches
+
+The admin entrypoint is not optional decoration: it carries the Turbo Drive
+opt-out (`Turbo.session.drive = false`), the sidebar-focus behavior and the
+five admin stylesheets. Without it the admin workspace renders with the
+settings panel inline and expanded instead of as an overlay, every sidebar
+group expanded, and Turbo Drive hijacking every admin navigation — the
+controllers all load and run, so nothing errors, which makes it an easy
+misconfiguration to miss. Until 2.3.4 this was a manual step printed by
+`post-install-output`; it is now patched in.
+
+Two details of these patches are load-bearing:
+
+- **`"position": "top"`, not `"after_target"`.** The controller patches anchor
+  on `"controllers": {`, a string that exists in the target JSON. An
+  `entrypoint.js` has no comparable stable anchor — a consumer's file may start
+  with `import './bootstrap.js';`, a comment, or other plugins' imports. With
+  `after_target` and a target that is not found, Flex does not fail: it prints
+  the lines and writes nothing, so the install looks clean and the admin stays
+  broken. `top` needs no anchor and only requires the file to exist.
+- **The npm package name, not a webpack alias.** `@vanssa/sylius-slider-plugin`
+  is guaranteed present in the consumer's `package.json` because core Flex's
+  `PackageJsonSynchronizer` puts it there (see below), and the package root
+  maps to the plugin's `assets/` directory — so `admin/entrypoint` resolves to
+  `assets/admin/entrypoint.js`. A `@vendor/...`-style alias would be wrong:
+  `@vendor` is a project-local Encore alias whose meaning differs per app
+  (`<root>/vendor` in `sylius-standard`, but `../..` in
+  `vendor/sylius/test-application`), and nothing guarantees a consumer defines
+  it at all.
+
+Both patches are idempotent — `AddLinesConfigurator` skips a file that already
+contains the exact content string — and `composer remove` strips the lines
+again. A consumer who instead wires the entrypoints as separate Encore entries
+(the pre-2.3.4 instructions, still valid) should delete the injected imports,
+or the styles and the sidebar handler load twice.
+
+These six are what *this* endpoint/recipe adds. Separately — and
 independently of this endpoint — `composer.json` also carries the
 `symfony-ux` keyword, which Symfony Flex recognizes natively (this is core
 Flex's `PackageJsonSynchronizer`, not something the recipe defines) — it is
@@ -79,11 +119,10 @@ it. That is why the recipe's per-context patches above take precedence over
 the root seed in both builds — the root manifest only matters as a fallback
 for a project with no per-context files.
 
-The remaining manual steps are building the assets (`yarn install --force`,
-`yarn build`, `bin/console assets:install`) and including the plugin's
-`assets/admin/entrypoint.js` / `assets/shop/entrypoint.js` in your Encore
-entries — see the README's Frontend setup section for the full contract
-(Turbo drive opt-out, admin styles, sidebar behavior).
+The only remaining manual step is building the assets (`yarn install --force`,
+`yarn build`, `bin/console assets:install`). Registering the plugin's
+entrypoints used to be manual too; the recipe now patches them in (see
+[Entrypoint patches](#entrypoint-patches)).
 
 ## Consumer wiring
 
