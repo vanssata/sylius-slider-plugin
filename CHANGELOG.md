@@ -31,10 +31,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `package.json`); the recipe deliberately does not patch `package.json`
   itself. Existing consumers should run `composer recipes:update
   vanssa/sylius-slider-plugin` to pick up the new recipe `ref`; see
-  `UPGRADE.md`. Versions: `composer.json` and `assets/package.json` both
-  bump to `2.3.2`.
+  `UPGRADE.md`. `assets/package.json` bumps to `2.3.2`.
 
 ### Fixed
+- **CI could not go green.** `composer validate --ansi --strict` failed on
+  every leg because `composer.json` carried a `version` field, which Composer
+  warns about for a Packagist-published package and `--strict` promotes to an
+  error. The field is gone; the release version comes from the git tag, as it
+  did before 2.3.1. The Sylius `~2.1.0` matrix leg is now non-blocking: it
+  cannot build the test application's assets because
+  `symfony/ux-live-component` v2.36.0 ships an `assets/tsconfig.json` whose
+  `extends` points outside the installed package, and webpack pins
+  `enhanced-resolve` to `^5.19.0`, which trips over it. Neither problem
+  involves this plugin's code.
+- Dependabot now also watches the repository-root `package.json` (the
+  Playwright end-to-end toolchain); previously only `/assets` was configured,
+  so the pinned `@playwright/test` never received updates.
 - **The documented install command failed on a current
   `sylius/sylius-standard`.** That skeleton locks `api-platform` at `4.3.x`,
   which the plugin's `conflict` block forbids, so a plain `composer require`

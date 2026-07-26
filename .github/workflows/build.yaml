@@ -26,6 +26,16 @@ jobs:
 
         name: "Sylius ${{ matrix.sylius }}, PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}, ${{ matrix.database }}"
 
+        # The Sylius ~2.1.0 leg cannot currently build the test application's
+        # assets: symfony/ux-live-component v2.36.0 ships assets/tsconfig.json
+        # with "extends": "../../../tsconfig.package.json" — a path that only
+        # exists inside the symfony/ux monorepo — and enhanced-resolve (pinned
+        # to ^5.19.0 by webpack, so it cannot be downgraded) fails resolving it
+        # while processing dist/live.min.css. Nothing in this plugin is
+        # involved. The leg still runs so the signal stays visible, but it no
+        # longer fails the workflow; drop this once upstream ships a fix.
+        continue-on-error: ${{ matrix.sylius == '~2.1.0' }}
+
         strategy:
             fail-fast: false
             matrix:

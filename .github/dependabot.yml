@@ -11,6 +11,14 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 10
+# The published UX package lives in /assets; the repository root carries a
+# separate, private package.json with the Playwright end-to-end toolchain
+# (@playwright/test is pinned exactly, so it only moves when Dependabot bumps it).
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 10
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
