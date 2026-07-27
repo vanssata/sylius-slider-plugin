@@ -593,7 +593,12 @@ and unsaved form state.
   `_vanssa_slider_preview_channel` (constant
   `PreviewChannelContext::REQUEST_ATTRIBUTE`), which the preview controllers
   set before rendering, and throws `ChannelNotFoundException` otherwise —
-  so it never hijacks normal requests.
+  so it never hijacks normal requests. Since 2.3.5 the slider preview no
+  longer depends on it reaching `SliderComponent`: a channel-context miss on
+  the admin host (which does not have to match any channel hostname) is
+  cached for the rest of the request, so `SliderPreviewController` passes
+  its already-resolved channel straight through as an explicit `channelCode`
+  prop instead (`templates/admin/slider/preview.html.twig`).
 - **Breakpoints.** `Preview\PreviewBreakpointFlattener` bakes one breakpoint
   into the settings server-side. `flattenSliderSettings()` overlays
   `responsive.tablet` and then `responsive.mobile` onto the base settings;
@@ -899,7 +904,7 @@ SliderPreviewController::__invoke
   → admin/slider/preview.html.twig
       → admin/slide/preview/_assets.html.twig  shop CSS in a cascade layer
       → the same shop slider component as above
-        (PreviewChannelContext answers the channel lookup)
+        (channelCode prop passed explicitly — see "Channel" above)
 ```
 
 ## Where do I put a new X

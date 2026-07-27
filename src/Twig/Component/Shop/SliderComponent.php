@@ -27,11 +27,19 @@ final class SliderComponent
     public ?string $previewBreakpoint = null;
 
     /**
+     * Admin previews only — the admin host does not have to match any
+     * channel hostname, and a channel-context miss is cached for the whole
+     * request, so the preview passes its channel explicitly instead of
+     * relying on the request-based context.
+     */
+    public ?string $channelCode = null;
+
+    /**
      * @return array<int, Slide>
      */
     public function getEnabledSlides(): array
     {
-        $channelCode = $this->channelContext->getChannel()->getCode();
+        $channelCode = $this->channelCode ?? $this->channelContext->getChannel()->getCode();
 
         return array_values(array_filter(
             $this->slider->getOrderedSlides(),

@@ -5,6 +5,46 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.5] - 2026-07-27
+
+### Fixed
+- **The admin slider preview broke when the admin was served on a host that
+  matches no Sylius channel hostname.** Sylius's request-based
+  `ChannelContextInterface` resolves the current channel from the request's
+  host, and throws `ChannelNotFoundException` when nothing matches — which
+  is exactly what happens on an admin domain that was never meant to double
+  as a shop hostname. `SliderSlidesPreviewComponent` (the admin slides-list
+  LiveComponent shown on the slider edit page itself, not the preview
+  iframe) hit this indirectly: its template read
+  `sylius.channel.defaultLocale.code|default(null)` to pick a fallback
+  locale for slide titles/descriptions, and Twig's `default` filter quietly
+  turned the thrown exception into `null` — so every localized fallback text
+  silently disappeared from the preview with no error anywhere. The
+  component now exposes `getFallbackLocaleCode()`, which tries the channel
+  context first, falls back to one of the slider's own configured channels
+  (looked up via the newly injected `sylius.repository.channel`), then to
+  any enabled channel — a tier that resolves a channel without a default
+  locale falls through to the next — and only returns `null` if none
+  yield a locale;
+  `templates/components/vanssa_sylius_slider/admin/slider_slides_preview.html.twig`
+  now reads `this.fallbackLocaleCode` instead of reaching into `sylius.channel`
+  directly.
+- **The embedded storefront slider inside the admin preview iframe could
+  fail outright, not just lose localized text.** `Shop\SliderComponent::getEnabledSlides()`
+  called `$this->channelContext->getChannel()->getCode()` unconditionally to
+  filter slides by channel availability, and a channel-context miss is
+  cached for the rest of the request — so once anything earlier in the same
+  admin request failed to resolve a channel from the host, the cached
+  failure resurfaced here too, even though the preview controller had
+  already resolved a perfectly good channel of its own (from the slider's
+  configured channels, or the first enabled one). `SliderComponent` gains an
+  optional `channelCode` prop, documented as admin-preview-only;
+  `templates/admin/slider/preview.html.twig` now passes `channelCode:
+  channel.code` — the channel the preview controller already resolved —
+  and `getEnabledSlides()` prefers that explicit value over the
+  request-based channel context, which stays the code path for normal
+  storefront rendering, where it is expected to work.
+
 ## [2.3.4] - 2026-07-27
 
 ### Added

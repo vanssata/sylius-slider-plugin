@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace Vanssa\SyliusSliderPlugin\Twig\Component\Admin;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Sylius\Component\Channel\Context\ChannelContextInterface;
+use Sylius\Component\Channel\Context\ChannelNotFoundException;
+use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
+use Sylius\Component\Core\Model\ChannelInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
@@ -24,11 +29,59 @@ final class SliderSlidesPreviewComponent
     #[LiveProp]
     public int $sliderId;
 
+    /**
+     * @param ChannelRepositoryInterface<ChannelInterface> $channelRepository
+     */
     public function __construct(
         private readonly SliderRepository $sliderRepository,
         private readonly SlideRepository $slideRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly ChannelContextInterface $channelContext,
+        #[Autowire(service: 'sylius.repository.channel')]
+        private readonly ChannelRepositoryInterface $channelRepository,
     ) {
+    }
+
+    /**
+     * Fallback locale for the preview texts. The admin host does not have
+     * to match any channel hostname, so the request-based channel context
+     * may fail — fall back to the slider's own channels, then to any
+     * enabled channel. A tier that resolves a channel without a default
+     * locale falls through to the next one.
+     */
+    public function getFallbackLocaleCode(): ?string
+    {
+        try {
+            $channel = $this->channelContext->getChannel();
+            if ($channel instanceof ChannelInterface) {
+                $localeCode = $channel->getDefaultLocale()?->getCode();
+                if (null !== $localeCode) {
+                    return $localeCode;
+                }
+            }
+        } catch (ChannelNotFoundException) {
+        }
+
+        foreach ($this->getSlider()?->getChannelCodes() ?? [] as $channelCode) {
+            $channel = $this->channelRepository->findOneByCode($channelCode);
+            if ($channel instanceof ChannelInterface) {
+                $localeCode = $channel->getDefaultLocale()?->getCode();
+                if (null !== $localeCode) {
+                    return $localeCode;
+                }
+            }
+        }
+
+        foreach ($this->channelRepository->findEnabled() as $channel) {
+            if ($channel instanceof ChannelInterface) {
+                $localeCode = $channel->getDefaultLocale()?->getCode();
+                if (null !== $localeCode) {
+                    return $localeCode;
+                }
+            }
+        }
+
+        return null;
     }
 
     public function getSlider(): ?Slider

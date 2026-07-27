@@ -11,12 +11,13 @@
             {% include '@VanssaSyliusSliderPlugin/admin/slide/preview/_assets.html.twig' %}
         </div>
         <div class="vanssa-slider-slides-preview list-group" id="vanssa-slides-list" {{ stimulus_target('vanssa-slider-slides-preview', 'list') }}>
+            {% set fallbackLocaleCode = this.fallbackLocaleCode %}
             {% for slide in this.slides %}
                 {% set slideId = slide.id %}
                 {% set slideName = slide.name %}
                 {% set hasVideo = slide.slideCoverVideo %}
                 {% set hasImage = slide.slideCover %}
-                {% set localizedSettings = slide.localizedSlideSettings(app.request.locale, sylius.channel.defaultLocale.code|default(null)) %}
+                {% set localizedSettings = slide.localizedSlideSettings(app.request.locale, fallbackLocaleCode) %}
                 {% set responsiveDesktop = localizedSettings.responsive.desktop|default({}) %}
                 {% set slideTitle = responsiveDesktop.title|default('') %}
                 {% set slideDescription = responsiveDesktop.description|default('') %}
