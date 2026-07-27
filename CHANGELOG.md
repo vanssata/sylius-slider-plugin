@@ -5,6 +5,32 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **The documented `composer config --json extra.symfony.endpoint` command
+  dropped Sylius's own recipes endpoint.** `composer config --json` replaces
+  the whole array rather than appending to it, but `README.md`,
+  `docs/usage/getting-started.md` and `docs/FLEX_RECIPE.md` all showed a
+  two-entry command listing only this plugin's endpoint and
+  `flex://defaults`. Running it in a stock Sylius-Standard project — which
+  already ships
+  `https://api.github.com/repos/Sylius/SyliusRecipes/contents/index.json?ref=flex/main`
+  in that array — silently removed the Sylius entry, after which Sylius's
+  own recipes stopped resolving for every subsequent `composer require`. All
+  four occurrences (including the pre-release smoke test in
+  `docs/FLEX_RECIPE.md`, which was therefore not reproducing a realistic
+  consumer project) now list all three endpoints, with `flex://defaults`
+  last. Projects that ran the old command should restore the Sylius entry.
+
+### Added
+- **`README.md` documents the endpoint registration both ways** — the
+  `composer config` one-liner and the equivalent hand-edited `composer.json`
+  block — and gained an optional demo-fixtures step
+  (`sylius:fixtures:load vanssa_sylius_slider_demo -n`, suite name is
+  positional) plus an optional Twig Hooks homepage placement that chains
+  onto it, using the fixture suite's `fashion-classic-arrows` slider.
+
 ## [2.3.5] - 2026-07-27
 
 ### Fixed

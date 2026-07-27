@@ -71,9 +71,14 @@ the bundle, the config import and the route imports for you:
 
 ```bash
 composer config --json extra.symfony.endpoint \
-    '["https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/index.json","flex://defaults"]'
+    '["https://api.github.com/repos/Sylius/SyliusRecipes/contents/index.json?ref=flex/main","https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/index.json","flex://defaults"]'
 composer require vanssa/sylius-slider-plugin -W
 ```
+
+`composer config --json` **replaces** the whole array rather than appending to
+it, so list every endpoint the project needs in one command. The first entry
+above is Sylius-Standard's own recipe endpoint — omit it and Sylius's recipes
+stop resolving. Keep `flex://defaults` last; the list is searched in order.
 
 The recipe writes five things — the bundle entry in `config/bundles.php`,
 `config/packages/vanssa_sylius_slider.yaml`,

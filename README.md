@@ -81,11 +81,54 @@ lifted.
 
 ## Install
 
+### 1. Register the recipe endpoint
+
+The plugin ships its own [Flex recipe endpoint](docs/FLEX_RECIPE.md), which
+lets `composer require` auto-register the bundle, its config import, its
+routes and its Stimulus controller manifests. `composer config --json
+extra.symfony.endpoint` **replaces** the whole array, though: a stock
+Sylius-Standard project already lists Sylius's own recipes endpoint there,
+and a naive two-entry command silently drops it, after which Sylius's own
+recipes stop resolving.
+
+*Option A — with the `composer config` command:*
+
 ```bash
-composer config --json extra.symfony.endpoint '["https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/index.json","flex://defaults"]'
+composer config --json extra.symfony.endpoint '["https://api.github.com/repos/Sylius/SyliusRecipes/contents/index.json?ref=flex/main","https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/index.json","flex://defaults"]'
+```
+
+The first entry is Sylius's own recipes endpoint — keep it, since a plain
+Sylius-Standard project already ships it and this command has to restate the
+whole array. `flex://defaults` stays last: Flex tries each endpoint in order
+and falls back to it.
+
+*Option B — editing `composer.json` by hand*, for projects that prefer it,
+or whose `extra.symfony` block already carries other keys:
+
+```json
+{
+    "extra": {
+        "symfony": {
+            "endpoint": [
+                "https://api.github.com/repos/Sylius/SyliusRecipes/contents/index.json?ref=flex/main",
+                "https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/index.json",
+                "flex://defaults"
+            ]
+        }
+    }
+}
+```
+
+The plugin's entry goes before `flex://defaults` — order is significant,
+since Flex resolves endpoints in order and stops at the first match. This is
+equivalent to Option A.
+
+### 2. Install the package
+
+```bash
 composer require vanssa/sylius-slider-plugin -W
 bin/console doctrine:migrations:migrate -n
-yarn install --force && yarn build && bin/console assets:install
+yarn install --force && yarn build && bin/console assets:install && bin/console sylius:install:assets
 ```
 
 `--force` matters on the first install too: Yarn Classic *copies* `file:`
@@ -103,6 +146,54 @@ and the optional Twig Hooks homepage integration are in
 [docs/usage/getting-started.md](docs/usage/getting-started.md);
 [docs/FLEX_RECIPE.md](docs/FLEX_RECIPE.md) explains what the endpoint resolves
 and writes.
+
+### 3. Load the demo fixtures (optional)
+
+Optional — meant for trying the plugin out or developing against it, not for
+loading on a production shop:
+
+```bash
+bin/console sylius:fixtures:load vanssa_sylius_slider_demo -n
+```
+
+`sylius:fixtures:load` takes the suite name as a **positional argument** —
+there is no `--suite` option, and passing one aborts the command. The suite
+(`vanssa_sylius_slider_demo`, defined in `config/fixtures.yaml`) creates six
+demo sliders, one per shipped style preset, with bundled photos and a video
+clip. The full table of what it seeds is in
+[docs/usage/getting-started.md](docs/usage/getting-started.md#demo-fixtures).
+
+### Optional: homepage placement via Twig Hooks
+
+The plugin ships `config/twig_hooks/shop.yaml` with an **empty** hook map —
+it registers no storefront hookables of its own, so placement is your own
+project's configuration. Putting the fixture suite's
+`fashion-classic-arrows` slider on the homepage — the two steps chain
+together — looks like this:
+
+```yaml
+# config/packages/vanssa_sylius_slider.yaml
+sylius_twig_hooks:
+    hooks:
+        'sylius_shop.homepage.index':
+            banner:
+                enabled: false
+            vanssa_sylius_slider_homepage:
+                component: 'vanssa_sylius_slider:shop:homepage_slider'
+                props:
+                    code: 'fashion-classic-arrows'
+                priority: 400
+```
+
+`sylius_shop.homepage.index` is Sylius core's hookable; its own hookables
+are `banner` (priority 300), `latest_deals` (200), `new_collection` (100)
+and `latest_products` (0), so a priority above 300 puts the slider at the
+top. Disabling `banner` is optional — without it you get both. The
+`homepage_slider` component applies the channel restriction and renders
+nothing when no enabled slider matches the code and channel — no error, no
+placeholder — which is the first thing to check if nothing appears. Other
+placements (a single slide, a CMS block, the direct routes) are in
+[docs/usage/storefront.md](docs/usage/storefront.md).
 
 ## Documentation
 

@@ -130,9 +130,15 @@ In the consuming project, before requiring the plugin:
 
 ```bash
 composer config --json extra.symfony.endpoint \
-    '["https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/index.json","flex://defaults"]'
+    '["https://api.github.com/repos/Sylius/SyliusRecipes/contents/index.json?ref=flex/main","https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/2.3/flex/index.json","flex://defaults"]'
 composer require vanssa/sylius-slider-plugin
 ```
+
+`composer config --json` overwrites `extra.symfony.endpoint` instead of
+appending to it, so the command has to repeat every endpoint the project
+needs — including Sylius-Standard's own (the first entry), which a stock
+project already ships and which would otherwise be dropped. Flex searches the
+list in order, so `flex://defaults` stays last.
 
 ## Verifying before a release
 
@@ -143,12 +149,13 @@ raw.githubusercontent.com — then run (takes several minutes, needs network):
 ```bash
 BRANCH=2.3
 ENDPOINT="https://raw.githubusercontent.com/vanssata/sylius-slider-plugin/${BRANCH}/flex/index.json"
+SYLIUS_ENDPOINT="https://api.github.com/repos/Sylius/SyliusRecipes/contents/index.json?ref=flex/main"
 
 docker run --rm composer:2 sh -ec "
     apk add --no-cache jq >/dev/null
     composer create-project sylius/sylius-standard smoke --no-interaction --no-scripts --quiet
     cd smoke
-    composer config --json extra.symfony.endpoint '[\"${ENDPOINT}\",\"flex://defaults\"]'
+    composer config --json extra.symfony.endpoint '[\"${SYLIUS_ENDPOINT}\",\"${ENDPOINT}\",\"flex://defaults\"]'
     composer require vanssa/sylius-slider-plugin --no-interaction --no-scripts
 
     grep -F 'VanssaSyliusSliderPlugin' config/bundles.php
