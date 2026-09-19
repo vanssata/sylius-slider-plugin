@@ -52,7 +52,22 @@ services:
             # if you develop on Linux, you may use a bind-mounted host directory instead
 #            - ./public/media:/srv/sylius/public/media:ro
         ports:
-            - "80:80"
+            # Direct, proxy-free bypass. Host :80 belongs to the shared Traefik
+            # (docker/proxy/compose.yml) so that several projects can serve on
+            # :80 at once, each on its own hostname — binding it here again
+            # would defeat the point and collide with every sibling project.
+            - "82:80"
+        networks:
+            - default   # keep the project-internal alias `nginx` -> php
+            - web       # shared proxy network
+        labels:
+            - "traefik.enable=true"
+            # Explicit: nginx sits on two networks and Traefik must be told
+            # which one to dial, or it may pick the project-internal one.
+            - "traefik.docker.network=web"
+            - "traefik.http.routers.sylius-slider.rule=Host(`sylius-slider.localhost`)"
+            - "traefik.http.routers.sylius-slider.entrypoints=web"
+            - "traefik.http.services.sylius-slider.loadbalancer.server.port=80"
     nodejs:
         image: node:${NODE_VERSION:-20}-alpine
         user: ${DOCKER_USER:-1000:1000}
@@ -132,19 +147,25 @@ services:
         # mate MCP config).
         build:
             context: ./docker/playwright
-        # network_mode: host is load-bearing, not a convenience. Every Sylius
-        # channel in this project has hostname "localhost" and Sylius resolves
-        # the channel from the request host — from inside the compose network
-        # the app is reachable as http://nginx, which resolves to NO channel and
-        # every shop page 404s. Host networking makes http://localhost hit the
-        # published nginx port and the channel resolves. (Linux only; on
+        # network_mode: host is load-bearing, not a convenience: it is what
+        # makes `sylius-slider.localhost` resolve inside the container the same
+        # way it does on the host, so the request reaches the shared Traefik
+        # with the hostname its router matches on. (Linux only; on
         # macOS/Windows swap this for `extra_hosts` + http://host.docker.internal.)
+        #
+        # Channel resolution used to be the reason too — the FASHION_WEB channel
+        # had hostname "localhost", so any other host 404'd the whole shop. Its
+        # hostname is NULL now, i.e. the channel matches every domain, which is
+        # what lets :82, sylius-slider.localhost and the Behat hosts all work.
+        # Reloading Sylius fixtures sets it back — see docs/dev/local-domains.md.
         network_mode: host
         working_dir: /srv/sylius
         user: ${DOCKER_USER:-1000:1000}
         profiles: ["e2e"]
         environment:
-            BASE_URL: ${BASE_URL:-http://localhost}
+            # Through the shared proxy. Set BASE_URL=http://localhost:82 to
+            # bypass it (useful when the proxy is down or being debugged).
+            BASE_URL: ${BASE_URL:-http://sylius-slider.localhost}
         command: ["sleep", "infinity"]
         volumes:
             - .:/srv/sylius:rw,cached
@@ -155,3 +176,10 @@ services:
 volumes:
     mysql-data:
     public-media:
+
+networks:
+    # Created by the shared proxy (`make proxy-up`), never by this project —
+    # `external` keeps compose from creating a second, differently-named one.
+    web:
+        external: true
+        name: web

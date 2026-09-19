@@ -14,7 +14,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Environment
 ```bash
 make init             # build images, install deps, create compose.override.yml
-make up / make down   # start / stop the stack (nginx on http://localhost)
+make up / make down   # start / stop the stack
+                      #   http://sylius-slider.localhost  (via the shared Traefik, started by `make up`)
+                      #   http://localhost:82             (proxy-free bypass to the same nginx)
+make proxy-up / make proxy-down / make proxy-logs   # the shared :80 proxy on its own
+                      # see docs/dev/local-domains.md — incl. why fixtures break the shop
 make clean            # down -v
 
 make database-init    # create the DB and run migrations
@@ -320,3 +324,35 @@ This project uses the Symfony UX frontend stack. Seven agent skills are installe
 - Lock on-demand icons before deploying: `php bin/console ux:icons:lock`
 - Use Playwright to get what how pages is like. 
 - Use Playwright to get browsers test. 
+
+<!-- claude-agentic:start -->
+## AI agent workflow
+
+This repository has an agentic engineering setup under `.ai/`. Read
+`.ai/AGENTS.md` before making any change.
+
+- Production behaviour is the source of truth. Document problems you find outside
+  the task; do not fix them.
+- Work runs through `/ai-task <request>`: discovery, context, impact, risk tier,
+  plan, implementation, test, review, security review, release report, human
+  approval. `pipeline_profile` in `.ai/policies/risk-tiers.json` says which of
+  those the session does inline (solo: T0–T2 directly, with cheap readers and
+  one `sonnet` review at T2; the full pipeline from T3) and which go to an
+  agent. A step runs only its own tests; the full suite runs once after the last
+  step and the e2e suite once after that, and every failure is fixed as one
+  batch. `/ai-status` shows where a task stands.
+- Verify before reporting done: run `verify_command` from the Verification
+  section of `.ai/policies/testing.md`, then `e2e_command` once, and show the
+  output of both. A bugfix starts with the
+  failing test. When a review flags the same mistake twice, the correction goes
+  into this file.
+- Each implementation step names the files it may touch. Editing anything else is
+  refused; answer `SCOPE_CHANGE_REQUIRED` and let the plan be amended.
+- The risk tier in `.ai/policies/risk-tiers.json` decides who reviews the change
+  and whether a human must approve it. Payments, tax, fiscal, auth and order
+  state transitions are T4 by default.
+- Tools, MCP servers and large files are context. Anything this task does not
+  need stays off, and a file too large to open is read by the cheapest model,
+  which returns only the relevant excerpt. See `.ai/policies/tooling.md`.
+- No agent commits, merges or deploys on its own initiative.
+<!-- claude-agentic:end -->

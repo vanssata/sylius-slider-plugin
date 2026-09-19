@@ -1,7 +1,8 @@
 .PHONY: init run dev debug up down clean php-shell node-shell node-watch node-watch-logs node-watch-stop node-build \
 	docker-compose-check database-init database-reset load-fixtures load-slider-fixtures cc mig \
 	phpstan ecs rector rector-fix phpunit behat rename run-github-tests \
-	mate-init mate-discover verify e2e e2e-up e2e-check e2e-down docs-media
+	mate-init mate-discover verify e2e e2e-up e2e-check e2e-down docs-media \
+	proxy-up proxy-down proxy-logs
 
 DOCKER_COMPOSE ?= docker compose
 DOCKER_USER ?= "$(shell id -u):$(shell id -g)"
@@ -19,6 +20,7 @@ init:
 	@if [ ! -e compose.override.yml ]; then \
 		cp compose.override.dist.yml compose.override.yml; \
 	fi
+	@make -s proxy-up
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php composer install --no-interaction --no-scripts --no-plugins
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm nodejs
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) up -d
@@ -34,7 +36,7 @@ dev:
 # (XDEBUG_MODE defaults to `off` in compose.override.dist.yml), so this target
 # is only for extra overrides; fail with an explanation instead of a compose
 # "no such file".
-debug:
+debug: proxy-up
 	@test -f compose.debug.yml || { \
 		echo "compose.debug.yml does not exist. It is a personal overlay, not part of the repository."; \
 		echo "Xdebug is off by default — 'XDEBUG_MODE=debug make up' turns it on without this target."; \
@@ -43,8 +45,26 @@ debug:
 	}
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) -f compose.yml -f compose.override.yml -f compose.debug.yml up -d
 
-up:
+# --- Shared local reverse proxy ---------------------------------------------
+# One Traefik per machine owns host :80 and routes by hostname, so this project
+# and its siblings can all be up at once. Separate compose project name, so a
+# `make down` here never takes the proxy (and other projects) with it.
+PROXY_COMPOSE = $(DOCKER_COMPOSE) -p localproxy -f docker/proxy/compose.yml
+
+proxy-up:
+	@$(PROXY_COMPOSE) up -d
+
+proxy-down:
+	@$(PROXY_COMPOSE) down
+
+proxy-logs:
+	@$(PROXY_COMPOSE) logs -f traefik
+
+# `up` starts the proxy first: the project's nginx joins the external `web`
+# network, which the proxy compose file is what creates.
+up: proxy-up
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) up -d
+	@echo "  shop:  http://sylius-slider.localhost   (direct: http://localhost:82)"
 
 down:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) down

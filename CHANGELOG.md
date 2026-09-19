@@ -5,6 +5,26 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **The development stack now serves on `http://sylius-slider.localhost`
+  (port 80) through a shared Traefik**, instead of binding host `:80`
+  directly. `docker/proxy/compose.yml` is a one-per-machine reverse proxy in
+  its own compose project (`make proxy-up` / `proxy-down` / `proxy-logs`,
+  started automatically by `make up`) that owns `:80` and routes by hostname,
+  so this project and unrelated ones can be up at the same time. Other
+  projects are unaffected until they opt in — Traefik runs with
+  `exposedByDefault=false`, so only containers carrying `traefik.enable=true`
+  are routed. `http://localhost:82` remains as a proxy-free bypass to the same
+  nginx, and the Playwright suite's `BASE_URL` now defaults to the new
+  hostname (`BASE_URL=http://localhost:82 make e2e` still bypasses it). The
+  `FASHION_WEB` channel's `hostname` is cleared to `NULL` so the shop answers
+  on any domain; **reloading Sylius fixtures sets it back**. New guide:
+  `docs/dev/local-domains.md`, which also documents why the proxy must be
+  Traefik v3.6 or newer. Nothing in the plugin's shipped code changes — this
+  is the local development environment only.
+
 ## [2.3.6] - 2026-07-28
 
 ### Fixed
