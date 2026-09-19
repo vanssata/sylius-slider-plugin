@@ -45,13 +45,19 @@ It creates the slides `new-collection`, `summer-dresses`, `denim-essentials`,
 `fashion-parallax-showcase`. The fixture is idempotent — re-running it updates
 those codes instead of duplicating them.
 
-Other lifecycle targets: `make up`, `make down`, `make clean` (down `-v`, drops
-the database volume), `make database-reset` (drop + create + migrate),
+Other lifecycle targets: `make up`, `make down`, `make clean` (down `-v`),
+`make database-reset` (drop + create + migrate),
 `make cc`, `make mig`, `make php-shell`, `make node-shell`. `make debug` is the
 same `up -d` with `compose.debug.yml` layered on top; that file is not in the
 repository, so the target fails until you write one. `make rename` runs
 `bin/rename-plugin.php` — the one target that executes on the host and
 therefore needs a host PHP.
+
+MySQL stores its data in a **bind mount**, `docker/data/mysql` (gitignored),
+not in a named volume. So `make clean`'s `-v` no longer drops the database —
+to start from an empty datadir, remove the directory by hand
+(`sudo rm -rf docker/data/mysql`; the files belong to the container's mysql
+user) and then run `make database-init`.
 
 `make mate-init` and `make mate-discover` regenerate the gitignored `mate/`
 tree that the `symfony-ai-mate` MCP server reads, which is also why

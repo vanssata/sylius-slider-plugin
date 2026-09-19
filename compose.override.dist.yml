@@ -41,7 +41,10 @@ services:
           - public-media:/srv/sylius/public/media:rw
     mysql:
         volumes:
-            - mysql-data:/var/lib/mysql:rw
+            # Bind mount, not a named volume: the data stays visible on the
+            # host and survives `make clean` (`down -v`). Wipe it with
+            # `sudo rm -rf docker/data/mysql`. Gitignored via /docker/data/.
+            - ./docker/data/mysql:/var/lib/mysql:rw
         ports:
             - "3306:3306"
     nginx:
@@ -174,7 +177,6 @@ services:
             - "8025:8025"
 
 volumes:
-    mysql-data:
     public-media:
 
 networks:
