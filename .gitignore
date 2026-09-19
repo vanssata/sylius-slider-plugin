@@ -46,6 +46,9 @@
 .claude/settings.local.json
 .claude/memory/local/
 .codex/memory/local/
+# MySQL data, bind-mounted from the compose stack
+/docker/data/
+
 # claude-agentic (.ai)
 .ai/state/*.json
 .ai/local/
