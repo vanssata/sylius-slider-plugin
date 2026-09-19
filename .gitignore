@@ -42,3 +42,10 @@
 /mcp.json
 /.mcp.json
 .env.local
+# claude-agentic (sdlc)
+.claude/settings.local.json
+.claude/memory/local/
+.codex/memory/local/
+# claude-agentic (.ai)
+.ai/state/*.json
+.ai/local/
