@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing in the plugin's shipped code changes: `src/`, `config/`,
-`templates/`, `assets/` and `translations/` are untouched.
+## [2.3.7] - 2026-09-22
+
+Nothing in the plugin's shipped code changes in this release: `src/`,
+`config/`, `templates/`, `assets/` and `translations/` are identical to 2.3.6.
 
 ### Fixed
+- **The composer dist archive no longer ships AI agent tooling.**
+  `.gitattributes` now export-ignores `/.ai`, `/.codex` and every `CLAUDE.md`
+  / `AGENTS.md`, so they stay in the repository for contributors but are not
+  installed into a consumer's `vendor/`. 2.3.6 already shipped the root
+  `CLAUDE.md`, `AGENTS.md` and `.codex/`.
 - **The Sylius ~2.1.0 CI leg is green again and no longer allowed to fail.**
   Its 8 failing storefront Behat scenarios were a test bug, not the
   `symfony/ux-live-component` tsconfig problem the workflow blamed (the asset
@@ -23,18 +30,6 @@ Nothing in the plugin's shipped code changes: `src/`, `config/`,
   `continue-on-error` is removed from the Build workflow.
 - **Behat failure logs are uploaded again.** The CI artifact name contained
   the matrix database (`mysql:8.4`), and artifact names may not contain `:`.
-
-## [2.3.7] - 2026-09-22
-
-Nothing in the plugin's shipped code changes in this release: `src/`,
-`config/`, `templates/`, `assets/` and `translations/` are identical to 2.3.6.
-
-### Fixed
-- **The composer dist archive no longer ships AI agent tooling.**
-  `.gitattributes` now export-ignores `/.ai`, `/.codex` and every `CLAUDE.md`
-  / `AGENTS.md`, so they stay in the repository for contributors but are not
-  installed into a consumer's `vendor/`. 2.3.6 already shipped the root
-  `CLAUDE.md`, `AGENTS.md` and `.codex/`.
 
 ### Changed
 - **Agent instructions are split into the `.ai/` tree.** The root
