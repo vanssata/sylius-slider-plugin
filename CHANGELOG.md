@@ -7,22 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing in the plugin's shipped code changes: `src/`, `config/`,
-`templates/`, `assets/` and `translations/` are untouched.
-
 ### Fixed
-- **The Sylius ~2.1.0 CI leg is green again and no longer allowed to fail.**
-  Its 8 failing storefront Behat scenarios were a test bug, not the
-  `symfony/ux-live-component` tsconfig problem the workflow blamed (the asset
-  build succeeds). Non-JS Behat sessions requested `127.0.0.1` while the
-  fixture step pins channel hostnames to `localhost`; Sylius 2.2 treats the
-  two as equivalent, Sylius 2.1 matches hostnames exactly. Once the functional
-  PHPUnit suite had left a second channel in the shared test database, no
-  channel resolved and the shop page threw `ChannelNotFoundException`. The
-  shop Behat context now requests the pinned hostname, and
-  `continue-on-error` is removed from the Build workflow.
-- **Behat failure logs are uploaded again.** The CI artifact name contained
-  the matrix database (`mysql:8.4`), and artifact names may not contain `:`.
+- **Functional tests no longer leave a channel in the test database.**
+  `FunctionalTestCase::ensureChannel()` created channel `FUNCTIONAL`
+  (hostname `localhost`) and never removed it. CI runs the non-unit PHPUnit
+  suite before Behat on the same database, so Behat then saw two channels:
+  Sylius' single-channel fallback no longer applied, and a shop request resolved
+  whichever channel had the lowest id for the pinned hostname. `tearDown()` now
+  removes the channels `ensureChannel()` created in that test. A channel that
+  already existed is left alone. Test-only; the plugin's shipped code is
+  unchanged.
 
 ## [2.3.7] - 2026-09-22
 
@@ -35,6 +29,18 @@ Nothing in the plugin's shipped code changes in this release: `src/`,
   / `AGENTS.md`, so they stay in the repository for contributors but are not
   installed into a consumer's `vendor/`. 2.3.6 already shipped the root
   `CLAUDE.md`, `AGENTS.md` and `.codex/`.
+- **The Sylius ~2.1.0 CI leg is green again and no longer allowed to fail.**
+  Its 8 failing storefront Behat scenarios were a test bug, not the
+  `symfony/ux-live-component` tsconfig problem the workflow blamed (the asset
+  build succeeds). Non-JS Behat sessions requested `127.0.0.1` while the
+  fixture step pins channel hostnames to `localhost`; Sylius 2.2 treats the
+  two as equivalent, Sylius 2.1 matches hostnames exactly. Once the functional
+  PHPUnit suite had left a second channel in the shared test database, no
+  channel resolved and the shop page threw `ChannelNotFoundException`. The
+  shop Behat context now requests the pinned hostname, and
+  `continue-on-error` is removed from the Build workflow.
+- **Behat failure logs are uploaded again.** The CI artifact name contained
+  the matrix database (`mysql:8.4`), and artifact names may not contain `:`.
 
 ### Changed
 - **Agent instructions are split into the `.ai/` tree.** The root

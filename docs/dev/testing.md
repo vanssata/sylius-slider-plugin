@@ -140,7 +140,9 @@ final class PreviewBreakpointFlattenerTest extends TestCase
 `WebTestCase` and provides the four things every functional test here needs:
 `entityManager()`, `logInAsAdmin()` (creates and logs in a `functional-admin`
 user on the `admin` firewall), `ensureChannel()` (idempotent channel with
-`localhost` as hostname, `USD`, `en_US`) and
+`localhost` as hostname, `USD`, `en_US`; `tearDown()` removes a channel it
+created, because CI runs Behat on the same database next, and a second channel
+turns off Sylius' single-channel fallback) and
 `createSlider($code, $settings, $slideCount)` (idempotent slider plus slides).
 Build the data you need per test rather than depending on the demo fixtures:
 
