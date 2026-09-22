@@ -52,3 +52,5 @@
 # claude-agentic (.ai)
 .ai/state/*.json
 .ai/local/
+.ai/state/handoff.md
+.ai/state/*.tmp
