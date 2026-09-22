@@ -60,10 +60,14 @@ to start from an empty datadir, remove the directory by hand
 user) and then run `make database-init`.
 
 `make mate-init` and `make mate-discover` regenerate the gitignored `mate/`
-tree that the `symfony-ai-mate` MCP server reads, which is also why
-`composer.json` allows the `symfony/ai-mate-composer-plugin` plugin. That tree
-is not part of the repository and nothing in the build, the test suites or the
-asset pipeline needs it — skip both targets unless you run that server.
+tree that the `symfony/ai-mate` CLI reads (`vendor/bin/mate tools:list`,
+`tools:call`), which is also why `composer.json` allows the
+`symfony/ai-mate-composer-plugin` plugin: once `mate/` exists, it re-runs
+`mate discover` after every `composer install`/`update`. Since mate 0.13 there
+is no MCP server. That tree is not part of the repository and nothing in the
+build, the test suites or the asset pipeline needs it — skip both targets
+unless you use mate. `mate discover` also writes an AI Mate block into
+`AGENTS.md`; check `git diff AGENTS.md` before committing.
 
 Storefront and admin are served by the `nginx` container on
 **`http://sylius-slider.localhost`** (`/admin` for the backend), through a

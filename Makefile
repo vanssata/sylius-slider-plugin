@@ -193,11 +193,12 @@ docs-media: e2e-up
 e2e-down:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) --profile e2e rm -sf playwright
 
-# AI Mate (MCP server) — regenerate the local `mate/` tree. Both the tree and
-# the MCP client configuration are gitignored local tooling: optional, not
-# required to build or test the plugin.
-# There is deliberately NO `mate-serve` target: `mate serve` speaks MCP over
-# stdio and is started by the MCP client, never by a human or by `make dev`.
+# AI Mate — regenerate the local `mate/` tree. The tree is gitignored local
+# tooling: optional, not required to build or test the plugin. Since
+# symfony/ai-mate 0.13 mate is a plain CLI (`vendor/bin/mate tools:call …`);
+# there is no MCP server and no `serve` command any more.
+# Note: `mate discover` also writes an AI Mate block into AGENTS.md — review
+# `git diff AGENTS.md` after running either target.
 mate-init:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/mate init -n
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php composer dump-autoload
