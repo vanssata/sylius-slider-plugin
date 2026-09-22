@@ -52,7 +52,20 @@ final class SliderFrontendContext extends RawMinkContext implements Context
      */
     public function iVisitTheSliderPageForCode(string $code): void
     {
-        $this->visitPath('/slider/' . $code);
+        $path = '/slider/' . $code;
+
+        // Non-JS sessions must request the canonical hostname the fixture
+        // step pins: base_url is 127.0.0.1, and Sylius < 2.2 matches channel
+        // hostnames exactly (no localhost/127.0.0.1 equivalence), so with more
+        // than one channel in the shared test DB the request would resolve no
+        // channel at all.
+        if ($this->getSession()->getDriver() instanceof \DMore\ChromeDriver\ChromeDriver) {
+            $this->visitPath($path);
+
+            return;
+        }
+
+        $this->getSession()->visit('http://localhost' . $path);
     }
 
     /**

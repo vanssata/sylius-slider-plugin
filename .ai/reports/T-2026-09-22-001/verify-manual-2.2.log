@@ -1,0 +1,15 @@
+== ECS
+
+ [OK] No errors found. Great job - your code is shiny in style!                 
+
+== PHPStan
+
+ [OK] No errors                                                                 
+
+== PHPUnit
+Time: 00:50.848, Memory: 242.43 MB
+
+OK (350 tests, 1312 assertions)
+== Behat (after phpunit, CI order)
+14 scenarios (14 passed)
+89 steps (89 passed)
