@@ -66,8 +66,11 @@ tree that the `symfony/ai-mate` CLI reads (`vendor/bin/mate tools:list`,
 `mate discover` after every `composer install`/`update`. Since mate 0.13 there
 is no MCP server. That tree is not part of the repository and nothing in the
 build, the test suites or the asset pipeline needs it — skip both targets
-unless you use mate. `mate discover` also writes an AI Mate block into
-`AGENTS.md`; check `git diff AGENTS.md` before committing.
+unless you use mate. `mate init`/`mate discover` always write an AI Mate block
+into `AGENTS.md` and may rewrite `CLAUDE.md`; both make targets restore those
+two files afterwards, also on failure or Ctrl-C. Running mate or
+`composer install`/`update` by hand does not, so check
+`git diff AGENTS.md CLAUDE.md` then.
 
 Storefront and admin are served by the `nginx` container on
 **`http://sylius-slider.localhost`** (`/admin` for the backend), through a
