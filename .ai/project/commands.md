@@ -17,9 +17,11 @@ make php-shell / make node-shell
 make cc / make mig
 ```
 
-The stack runs with `APP_ENV=${ENV:-prod}` (see `compose.override.dist.yml`),
-so by default there is **no web debug toolbar** — which is what the docs-media
-generators rely on. Start with `ENV=dev make up` when you want the profiler.
+The stack runs with `APP_ENV=${ENV:-dev}` and `APP_DEBUG=true` (see
+`compose.override.dist.yml`; the Makefile also defaults `ENV` to `dev`), so a
+plain `make up` gives you the **web debug toolbar** and the profiler. The
+docs-media generators need a stack without it: start with `ENV=prod make up`
+first (`docs/dev/docs-media.md`).
 
 ### Testing
 ```bash
