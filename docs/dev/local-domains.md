@@ -112,19 +112,23 @@ docker compose exec -T mysql \
   mysql -uroot -N -e "SELECT code, IFNULL(hostname,'(NULL)') FROM sylius_channel;" sylius_dev
 ```
 
-**Do not null every channel in `sylius_test`.** The PHPUnit functional tests
-create their own `FUNCTIONAL` channel with `hostname = 'localhost'`
-(`FunctionalTestCase::ensureChannel()`) and reuse it if it already exists — they
-never re-create it. Nulling that row makes the browser-kit request resolve to no
-channel and 27 functional tests fail with *"Channel could not be found!"*, which
-reads like a plugin regression and is not one. In `sylius_test`, keep
-`FUNCTIONAL` on `localhost`; `FASHION_WEB` may stay `NULL` there (Behat drives
-the stack over the `nginx` host, and a second row on `localhost` would make the
-hostname lookup ambiguous):
+**In `sylius_test`, `FASHION_WEB` may stay `NULL`.** The PHPUnit functional
+tests create their own `FUNCTIONAL` channel with `hostname = 'localhost'`
+(`FunctionalTestCase::ensureChannel()`) and remove it again in `tearDown()`, so
+the row exists only while a test runs. Behat drives the stack over the `nginx`
+host.
+
+A `FUNCTIONAL` row left by a run from before that cleanup existed is different:
+`ensureChannel()` reuses a channel it did not create and never removes it.
+Nulling its hostname makes every browser-kit request resolve to no channel, and
+the functional tests fail with *"Channel could not be found!"*. That looks like
+a plugin regression and is not one. Delete the stale row instead:
 
 ```bash
-docker compose exec -T mysql \
-  mysql -uroot -e "UPDATE sylius_channel SET hostname = 'localhost' WHERE code = 'FUNCTIONAL';" sylius_test
+docker compose exec -T mysql mysql -uroot sylius_test -e "
+  DELETE cc FROM sylius_channel_currencies cc JOIN sylius_channel c ON c.id = cc.channel_id WHERE c.code = 'FUNCTIONAL';
+  DELETE cl FROM sylius_channel_locales cl JOIN sylius_channel c ON c.id = cl.channel_id WHERE c.code = 'FUNCTIONAL';
+  DELETE FROM sylius_channel WHERE code = 'FUNCTIONAL';"
 ```
 
 ## Verifying the whole path

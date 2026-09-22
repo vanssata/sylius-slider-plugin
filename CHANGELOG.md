@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Functional tests no longer leave a channel in the test database.**
+  `FunctionalTestCase::ensureChannel()` created channel `FUNCTIONAL`
+  (hostname `localhost`) and never removed it. CI runs the non-unit PHPUnit
+  suite before Behat on the same database, so Behat then saw two channels:
+  Sylius' single-channel fallback no longer applied, and a shop request resolved
+  whichever channel had the lowest id for the pinned hostname. `tearDown()` now
+  removes the channels `ensureChannel()` created in that test. A channel that
+  already existed is left alone. Test-only; the plugin's shipped code is
+  unchanged.
+
 ## [2.3.7] - 2026-09-22
 
 Nothing in the plugin's shipped code changes in this release: `src/`,

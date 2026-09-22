@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Vanssa\SyliusSliderPlugin\Functional;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Sylius\Component\Core\Model\AdminUser;
 use Sylius\Component\Core\Model\AdminUserInterface;
 use Sylius\Component\Core\Model\Channel;
@@ -22,9 +23,25 @@ abstract class FunctionalTestCase extends WebTestCase
 {
     protected KernelBrowser $client;
 
+    /**
+     * Ids of the channels ensureChannel() created in this test, removed again in tearDown().
+     * CI runs this suite before Behat on the same database, and a channel left behind
+     * turns off Sylius' single-channel fallback for every Behat scenario.
+     *
+     * @var list<mixed>
+     */
+    private array $createdChannelIds = [];
+
     protected function setUp(): void
     {
         $this->client = self::createClient();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->removeCreatedChannels();
+
+        parent::tearDown();
     }
 
     protected function entityManager(): EntityManagerInterface
@@ -93,7 +110,41 @@ abstract class FunctionalTestCase extends WebTestCase
         $entityManager->persist($channel);
         $entityManager->flush();
 
+        $this->createdChannelIds[] = $channel->getId();
+
         return $channel;
+    }
+
+    private function removeCreatedChannels(): void
+    {
+        if ([] === $this->createdChannelIds) {
+            return;
+        }
+
+        $channelIds = $this->createdChannelIds;
+        $this->createdChannelIds = [];
+
+        $doctrine = self::getContainer()->get('doctrine');
+        \assert($doctrine instanceof ManagerRegistry);
+
+        $entityManager = $doctrine->getManager();
+        \assert($entityManager instanceof EntityManagerInterface);
+        if (!$entityManager->isOpen()) {
+            $entityManager = $doctrine->resetManager();
+            \assert($entityManager instanceof EntityManagerInterface);
+        }
+
+        // Drop whatever the test left unflushed; only the channels are removed.
+        $entityManager->clear();
+
+        foreach ($channelIds as $channelId) {
+            $channel = $entityManager->find(Channel::class, $channelId);
+            if (null !== $channel) {
+                $entityManager->remove($channel);
+            }
+        }
+
+        $entityManager->flush();
     }
 
     /**
