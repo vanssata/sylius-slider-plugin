@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "mode": "migrate",
+  "adopted_at": "2026-09-22T12:15:24Z",
+  "original_bytes": 22305,
+  "original_skipped": [],
+  "status": "applied",
+  "split": {
+    "CLAUDE.md": {
+      "by": "proposal",
+      "proposal_sha": "sha256:1ff59d56410f73eab9c96ecfd6e629147f03e1e0c6a0ec7463e66460c1388f18",
+      "kept_bytes": 535,
+      "moves": 15,
+      "dropped": 0
+    },
+    "AGENTS.md": {
+      "by": "proposal",
+      "proposal_sha": "sha256:2c71e7f075534c021492f3e7418dfe5c05c43c757d65b920f2543c056745b69f",
+      "kept_bytes": 383,
+      "moves": 1,
+      "dropped": 0
+    }
+  },
+  "tools": {
+    "claude": {
+      "files": 1
+    },
+    "codex": {
+      "files": 1
+    }
+  },
+  "sources": [
+    {
+      "path": "CLAUDE.md",
+      "sha": "sha256:86337d8c3dfb23174a007deaebadce2274c575e15f03fd41672672b032925961",
+      "tool": "claude",
+      "transform": "instruction-file",
+      "cleanup": false,
+      "dest": ".ai/project/commands.md",
+      "dest_sha": "sha256:94b9872b04610431e132e02265a2cafe77fd7563f1db87a8471985dd51659ca2",
+      "original": "original/CLAUDE.md"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha": "sha256:41aca9b2a8f673f50fe792bf901eda93824e8a691776451d2cbbddef1858c296",
+      "tool": "codex",
+      "transform": "instruction-file",
+      "cleanup": false,
+      "dest": ".ai/project/ai-tooling.md",
+      "dest_sha": "sha256:ff3bc3ff6b41c86f525c583be793d194e81f44a2e79b74c2f52baaa0a5b0457b",
+      "original": "original/AGENTS.md"
+    }
+  ],
+  "dropped": 0,
+  "ignored": [],
+  "unmapped": [],
+  "checks": {
+    "no_line_lost": {
+      "status": "pass",
+      "checked_at": "2026-09-22T12:15:24Z",
+      "lines": 248,
+      "missing": 0
+    },
+    "no_dangling": {
+      "status": "pass",
+      "checked_at": "2026-09-22T12:15:24Z",
+      "hard": 0,
+      "warn": 0
+    },
+    "no_line_added": {
+      "status": "pass",
+      "checked_at": "2026-09-22T12:15:24Z",
+      "added": 0
+    }
+  },
+  "cleanup": {
+    "offered": true,
+    "confirmed_by": null,
+    "at": null,
+    "unattended": null,
+    "tty": null,
+    "deleted": []
+  }
+}
