@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "source": "AGENTS.md",
+  "source_sha": "sha256:d490fbdf5f09797f719434c68c4d4aac9ba096b102626b7727bd2088636613dc",
+  "keep": [
+    [1, 9]
+  ],
+  "moves": [
+    {
+      "lines": [10, 23],
+      "dest": ".ai/project/ai-tooling.md",
+      "heading": ""
+    }
+  ],
+  "dropped": []
+}

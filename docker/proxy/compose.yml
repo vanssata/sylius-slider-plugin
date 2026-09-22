@@ -1,0 +1,56 @@
+# Shared local reverse proxy — ONE per machine, not one per project.
+#
+# It owns host port 80 and routes to a project by the requested hostname, so
+# several projects can be up at the same time instead of fighting over :80.
+#
+#   docker compose -p localproxy -f docker/proxy/compose.yml up -d      (= make proxy-up)
+#   docker compose -p localproxy -f docker/proxy/compose.yml down       (= make proxy-down)
+#
+# The dashboard is on http://traefik.localhost — useful to see whether a
+# project's router was actually picked up.
+#
+# It lives in this repository only because this is where it was first needed;
+# nothing in it is specific to the slider plugin. Any other project joins by
+# attaching its web-facing container to the external `web` network and adding
+# the four traefik labels — see docs/dev/local-domains.md.
+
+services:
+    traefik:
+        # v3.6 is a floor, not a preference. Every Traefik up to and including
+        # v3.5 asks the daemon for Docker API 1.24; Docker Engine 28 dropped
+        # everything below 1.40 (`docker version` here reports min 1.40), so the
+        # docker provider never loads a single router. DOCKER_API_VERSION does
+        # not override it — the version is compiled in. The symptom is silent:
+        # every request 404s, the dashboard included, and only
+        # `make proxy-logs` says why ("client version 1.24 is too old").
+        image: traefik:v3.6
+        container_name: localproxy-traefik
+        restart: unless-stopped
+        command:
+            - --providers.docker=true
+            # Opt-in: a container is routed only if it says traefik.enable=true,
+            # so an unrelated project's containers are never exposed by accident.
+            - --providers.docker.exposedByDefault=false
+            - --entrypoints.web.address=:80
+            - --api.dashboard=true
+            - --log.level=INFO
+        ports:
+            # Both families: *.localhost resolves to ::1 on systemd-resolved,
+            # to 127.0.0.1 via an /etc/hosts entry. Publish for both or one of
+            # the two paths gives "connection refused".
+            - "80:80"
+        volumes:
+            # Read-only: Traefik only needs to watch container labels.
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        networks:
+            - web
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)"
+            - "traefik.http.routers.traefik-dashboard.entrypoints=web"
+            - "traefik.http.routers.traefik-dashboard.service=api@internal"
+
+networks:
+    web:
+        # Fixed name so every project can reference it as `external: true`.
+        name: web

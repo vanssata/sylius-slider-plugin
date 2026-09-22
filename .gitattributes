@@ -14,3 +14,9 @@
 /phpunit.xml.dist export-ignore
 /psalm.xml export-ignore
 /symfony.lock export-ignore
+
+# AI agent tooling: tracked for contributors, never shipped in the dist archive
+/.ai export-ignore
+/.codex export-ignore
+CLAUDE.md export-ignore
+AGENTS.md export-ignore

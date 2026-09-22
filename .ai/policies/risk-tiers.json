@@ -1,0 +1,571 @@
+{
+  "_comment": "SOURCE OF TRUTH for risk classification. /ai-task reads this file to decide which stages are mandatory, which model tier plans and reviews the change, whether a human must approve before anything leaves the branch, and — through pipeline_profile — which stages the main session does inline and which go to a subagent. risk-tiers.md is a human-readable mirror of this file; when they disagree, this file wins. Adjust the triggers to the project after /ai-init — the defaults are generic.",
+  "version": 3,
+  "pipeline_profile": "solo",
+  "pipeline_profiles": {
+    "_comment": "WHO runs a stage, not WHETHER it runs: stages_required is fixed per tier, the profile decides which of them are delegated to a subagent and which the main session does inline in a few lines. 'solo' is for one developer who knows the codebase and has two modes. DIRECT (T0–T2): no pipeline ceremony — the session names the files, edits, runs each step's own scoped tests, then the verification command once at the end and the e2e suite once after it, fixing every failure as one batch; the only subagents are cheap readers (Explore, log-reader) and, at T2, one review on the BALANCED model. SDLC (T3–T5): the full pipeline with delegated plan, plan review, adversarial review, security review and release report, on the STRONG and EXPERT tiers. 'team' is the fully delegated pipeline. Switch by editing pipeline_profile.",
+    "solo": {
+      "delegated_stages": {
+        "T0": [],
+        "T1": [],
+        "T2": [
+          "adversarial_review"
+        ],
+        "T3": [
+          "plan",
+          "plan_review",
+          "adversarial_review"
+        ],
+        "T4": [
+          "plan",
+          "plan_review",
+          "adversarial_review",
+          "security_review",
+          "release_report"
+        ],
+        "T5": [
+          "discovery",
+          "impact_analysis",
+          "plan",
+          "plan_review",
+          "adversarial_review",
+          "security_review",
+          "release_report"
+        ]
+      },
+      "delegate_anyway_when": [
+        "the developer says the area is unfamiliar, or the request names no entry point and grep does not find one within a few calls (Explore on FAST, then ai-discovery if Explore returned nothing usable)",
+        "the inline context summary has an UNKNOWN the plan depends on (ai-discovery, one agent)",
+        "the risk tier is T3 or above and not obvious from the trigger table (ai-risk on STRONG)",
+        "the verification command prints more than ~40 lines (log-reader on FAST), or the test setup is unfamiliar (ai-tester on FAST)"
+      ],
+      "review_model": {
+        "T2": "BALANCED",
+        "T3": "STRONG",
+        "T4": "STRONG",
+        "T5": "STRONG"
+      },
+      "release_report": "T0–T2: the commit message body; T3: the session writes the short form into task.md; T4 and T5: ai-release",
+      "plan": {
+        "T0": "none",
+        "T1": "none",
+        "T2": "three to five lines in the conversation, registered through `state.py quick`; plan mode only when the change spans several modules",
+        "T3": "ai-planner on STRONG, in plan mode",
+        "T4": "ai-planner on STRONG, in plan mode",
+        "T5": "ai-expert"
+      },
+      "test": "three scopes. During a step: only the tests the plan named for that step (`step_test_command` scoped to its files), fixed inside the step before `state.py step-done` — never the full suite, never e2e. After the LAST step: `verify_command` once, to the end, no fail-fast flag, output through tail -40 or log-reader; every failure is collected and classified first, every NEW REGRESSION is fixed in ONE `state.py remediate` step and the command runs once more, at most two rounds. At the END of the task, after the full suite is green: `e2e_command` once, never per step, skipped at T0/T1 and when no e2e-covered flow can be reached (say which).",
+      "e2e": "once per task, at the end, after verify_command is green and before the adversarial review. T0/T1: none. T2+: required when the change can reach a flow the e2e suite covers, otherwise one line saying why it cannot. T4/T5: always, and its result goes in the release report. Record it with `state.py set e2e_status <passing|failing|not_applicable|not_run>`.",
+      "triage": "T0/T1: no state file. T2: `state.py quick` records discovery, context, impact, risk and the one-step plan in a single call. T3+: the stages run and are recorded one at a time.",
+      "artifacts": {
+        "T0": "none — the commit message",
+        "T1": "none — the commit message",
+        "T2": "none — the state archive and the commit message",
+        "T3": "task.md plus the delegated plan and review reports",
+        "T4": "the full set",
+        "T5": "the full set"
+      },
+      "mode": {
+        "T0": "direct",
+        "T1": "direct",
+        "T2": "direct",
+        "T3": "sdlc",
+        "T4": "sdlc",
+        "T5": "sdlc"
+      },
+      "direct": {
+        "state": "T0/T1: none — the commit message is the record. T2: one `state.py quick` call (init + triage + one-step plan) so the scope guard is armed; `state.py close` at the end",
+        "plan": "T0/T1: say which files, in one line. T2: three to five lines in the conversation — steps and files — never a file",
+        "artifacts": "none below T3",
+        "agents": "Explore and log-reader on FAST for reading; ai-implementer on BALANCED for a mechanical pattern-copy step; ai-reviewer on BALANCED once at T2 — nothing on STRONG",
+        "review": "T0/T1: none. T2: one ai-reviewer on the BALANCED model over the diff, after the tests pass; findings fixed as one batch in a `state.py remediate` step; one scoped re-review only when a BLOCKER was fixed",
+        "release": "the commit message body: what changed, verification command and result, rollback"
+      }
+    },
+    "team": {
+      "delegated_stages": {
+        "T0": [
+          "discovery"
+        ],
+        "T1": [
+          "discovery",
+          "test"
+        ],
+        "T2": [
+          "discovery",
+          "context",
+          "impact_analysis",
+          "risk_classification",
+          "plan",
+          "test",
+          "adversarial_review",
+          "release_report"
+        ],
+        "T3": [
+          "discovery",
+          "context",
+          "impact_analysis",
+          "risk_classification",
+          "plan",
+          "plan_review",
+          "test",
+          "adversarial_review",
+          "release_report"
+        ],
+        "T4": [
+          "discovery",
+          "context",
+          "impact_analysis",
+          "risk_classification",
+          "plan",
+          "plan_review",
+          "test",
+          "adversarial_review",
+          "security_review",
+          "release_report"
+        ],
+        "T5": [
+          "discovery",
+          "context",
+          "impact_analysis",
+          "risk_classification",
+          "plan",
+          "plan_review",
+          "test",
+          "adversarial_review",
+          "security_review",
+          "release_report"
+        ]
+      },
+      "review_model": {
+        "T2": "STRONG",
+        "T3": "STRONG",
+        "T4": "STRONG",
+        "T5": "STRONG"
+      },
+      "test": "step-scoped tests inside each step (`step_test_command`, the tests the plan named for that step); ai-tester once after the last step on `verify_command`, to the end with no fail-fast flag; every failure is fixed as one batch in a `state.py remediate` step, then one more run",
+      "e2e": "ai-tester once at the end of the task on `e2e_command`, after verify_command is green; never inside a step"
+    }
+  },
+  "tiers": {
+    "T0": {
+      "label": "documentation only",
+      "examples": [
+        "comments",
+        "README and docs",
+        "translation strings with no logic"
+      ],
+      "model_tier": "FAST",
+      "stages_required": [
+        "discovery",
+        "context",
+        "implementation"
+      ],
+      "plan_review": false,
+      "human_plan_approval": false,
+      "adversarial_review": false,
+      "security_review": false,
+      "release_report": "light",
+      "human_approval": false,
+      "plan": "none — say which files you will touch, then edit"
+    },
+    "T1": {
+      "label": "isolated low-risk change",
+      "examples": [
+        "formatting",
+        "an isolated admin template",
+        "a label or a small presentation tweak"
+      ],
+      "model_tier": "FAST",
+      "stages_required": [
+        "discovery",
+        "context",
+        "implementation",
+        "test"
+      ],
+      "plan_review": false,
+      "human_plan_approval": false,
+      "adversarial_review": false,
+      "security_review": false,
+      "release_report": "light",
+      "human_approval": false,
+      "plan": "none — say which files you will touch, then edit"
+    },
+    "T2": {
+      "label": "normal feature",
+      "examples": [
+        "an isolated business feature",
+        "a new service with limited blast radius",
+        "a non-critical API extension"
+      ],
+      "model_tier": "BALANCED",
+      "stages_required": [
+        "discovery",
+        "context",
+        "impact_analysis",
+        "risk_classification",
+        "plan",
+        "implementation",
+        "test",
+        "adversarial_review"
+      ],
+      "plan_review": false,
+      "human_plan_approval": false,
+      "adversarial_review": true,
+      "security_review": false,
+      "release_report": "full",
+      "human_approval": false,
+      "plan": "a short numbered list of steps with their files, inline"
+    },
+    "T3": {
+      "label": "shared domain behaviour",
+      "examples": [
+        "shared services",
+        "order processing",
+        "state machines and workflows",
+        "asynchronous processing",
+        "an important integration"
+      ],
+      "model_tier": "STRONG",
+      "stages_required": [
+        "discovery",
+        "context",
+        "impact_analysis",
+        "risk_classification",
+        "plan",
+        "plan_review",
+        "implementation",
+        "test",
+        "adversarial_review",
+        "release_report"
+      ],
+      "plan_review": true,
+      "human_plan_approval": true,
+      "adversarial_review": true,
+      "security_review": "when the change touches authentication, authorization or personal data",
+      "release_report": "full",
+      "human_approval": true,
+      "characterization_tests": "required before changing legacy behaviour"
+    },
+    "T4": {
+      "label": "critical business or system behaviour",
+      "examples": [
+        "payments",
+        "accounting",
+        "taxation",
+        "fiscal devices and reporting",
+        "authentication",
+        "authorization",
+        "order state transitions",
+        "customer data",
+        "external financial systems"
+      ],
+      "model_tier": "STRONG",
+      "stages_required": [
+        "discovery",
+        "context",
+        "impact_analysis",
+        "risk_classification",
+        "plan",
+        "plan_review",
+        "implementation",
+        "test",
+        "adversarial_review",
+        "security_review",
+        "release_report",
+        "human_approval"
+      ],
+      "plan_review": true,
+      "human_plan_approval": true,
+      "adversarial_review": true,
+      "security_review": true,
+      "release_report": "full",
+      "human_approval": true,
+      "characterization_tests": "required",
+      "extra_requirements": [
+        "rollback section is mandatory",
+        "monitoring section is mandatory",
+        "idempotency and retry behaviour must be stated explicitly"
+      ]
+    },
+    "T5": {
+      "label": "system level, irreversible, production architecture",
+      "examples": [
+        "database migration strategy",
+        "infrastructure architecture",
+        "Kubernetes topology",
+        "production deployment mechanics",
+        "data migration",
+        "destructive schema changes",
+        "distributed transactions",
+        "cross-system migration"
+      ],
+      "model_tier": "EXPERT",
+      "stages_required": [
+        "discovery",
+        "context",
+        "impact_analysis",
+        "risk_classification",
+        "plan",
+        "plan_review",
+        "implementation",
+        "test",
+        "adversarial_review",
+        "security_review",
+        "release_report",
+        "human_approval"
+      ],
+      "plan_review": true,
+      "human_plan_approval": true,
+      "adversarial_review": true,
+      "security_review": true,
+      "release_report": "full",
+      "human_approval": true,
+      "characterization_tests": "required",
+      "extra_requirements": [
+        "migration analysis: locks, table size, duration, deployment ordering, old-version compatibility",
+        "a rehearsed rollback plan, not a described one",
+        "destructive operations need explicit, separate human approval naming the operation"
+      ]
+    }
+  },
+  "model_tiers": {
+    "LOCAL": {
+      "agent": null,
+      "note": "No local model runs inside Claude Code or Codex. The work this tier would do — indexing, listing, counting, summarising git history — is done by deterministic tools (rg, git, jq, the framework CLI) and by ai-indexer on the cheapest model."
+    },
+    "FAST": {
+      "agent": "ai-indexer, Explore, log-reader, ai-tester",
+      "effort": "low",
+      "note": "readers and runners: they collect, run and report; anything they cannot settle is escalated one tier, never retried on the same one"
+    },
+    "BALANCED": {
+      "agent": "ai-discovery, ai-context, ai-risk, ai-planner, ai-release, ai-implementer; ai-reviewer at T2",
+      "effort": "low for compression and mechanical edits, medium for judgement",
+      "note": "the default tier for agents; the main session runs the installed profile's model and does the implementation itself"
+    },
+    "STRONG": {
+      "agent": "ai-reviewer, ai-security; ai-planner and ai-risk on STRONG (under Codex the ai-planner-strong and ai-risk-strong agents, because a Codex agent file outranks a spawn-time model)",
+      "effort": "high"
+    },
+    "EXPERT": {
+      "agent": "ai-expert; architect for design outside a task",
+      "effort": "set at install time"
+    }
+  },
+  "diff_budget": {
+    "_comment": "A per-tier ceiling on what one step and one task may actually change, measured by skills/ai-task/sensors.py between two tree objects and enforced by state.py step-done. lines = added + deleted after `exclude` and `unbudgeted_scopes`. Conservative on purpose: these sit near the band where review still finds defects (a few hundred lines), T4/T5 are tighter because those reviews read every line and a re-score never lowers a tier, T3 is wider because shared-domain work legitimately reaches its callers. Over the budget is not a refusal to do the work: it asks for the step to be split (state.py step-split). Adjust them to the project, the way the triggers are adjusted, and calibrate from /usage-report.",
+    "per_step": {
+      "T0": {
+        "max_lines": 300,
+        "max_files": 15
+      },
+      "T1": {
+        "max_lines": 120,
+        "max_files": 5
+      },
+      "T2": {
+        "max_lines": 200,
+        "max_files": 8
+      },
+      "T3": {
+        "max_lines": 250,
+        "max_files": 10
+      },
+      "T4": {
+        "max_lines": 150,
+        "max_files": 6
+      },
+      "T5": {
+        "max_lines": 150,
+        "max_files": 6
+      }
+    },
+    "per_task": {
+      "T0": {
+        "max_lines": 600,
+        "max_files": 30
+      },
+      "T1": {
+        "max_lines": 300,
+        "max_files": 10
+      },
+      "T2": {
+        "max_lines": 400,
+        "max_files": 15
+      },
+      "T3": {
+        "max_lines": 800,
+        "max_files": 30
+      },
+      "T4": {
+        "max_lines": 400,
+        "max_files": 15
+      },
+      "T5": {
+        "max_lines": 400,
+        "max_files": 15
+      }
+    },
+    "exclude": [
+      "**/*.lock",
+      "package-lock.json",
+      "composer.lock",
+      "**/__snapshots__/**",
+      "**/*.snap",
+      "**/*.min.*",
+      "**/*.map",
+      "**/generated/**",
+      "**/*.generated.*",
+      ".ai/state/**",
+      ".ai/reports/**"
+    ],
+    "unbudgeted_scopes": [
+      "docs"
+    ]
+  },
+  "path_scopes": [
+    {
+      "scope": "pipeline",
+      "min_tier": "T3",
+      "paths": [
+        ".ai/policies/**",
+        ".ai/workflows/**",
+        ".claude/**",
+        ".codex/**",
+        "CLAUDE.md",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "scope": "tests",
+      "min_tier": "T1",
+      "paths": [
+        "tests/**",
+        "spec/**",
+        "**/*Test.php",
+        "**/*.test.*",
+        "**/*.spec.*",
+        "**/test_*.py"
+      ]
+    },
+    {
+      "scope": "docs",
+      "min_tier": "T0",
+      "paths": [
+        "docs/**",
+        "**/*.md",
+        "**/*.rst",
+        "**/*.txt"
+      ]
+    },
+    {
+      "scope": "migrations",
+      "min_tier": "T5",
+      "paths": [
+        "**/migrations/**",
+        "**/Migrations/**",
+        "db/migrate/**"
+      ]
+    },
+    {
+      "scope": "infra",
+      "min_tier": "T5",
+      "paths": [
+        "Dockerfile*",
+        "docker-compose*",
+        "k8s/**",
+        "helm/**",
+        "terraform/**",
+        ".github/workflows/**"
+      ]
+    },
+    {
+      "scope": "auth",
+      "min_tier": "T4",
+      "paths": [
+        "**/Security/**",
+        "**/Auth/**",
+        "**/auth/**"
+      ]
+    },
+    {
+      "scope": "payments",
+      "min_tier": "T4",
+      "paths": [
+        "**/Payment/**",
+        "**/Billing/**",
+        "**/Tax/**",
+        "**/Invoice/**"
+      ]
+    },
+    {
+      "scope": "config",
+      "min_tier": "T3",
+      "paths": [
+        "config/**",
+        ".env*"
+      ]
+    },
+    {
+      "scope": "dependencies",
+      "min_tier": "T3",
+      "paths": [
+        "composer.json",
+        "package.json",
+        "pyproject.toml",
+        "requirements*.txt",
+        "go.mod"
+      ]
+    }
+  ],
+  "_path_scopes_comment": "Ordered, first match wins per file — that is why `pipeline` stands above `docs` (an instruction file is pipeline, not documentation) and `tests` above `payments` (a test for the payment code is a test). A file matching nothing is scope `source` and demands no tier. min_tier is the lowest tier a change touching that scope may have: state.py step-done re-scores the task from the real diff and raises the tier when it must. It never lowers one.",
+  "sensors": {
+    "_comment": "The deterministic checks that run before any model review. A red sensor costs one review at the tier's model — today's price. A green one must therefore be impossible to fake: every ambiguity resolves to red, `unavailable` or `stale`, never to green. A missing lint_command is NOT green; only a human writing `lint_command: none` in testing.md makes it not_applicable. At or below skip_review_at_or_below, all green replaces the model review (risk-tiers.md, 'When the sensors replace the review').",
+    "skip_review_at_or_below": "T2",
+    "required_for_skip": [
+      "tests",
+      "lint",
+      "typecheck",
+      "diff",
+      "rescore",
+      "traceability",
+      "duplicates",
+      "bite"
+    ],
+    "tests": {
+      "timeout_seconds": 1800,
+      "env_retries": 1,
+      "max_suite_runs": 5,
+      "log_max_bytes": 2097152
+    },
+    "lint": {
+      "timeout_seconds": 600
+    },
+    "typecheck": {
+      "timeout_seconds": 600
+    },
+    "bite": {
+      "timeout_seconds": 600,
+      "required_from": "T2"
+    },
+    "duplicates": {
+      "min_lines": 8,
+      "ignore_scopes": [
+        "tests",
+        "docs"
+      ]
+    }
+  },
+  "remediation_rounds": 2,
+  "escalation_triggers": [
+    "the STRONG tier could not resolve an ambiguity and said so",
+    "two constraints in the architecture contradict each other",
+    "the task is classified T5",
+    "several viable high-risk designs remain and the choice is not reversible",
+    "the cost of being wrong is very high (money, data loss, legal or fiscal exposure)"
+  ],
+  "escalation_rule": "Start at the tier the table gives. Escalate one step, for one task, when a trigger fires — never escalate the whole pipeline, and never start at EXPERT because it exists. Never retry a failed reasoning task on a cheaper tier; downgrading is for mechanical work only.",
+  "downgrade_rule": "A tier may be lowered only by a human, in writing, in the task record. An agent may propose a lower tier with evidence; it may not apply one.",
+  "remediation_rule": "Failures are fixed in batches, never one at a time. A step's own scoped tests are the exception: they fail and are fixed inside that step. After the verification run, the e2e run (and after a review) collect every finding, classify each, open ONE `state.py remediate` step whose scope is the union of the finished steps plus the failing tests, fix them all, then run the verification command once more. A remediation never re-triages or re-plans the task; at most two rounds before the human decides."
+}

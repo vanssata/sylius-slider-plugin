@@ -45,13 +45,19 @@ It creates the slides `new-collection`, `summer-dresses`, `denim-essentials`,
 `fashion-parallax-showcase`. The fixture is idempotent — re-running it updates
 those codes instead of duplicating them.
 
-Other lifecycle targets: `make up`, `make down`, `make clean` (down `-v`, drops
-the database volume), `make database-reset` (drop + create + migrate),
+Other lifecycle targets: `make up`, `make down`, `make clean` (down `-v`),
+`make database-reset` (drop + create + migrate),
 `make cc`, `make mig`, `make php-shell`, `make node-shell`. `make debug` is the
 same `up -d` with `compose.debug.yml` layered on top; that file is not in the
 repository, so the target fails until you write one. `make rename` runs
 `bin/rename-plugin.php` — the one target that executes on the host and
 therefore needs a host PHP.
+
+MySQL stores its data in a **bind mount**, `docker/data/mysql` (gitignored),
+not in a named volume. So `make clean`'s `-v` no longer drops the database —
+to start from an empty datadir, remove the directory by hand
+(`sudo rm -rf docker/data/mysql`; the files belong to the container's mysql
+user) and then run `make database-init`.
 
 `make mate-init` and `make mate-discover` regenerate the gitignored `mate/`
 tree that the `symfony-ai-mate` MCP server reads, which is also why
@@ -60,7 +66,10 @@ is not part of the repository and nothing in the build, the test suites or the
 asset pipeline needs it — skip both targets unless you run that server.
 
 Storefront and admin are served by the `nginx` container on
-`http://localhost` (`/admin` for the backend). Mailhog is on
+**`http://sylius-slider.localhost`** (`/admin` for the backend), through a
+shared Traefik that `make up` starts for you; `http://localhost:82` is the
+proxy-free bypass to the same nginx. `docs/dev/local-domains.md` explains the
+arrangement and how a sibling project joins it. Mailhog is on
 `http://localhost:8025`.
 
 ## What the app actually is
@@ -309,11 +318,15 @@ than the newest file in `assets/` (i.e. the watcher caught up, giving up after
 
 Configuration notes from `playwright.config.ts` that will bite you otherwise:
 
-- `BASE_URL` defaults to `http://localhost` and the service uses
-  `network_mode: host`. Every Sylius channel here has hostname `localhost`, and
-  Sylius resolves the channel from the request host — from inside the compose
-  network the app is only reachable as `http://nginx`, which matches no channel
-  and 404s on every shop page.
+- `BASE_URL` defaults to `http://sylius-slider.localhost` and the service uses
+  `network_mode: host` — that is what makes the hostname resolve inside the
+  container the same way it does on the host, so the request reaches the shared
+  Traefik with the name its router matches on. From inside the compose network
+  the app is only reachable as `http://nginx`, which the proxy never sees.
+  Sylius also resolves the channel from the request host; the `FASHION_WEB`
+  channel's hostname is `NULL` here so every domain matches, and **reloading
+  fixtures sets it back to `localhost`** — see `docs/dev/local-domains.md`.
+  `BASE_URL=http://localhost:82 make e2e` bypasses the proxy.
 - `fullyParallel: false`, `workers: 1`. The specs share one fixture dataset and
   several of them mutate it (drag reorder, saving a slide).
 - Projects: `desktop` (1400x900), `tablet` (820x1180) and `mobile` (390x844).

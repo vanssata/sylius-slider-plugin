@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "source": "CLAUDE.md",
+  "source_sha": "sha256:c6e2b189b73c562f5a4805064f0eea1a538cc3587b6a26f635b4a5a5cb9fe58f",
+  "lines": 340,
+  "block": [
+    328,
+    340
+  ],
+  "block_edited": false,
+  "cover": "1-327",
+  "outline": [
+    {
+      "line": 1,
+      "heading": "# CLAUDE.md"
+    },
+    {
+      "line": 5,
+      "heading": "## Development Commands"
+    },
+    {
+      "line": 14,
+      "heading": "### Environment"
+    },
+    {
+      "line": 37,
+      "heading": "### Testing"
+    },
+    {
+      "line": 53,
+      "heading": "### Code Quality"
+    },
+    {
+      "line": 61,
+      "heading": "### Docker Compose command quoting"
+    },
+    {
+      "line": 69,
+      "heading": "### Composer Scripts"
+    },
+    {
+      "line": 71,
+      "heading": "# Database reset with fixtures"
+    },
+    {
+      "line": 74,
+      "heading": "# Frontend rebuild"
+    },
+    {
+      "line": 77,
+      "heading": "# Complete test app initialization"
+    },
+    {
+      "line": 81,
+      "heading": "## Architecture"
+    },
+    {
+      "line": 104,
+      "heading": "### Database Configuration"
+    },
+    {
+      "line": 115,
+      "heading": "## AI tooling"
+    },
+    {
+      "line": 139,
+      "heading": "## Stimulus Controller Manifests (Important Gotchas)"
+    },
+    {
+      "line": 239,
+      "heading": "## Asset watch mode"
+    },
+    {
+      "line": 279,
+      "heading": "## Documentation layout"
+    },
+    {
+      "line": 292,
+      "heading": "## Repository maintenance guides"
+    },
+    {
+      "line": 298,
+      "heading": "# Symfony UX Frontend Stack"
+    },
+    {
+      "line": 302,
+      "heading": "## Which tool to use"
+    },
+    {
+      "line": 312,
+      "heading": "## Key rules"
+    }
+  ],
+  "keep_budget_bytes": 940,
+  "allowed_dest": [
+    ".ai/policies/adopted/<slug>.md",
+    ".ai/rules/<slug>.md",
+    ".ai/project/<slug>.md",
+    "docs/sdlc/constitution.md"
+  ],
+  "proposal": ".ai/reports/adopt-2026-09-22/split-proposal-claude-md.json"
+}

@@ -328,12 +328,15 @@ docker compose --profile e2e rm -sf playwright
 Use `exec`, never `docker compose run -d` — a `run` with a never-exiting
 command leaks an orphan container per session.
 
-`network_mode: host` on that service is load-bearing, not a convenience.
-Every Sylius channel in this project has hostname `localhost`; from inside
-the compose network the app is only reachable as `http://nginx`, which
-resolves to no channel and 404s on every shop page. Host networking makes
-`http://localhost` hit the published nginx port so the channel resolves. This
-is Linux-specific; on macOS or Windows swap it for `extra_hosts` plus
+`network_mode: host` on that service is load-bearing, not a convenience. The
+suite drives `http://sylius-slider.localhost`, which is a name the shared
+Traefik on host :80 routes by — host networking is what makes it resolve inside
+the container at all; from inside the compose network the app is only reachable
+as `http://nginx`, which the proxy never sees. Sylius resolves the channel from
+the request host too, so the `FASHION_WEB` channel's hostname is `NULL` here
+(matches any domain) and **reloading fixtures sets it back to `localhost`** —
+`docs/dev/local-domains.md` has the repair. Host networking is Linux-specific;
+on macOS or Windows swap it for `extra_hosts` plus
 `http://host.docker.internal`. There is deliberately no `webServer` block in
 `playwright.config.ts` — the docker stack *is* the server, and
 `symfony server:start` is not an option on a host with no PHP.

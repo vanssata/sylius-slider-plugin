@@ -1,0 +1,18 @@
+# Project-scoped Codex configuration for SyliusSlider.
+#
+# This layer is loaded only when the project is trusted. Put here what belongs to
+# the repository rather than to the machine: per-project agent limits, project
+# MCP servers, project hooks. Host-wide routing stays in ~/.codex/config.toml.
+#
+# Example — cap the agent fan-out for a small repository:
+#
+#   [agents]
+#   max_concurrent_threads_per_session = 4
+
+# MCP servers: default off. Enable here only what nearly every task in this
+# repository needs; give a single task what only it needs, and take it away
+# again when the task ends (`.ai/policies/tooling.md`). Every connected server
+# sits in the context of every turn, used or not.
+#
+#   [mcp_servers.example]
+#   command = "..."

@@ -6,16 +6,20 @@ import { defineConfig, devices } from '@playwright/test';
  * which only holds config/templates merged into it.
  *
  * There is deliberately no `webServer` block. The docker stack IS the server:
- * nginx publishes port 80 and the `playwright` service joins the host network so
- * `http://localhost` resolves the Sylius channel (every channel here has
- * hostname "localhost"; from inside the compose network the app is only
- * reachable as `http://nginx`, which resolves to no channel and 404s).
+ * the shared Traefik (`make proxy-up`) owns host :80 and routes
+ * `sylius-slider.localhost` to this project's nginx, and the `playwright`
+ * service joins the host network so that hostname resolves inside the
+ * container exactly as it does on the host. From inside the compose network
+ * the app would only be reachable as `http://nginx`, and Sylius resolves the
+ * channel from the host — see docs/dev/local-domains.md.
  * `symfony server:start` is not an option — this host has no PHP.
+ *
+ * Set BASE_URL=http://localhost:82 to bypass the proxy and hit nginx directly.
  *
  * Entry points: `make e2e`, `make e2e-check SPEC=...`, `make docs-media`.
  */
 
-const BASE_URL = process.env.BASE_URL ?? 'http://localhost';
+const BASE_URL = process.env.BASE_URL ?? 'http://sylius-slider.localhost';
 
 /** Storefront specs run at all three breakpoints; the admin workspace is a desktop tool. */
 const RESPONSIVE_GLOB = 'shop/**/*.spec.ts';

@@ -213,6 +213,7 @@ placements (a single slide, a CMS block, the direct routes) are in
 - [Style presets](docs/dev/style-presets.md) — defining presets in config
 - [Color picker type](docs/dev/color-picker-type.md) — the reusable RGBA field
 - [Testing](docs/dev/testing.md) — PHPUnit, Behat, Playwright and when to use which
+- [Local domains](docs/dev/local-domains.md) — sharing port 80 with other projects
 - [Docs media](docs/dev/docs-media.md) — regenerating the screenshots and GIFs
 - [Contributing](docs/dev/contributing.md) — local setup and release flow
 - [Flex recipe](docs/FLEX_RECIPE.md) — how the recipe endpoint works

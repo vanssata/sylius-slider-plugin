@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "source": "CLAUDE.md",
+  "source_sha": "sha256:c6e2b189b73c562f5a4805064f0eea1a538cc3587b6a26f635b4a5a5cb9fe58f",
+  "keep": [
+    [1, 13]
+  ],
+  "moves": [
+    {
+      "lines": [14, 36],
+      "dest": ".ai/project/commands.md",
+      "heading": "### Environment"
+    },
+    {
+      "lines": [37, 52],
+      "dest": ".ai/project/commands.md",
+      "heading": "### Testing"
+    },
+    {
+      "lines": [53, 60],
+      "dest": ".ai/project/commands.md",
+      "heading": "### Code Quality"
+    },
+    {
+      "lines": [61, 68],
+      "dest": ".ai/project/commands.md",
+      "heading": "### Docker Compose command quoting"
+    },
+    {
+      "lines": [69, 80],
+      "dest": ".ai/project/commands.md",
+      "heading": "### Composer Scripts"
+    },
+    {
+      "lines": [81, 103],
+      "dest": ".ai/project/architecture.md",
+      "heading": "## Architecture"
+    },
+    {
+      "lines": [104, 114],
+      "dest": ".ai/project/architecture.md",
+      "heading": "### Database Configuration"
+    },
+    {
+      "lines": [115, 138],
+      "dest": ".ai/project/ai-tooling.md",
+      "heading": "## AI tooling"
+    },
+    {
+      "lines": [139, 238],
+      "dest": ".ai/rules/stimulus-controller-manifests.md",
+      "heading": "## Stimulus Controller Manifests (Important Gotchas)",
+      "dirs": ["assets", "flex"]
+    },
+    {
+      "lines": [239, 278],
+      "dest": ".ai/rules/asset-watch-mode.md",
+      "heading": "## Asset watch mode",
+      "dirs": ["assets"]
+    },
+    {
+      "lines": [279, 291],
+      "dest": ".ai/project/docs-layout.md",
+      "heading": "## Documentation layout"
+    },
+    {
+      "lines": [292, 297],
+      "dest": ".ai/project/docs-layout.md",
+      "heading": "## Repository maintenance guides"
+    },
+    {
+      "lines": [298, 301],
+      "dest": ".ai/rules/symfony-ux-stack.md",
+      "heading": "# Symfony UX Frontend Stack",
+      "dirs": ["templates", "assets", "src"]
+    },
+    {
+      "lines": [302, 311],
+      "dest": ".ai/rules/symfony-ux-stack.md",
+      "heading": "## Which tool to use",
+      "dirs": ["templates", "assets", "src"]
+    },
+    {
+      "lines": [312, 327],
+      "dest": ".ai/rules/symfony-ux-stack.md",
+      "heading": "## Key rules",
+      "dirs": ["templates", "assets", "src"]
+    }
+  ],
+  "dropped": []
+}

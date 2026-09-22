@@ -5,6 +5,67 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Nothing in the plugin's shipped code changes: `src/`, `config/`,
+`templates/`, `assets/` and `translations/` are untouched.
+
+### Fixed
+- **The Sylius ~2.1.0 CI leg is green again and no longer allowed to fail.**
+  Its 8 failing storefront Behat scenarios were a test bug, not the
+  `symfony/ux-live-component` tsconfig problem the workflow blamed (the asset
+  build succeeds). Non-JS Behat sessions requested `127.0.0.1` while the
+  fixture step pins channel hostnames to `localhost`; Sylius 2.2 treats the
+  two as equivalent, Sylius 2.1 matches hostnames exactly. Once the functional
+  PHPUnit suite had left a second channel in the shared test database, no
+  channel resolved and the shop page threw `ChannelNotFoundException`. The
+  shop Behat context now requests the pinned hostname, and
+  `continue-on-error` is removed from the Build workflow.
+- **Behat failure logs are uploaded again.** The CI artifact name contained
+  the matrix database (`mysql:8.4`), and artifact names may not contain `:`.
+
+## [2.3.7] - 2026-09-22
+
+Nothing in the plugin's shipped code changes in this release: `src/`,
+`config/`, `templates/`, `assets/` and `translations/` are identical to 2.3.6.
+
+### Fixed
+- **The composer dist archive no longer ships AI agent tooling.**
+  `.gitattributes` now export-ignores `/.ai`, `/.codex` and every `CLAUDE.md`
+  / `AGENTS.md`, so they stay in the repository for contributors but are not
+  installed into a consumer's `vendor/`. 2.3.6 already shipped the root
+  `CLAUDE.md`, `AGENTS.md` and `.codex/`.
+
+### Changed
+- **Agent instructions are split into the `.ai/` tree.** The root
+  `CLAUDE.md` keeps only the container-only rule; commands, architecture, AI
+  tooling and the docs layout move to `.ai/project/`, and the Stimulus
+  manifest, asset-watch and Symfony UX rules become path-scoped
+  `.ai/rules/` (rendered into `assets/`, `flex/`, `templates/` and `src/`).
+  `.ai/` is now tracked in git; its runtime state stays ignored.
+- **The development stack defaults to `APP_ENV=dev`** (was `prod`) and keeps
+  MySQL data in a `./docker/data/mysql` bind mount, which survives
+  `make clean`. Start with `ENV=prod make up` for the debug-toolbar-free stack
+  the docs-media generators expect.
+- Dev dependencies: `sylius/sylius-ai-dev-tools` `^0.4.0`,
+  `@playwright/test` 1.63.0.
+- **The development stack now serves on `http://sylius-slider.localhost`
+  (port 80) through a shared Traefik**, instead of binding host `:80`
+  directly. `docker/proxy/compose.yml` is a one-per-machine reverse proxy in
+  its own compose project (`make proxy-up` / `proxy-down` / `proxy-logs`,
+  started automatically by `make up`) that owns `:80` and routes by hostname,
+  so this project and unrelated ones can be up at the same time. Other
+  projects are unaffected until they opt in — Traefik runs with
+  `exposedByDefault=false`, so only containers carrying `traefik.enable=true`
+  are routed. `http://localhost:82` remains as a proxy-free bypass to the same
+  nginx, and the Playwright suite's `BASE_URL` now defaults to the new
+  hostname (`BASE_URL=http://localhost:82 make e2e` still bypasses it). The
+  `FASHION_WEB` channel's `hostname` is cleared to `NULL` so the shop answers
+  on any domain; **reloading Sylius fixtures sets it back**. New guide:
+  `docs/dev/local-domains.md`, which also documents why the proxy must be
+  Traefik v3.6 or newer. Nothing in the plugin's shipped code changes — this
+  is the local development environment only.
+
 ## [2.3.6] - 2026-07-28
 
 ### Fixed

@@ -931,7 +931,9 @@ The host has neither PHP nor Node. Every command below runs in a container.
 ```bash
 make init                 # compose.override.yml, composer install, yarn build, up -d
 make up                   # start the stack
-make down                 # stop it (make clean also drops volumes)
+make down                 # stop it (make clean also drops named volumes;
+                          #   MySQL lives in the ./docker/data/mysql bind mount
+                          #   and survives it — rm -rf that directory to reset)
 make database-init        # create the database + run migrations
 make load-fixtures        # Sylius core fixtures
 make load-slider-fixtures # suite vanssa_sylius_slider_demo
