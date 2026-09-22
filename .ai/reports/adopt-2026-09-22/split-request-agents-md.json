@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "source": "AGENTS.md",
+  "source_sha": "sha256:d490fbdf5f09797f719434c68c4d4aac9ba096b102626b7727bd2088636613dc",
+  "lines": 36,
+  "block": [
+    24,
+    36
+  ],
+  "block_edited": false,
+  "cover": "1-23",
+  "outline": [
+    {
+      "line": 3,
+      "heading": "## Rules"
+    }
+  ],
+  "keep_budget_bytes": 841,
+  "allowed_dest": [
+    ".ai/policies/adopted/<slug>.md",
+    ".ai/rules/<slug>.md",
+    ".ai/project/<slug>.md",
+    "docs/sdlc/constitution.md"
+  ],
+  "proposal": ".ai/reports/adopt-2026-09-22/split-proposal-agents-md.json"
+}

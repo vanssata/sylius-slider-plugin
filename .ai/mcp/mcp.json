@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "symfony-ai-mate": {
+      "command": "./.claude/scripts/mate-mcp.sh",
+      "args": []
+    },
+    "playwright": {
+      "command": "./.claude/scripts/playwright-mcp.sh",
+      "args": []
+    }
+  }
+}

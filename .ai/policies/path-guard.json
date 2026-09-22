@@ -1,0 +1,5 @@
+{
+  "_comment": "Project overrides for ai-path-guard. Patterns here are ADDED to the shipped defaults (POSIX extended regular expressions, matched against the absolute path). allow_patterns win over deny_patterns. Edit this file when the guard denies something it should not — do not work around the guard. This file is not editable by an agent; a human changes it.",
+  "deny_patterns": [],
+  "allow_patterns": []
+}
