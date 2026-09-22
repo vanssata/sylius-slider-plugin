@@ -7,7 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.7] - 2026-09-22
+
+Nothing in the plugin's shipped code changes in this release: `src/`,
+`config/`, `templates/`, `assets/` and `translations/` are identical to 2.3.6.
+
+### Fixed
+- **The composer dist archive no longer ships AI agent tooling.**
+  `.gitattributes` now export-ignores `/.ai`, `/.codex` and every `CLAUDE.md`
+  / `AGENTS.md`, so they stay in the repository for contributors but are not
+  installed into a consumer's `vendor/`. 2.3.6 already shipped the root
+  `CLAUDE.md`, `AGENTS.md` and `.codex/`.
+
 ### Changed
+- **Agent instructions are split into the `.ai/` tree.** The root
+  `CLAUDE.md` keeps only the container-only rule; commands, architecture, AI
+  tooling and the docs layout move to `.ai/project/`, and the Stimulus
+  manifest, asset-watch and Symfony UX rules become path-scoped
+  `.ai/rules/` (rendered into `assets/`, `flex/`, `templates/` and `src/`).
+  `.ai/` is now tracked in git; its runtime state stays ignored.
+- **The development stack defaults to `APP_ENV=dev`** (was `prod`) and keeps
+  MySQL data in a `./docker/data/mysql` bind mount, which survives
+  `make clean`. Start with `ENV=prod make up` for the debug-toolbar-free stack
+  the docs-media generators expect.
+- Dev dependencies: `sylius/sylius-ai-dev-tools` `^0.4.0`,
+  `@playwright/test` 1.63.0.
 - **The development stack now serves on `http://sylius-slider.localhost`
   (port 80) through a shared Traefik**, instead of binding host `:80`
   directly. `docker/proxy/compose.yml` is a one-per-machine reverse proxy in
