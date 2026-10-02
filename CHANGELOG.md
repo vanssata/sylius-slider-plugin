@@ -19,6 +19,14 @@ Nothing in the plugin's shipped code changes in this release: `src/`,
   `symfony/ai-mate` but no longer runs `mate discover` after every install or
   update. Run `make mate-discover` after adding, removing or upgrading a mate
   extension. Contributor tooling only; the plugin's shipped code is unchanged.
+- **The composer dist archive no longer ships the dev environment.**
+  `.gitattributes` now export-ignores `bin/`, `docker/`, `compose*.yml`,
+  `features/`, `tests/`, `flex/`, `rector/`, the root `package*.json`,
+  `phpstan-baseline.neon`, `playwright.config.ts`, `rector.php`,
+  `.dockerignore`, `.gitignore` and the three skeleton guides for AI
+  assistants. `assets/` (with its own `package.json`) and `Resources/public/`
+  still ship; the Flex recipe endpoint reads `flex/` from GitHub, not from
+  `vendor/`.
 
 ### Fixed
 - **Functional tests no longer leave a channel in the test database.**

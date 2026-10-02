@@ -15,6 +15,28 @@
 /psalm.xml export-ignore
 /symfony.lock export-ignore
 
+# Dev environment, test suites and build tooling: contributors only
+/.dockerignore export-ignore
+/.gitignore export-ignore
+/bin export-ignore
+/compose.yml export-ignore
+/compose.override.dist.yml export-ignore
+/docker export-ignore
+/features export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+/phpstan-baseline.neon export-ignore
+/playwright.config.ts export-ignore
+/rector export-ignore
+/rector.php export-ignore
+/tests export-ignore
+# Flex recipes are served from raw.githubusercontent.com, not from the package
+/flex export-ignore
+# Skeleton guides for AI assistants
+/CLEANUP_GUIDE.md export-ignore
+/COMPATIBILITY_GUIDE.md export-ignore
+/RENAME_GUIDE.md export-ignore
+
 # AI agent tooling: tracked for contributors, never shipped in the dist archive
 /.ai export-ignore
 /.codex export-ignore
