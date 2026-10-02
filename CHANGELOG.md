@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.8] - 2026-10-02
+
+Nothing in the plugin's shipped code changes in this release: `src/`,
+`config/`, `templates/`, `assets/` and `translations/` are identical to 2.3.7.
+
 ### Changed
 - **`composer install`/`update` no longer rewrite `AGENTS.md`.**
   `symfony/ai-mate-composer-plugin` is now disallowed in `composer.json`
