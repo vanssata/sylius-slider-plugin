@@ -193,17 +193,29 @@ docs-media: e2e-up
 e2e-down:
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) --profile e2e rm -sf playwright
 
-# AI Mate (MCP server) — regenerate the local `mate/` tree. Both the tree and
-# the MCP client configuration are gitignored local tooling: optional, not
-# required to build or test the plugin.
-# There is deliberately NO `mate-serve` target: `mate serve` speaks MCP over
-# stdio and is started by the MCP client, never by a human or by `make dev`.
+# AI Mate — regenerate the local `mate/` tree. The tree is gitignored local
+# tooling: optional, not required to build or test the plugin. Since
+# symfony/ai-mate 0.13 mate is a plain CLI (`vendor/bin/mate tools:call …`);
+# there is no MCP server and no `serve` command any more.
+# `mate init` and `mate discover` always write an AI Mate block into the
+# tracked AGENTS.md (mate has no opt-out), and both rewrite CLAUDE.md
+# unless it already mentions AGENTS.md. The tooling is local, so both targets
+# snapshot whichever of the two exist and restore them from an EXIT trap: on
+# success, on failure and on Ctrl-C alike, keeping mate's exit code. A file
+# that did not exist beforehand (e.g. a deleted AGENTS.md) is left as mate
+# writes it. Not safe against two runs at once.
+MATE_KEEPING_AGENT_FILES = d=$$(mktemp -d) || exit 1; \
+	for f in AGENTS.md CLAUDE.md; do if [ -e "$$f" ]; then cp "$$f" "$$d/$$f" || exit 1; fi; done; \
+	trap 'for f in AGENTS.md CLAUDE.md; do if [ -e "$$d/$$f" ]; then cp "$$d/$$f" "$$f"; fi; done; rm -rf "$$d"' EXIT; \
+	trap 'exit 130' INT TERM HUP; \
+	ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/mate $(1)
+
 mate-init:
-	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/mate init -n
+	@$(call MATE_KEEPING_AGENT_FILES,init -n)
 	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php composer dump-autoload
 
 mate-discover:
-	@ENV=$(ENV) DOCKER_USER=$(DOCKER_USER) $(DOCKER_COMPOSE) run --rm php vendor/bin/mate discover -n
+	@$(call MATE_KEEPING_AGENT_FILES,discover -n)
 
 rename:
 	@php bin/rename-plugin.php
