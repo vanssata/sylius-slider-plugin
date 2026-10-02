@@ -25,13 +25,17 @@ Mate-managed skills (`mate skills:list`) are disabled in `mate/extensions.php`:
 `sylius-dev` and `sylius-quality` already cover them, and installing them would
 also create an untracked `.agents/skills/`.
 
-Regenerate the mate tree with `make mate-init` / `make mate-discover`. Mate
-always writes an AI Mate block into `AGENTS.md`, and `mate init` rewrites
+Regenerate the mate tree with `make mate-init` / `make mate-discover` — also
+after adding, removing or upgrading a mate extension (a `composer update` that
+bumps one counts), since nothing does it automatically:
+`symfony/ai-mate-composer-plugin` is installed (a dependency of
+`symfony/ai-mate`) but disallowed in `composer.json` `config.allow-plugins`, so
+`composer install`/`update` never run `mate discover`. Mate always writes an AI
+Mate block into `AGENTS.md`, and both `mate init` and `mate discover` rewrite
 `CLAUDE.md` unless it already contains the string `AGENTS.md` (today it does,
 via `.ai/AGENTS.md`). Both targets snapshot the two files and restore them from
-an EXIT trap, so success, failure and Ctrl-C all leave them untouched. A bare
-`mate discover`, or the composer plugin after `composer install`/`update`,
-still leaves the block behind.
+an EXIT trap, so success, failure and Ctrl-C all leave them untouched. Only a
+bare `mate init`/`mate discover` still leaves the block behind.
 
 ## Adopted from AGENTS.md, lines 10-23
 

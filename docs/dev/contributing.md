@@ -61,16 +61,18 @@ user) and then run `make database-init`.
 
 `make mate-init` and `make mate-discover` regenerate the gitignored `mate/`
 tree that the `symfony/ai-mate` CLI reads (`vendor/bin/mate tools:list`,
-`tools:call`), which is also why `composer.json` allows the
-`symfony/ai-mate-composer-plugin` plugin: once `mate/` exists, it re-runs
-`mate discover` after every `composer install`/`update`. Since mate 0.13 there
-is no MCP server. That tree is not part of the repository and nothing in the
-build, the test suites or the asset pipeline needs it — skip both targets
-unless you use mate. `mate init`/`mate discover` always write an AI Mate block
-into `AGENTS.md` and may rewrite `CLAUDE.md`; both make targets restore those
-two files afterwards, also on failure or Ctrl-C. Running mate or
-`composer install`/`update` by hand does not, so check
-`git diff AGENTS.md CLAUDE.md` then.
+`tools:call`). Since mate 0.13 there is no MCP server. That tree is not part
+of the repository and nothing in the build, the test suites or the asset
+pipeline needs it — skip both targets unless you use mate, and run
+`make mate-discover` after adding, removing or upgrading a mate extension
+(a `composer update` that bumps one counts).
+`symfony/ai-mate-composer-plugin` is installed as a dependency of
+`symfony/ai-mate` but disallowed in `config.allow-plugins`, so
+`composer install`/`update` no longer run `mate discover` or touch `mate/` and
+`AGENTS.md`. `mate init`/`mate discover` always write an AI Mate block into
+`AGENTS.md` and may rewrite `CLAUDE.md`; both make targets restore those two
+files afterwards, also on failure or Ctrl-C. A bare `vendor/bin/mate` run does
+not, so check `git diff AGENTS.md CLAUDE.md` then.
 
 Storefront and admin are served by the `nginx` container on
 **`http://sylius-slider.localhost`** (`/admin` for the backend), through a

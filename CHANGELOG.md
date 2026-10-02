@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`composer install`/`update` no longer rewrite `AGENTS.md`.**
+  `symfony/ai-mate-composer-plugin` is now disallowed in `composer.json`
+  `config.allow-plugins`; it stays installed as a dependency of
+  `symfony/ai-mate` but no longer runs `mate discover` after every install or
+  update. Run `make mate-discover` after adding, removing or upgrading a mate
+  extension. Contributor tooling only; the plugin's shipped code is unchanged.
+
 ### Fixed
 - **Functional tests no longer leave a channel in the test database.**
   `FunctionalTestCase::ensureChannel()` created channel `FUNCTIONAL`

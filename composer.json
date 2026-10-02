@@ -64,7 +64,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": false,
             "php-http/discovery": false,
             "phpstan/extension-installer": true,
-            "symfony/ai-mate-composer-plugin": true,
+            "symfony/ai-mate-composer-plugin": false,
             "symfony/flex": true,
             "symfony/runtime": true
         }
