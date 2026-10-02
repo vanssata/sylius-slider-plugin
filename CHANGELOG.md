@@ -33,8 +33,10 @@ Nothing in the plugin's shipped code changes in this release: `src/`,
 
 ## [2.3.7] - 2026-09-22
 
-Nothing in the plugin's shipped code changes in this release: `src/`,
-`config/`, `templates/`, `assets/` and `translations/` are identical to 2.3.6.
+Nothing in the plugin's shipped code changes in this release: no PHP, Twig,
+JS, service, route, config key or translation changed since 2.3.6. The only
+additions under `src/`, `templates/` and `assets/` are `AGENTS.md` /
+`CLAUDE.md` agent docs, which the dist archive export-ignores.
 
 ### Fixed
 - **The composer dist archive no longer ships AI agent tooling.**
