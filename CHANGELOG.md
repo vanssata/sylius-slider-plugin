@@ -28,6 +28,11 @@ dev-only files (see Changed).
   assistants. `assets/` (with its own `package.json`), `Resources/public/` and
   the consumer Rector set `rector/sets/slider-plugin-2-2.php` still ship; the
   Flex recipe endpoint reads `flex/` from GitHub, not from `vendor/`.
+- **The plugin-skeleton `composer create-project` hooks are gone.**
+  `composer.json` no longer defines `post-root-package-install` and
+  `post-create-project-cmd`, which ran the skeleton's `bin/` rename and
+  setup scripts; with `bin/` export-ignored they would fail from dist. No
+  effect on `composer require`; `test-app-init` and the other scripts stay.
 
 ### Fixed
 - **Functional tests no longer leave a channel in the test database.**
