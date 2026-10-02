@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.8] - 2026-10-02
 
-Nothing in the plugin's shipped code changes in this release: `src/`,
-`config/`, `templates/`, `assets/` and `translations/` are identical to 2.3.7.
+No runtime code changes in this release: `src/`, `config/`, `templates/`,
+`assets/` and `translations/` are identical to 2.3.7. The dist archive drops
+dev-only files (see Changed).
 
 ### Changed
 - **`composer install`/`update` no longer rewrite `AGENTS.md`.**
@@ -21,12 +22,12 @@ Nothing in the plugin's shipped code changes in this release: `src/`,
   extension. Contributor tooling only; the plugin's shipped code is unchanged.
 - **The composer dist archive no longer ships the dev environment.**
   `.gitattributes` now export-ignores `bin/`, `docker/`, `compose*.yml`,
-  `features/`, `tests/`, `flex/`, `rector/`, the root `package*.json`,
+  `features/`, `tests/`, `flex/`, the root `package*.json`,
   `phpstan-baseline.neon`, `playwright.config.ts`, `rector.php`,
   `.dockerignore`, `.gitignore` and the three skeleton guides for AI
-  assistants. `assets/` (with its own `package.json`) and `Resources/public/`
-  still ship; the Flex recipe endpoint reads `flex/` from GitHub, not from
-  `vendor/`.
+  assistants. `assets/` (with its own `package.json`), `Resources/public/` and
+  the consumer Rector set `rector/sets/slider-plugin-2-2.php` still ship; the
+  Flex recipe endpoint reads `flex/` from GitHub, not from `vendor/`.
 
 ### Fixed
 - **Functional tests no longer leave a channel in the test database.**
