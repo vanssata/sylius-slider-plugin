@@ -198,7 +198,7 @@ e2e-down:
 # symfony/ai-mate 0.13 mate is a plain CLI (`vendor/bin/mate tools:call …`);
 # there is no MCP server and no `serve` command any more.
 # `mate init` and `mate discover` always write an AI Mate block into the
-# tracked AGENTS.md (mate has no opt-out), and `mate init` rewrites CLAUDE.md
+# tracked AGENTS.md (mate has no opt-out), and both rewrite CLAUDE.md
 # unless it already mentions AGENTS.md. The tooling is local, so both targets
 # snapshot whichever of the two exist and restore them from an EXIT trap: on
 # success, on failure and on Ctrl-C alike, keeping mate's exit code. A file
