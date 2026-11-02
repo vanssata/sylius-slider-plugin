@@ -46,7 +46,7 @@
         "sylius/sylius-rector": "^2.0",
         "sylius/test-application": "^2.0.0@alpha",
         "symfony/browser-kit": "^7.4",
-        "symfony/debug-bundle": "^7.4",
+        "symfony/debug-bundle": "^8.1",
         "symfony/dotenv": "^7.4",
         "symfony/http-client": "^7.4",
         "symfony/intl": "^7.4",
