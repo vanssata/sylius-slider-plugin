@@ -45,7 +45,7 @@
         "sylius/sylius-ai-dev-tools": "^0.6.0",
         "sylius/sylius-rector": "^2.0",
         "sylius/test-application": "^2.0.0@alpha",
-        "symfony/browser-kit": "^7.4",
+        "symfony/browser-kit": "^8.1",
         "symfony/debug-bundle": "^7.4",
         "symfony/dotenv": "^7.4",
         "symfony/http-client": "^7.4",
