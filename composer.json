@@ -14,7 +14,7 @@
     "require": {
         "php": ">=8.3",
         "sylius/sylius": "^2.1",
-        "symfony/ux-turbo": "^2.22"
+        "symfony/ux-turbo": "^3.7"
     },
     "conflict": {
         "api-platform/metadata": ">=4.3",
